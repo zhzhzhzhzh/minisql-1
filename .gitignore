@@ -1,5 +1,5 @@
 *.1
 bak/
-Self*
+*Debug*
 *.pyc
 *.so
