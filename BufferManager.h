@@ -34,7 +34,7 @@ public:
 	//BufferManager(arguments);
 	~BufferManager(){
 		for (int i = 0; i < MAX_BLOCK_NUM; i++)
-			Bufferlist[i].Initialize();
+			Bufferlist[i].Flushback();
 		delete [] Bufferlist;
 		//delete [] Tablelist;
 	};

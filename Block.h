@@ -6,9 +6,11 @@
 #define _BLOCK_H_
 #include <ctime>
 #include <cmath>
+#include <cstring>
 #include "typedefs.h"
 #define EMPTY 		0x00
-#define BLOCK_SIZE 	8192
+#define BLOCK_SIZE 	30
+#define _CRT_SECURE_NO_WARNINGS 1
 
 using namespace std;
 struct FileInf;
@@ -79,6 +81,9 @@ public:
 		fd.open(fileName, ios::in | ios::out | ios::binary);	
 		if ( !fd ){
 			fd.open(fileName, ios::in | ios::out | ios::binary | ios::trunc);
+			fd.close();
+			fd.write("aaaa", 10);
+			fd.open(fileName, ios::in | ios::out | ios::binary);
 		}
 
 		/* Calculating recordLen and blockNum */

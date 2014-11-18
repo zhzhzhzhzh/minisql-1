@@ -11,11 +11,12 @@
  @param FileInf*pFi: file to close 
  */
 void BufferManager::closeFile(FileInf *pFi){
-	int B_index;
+	int B_index, nextblock;
 	if ( !pFi ) return;
 	Bufferlist[pFi->firstBlock].unlock();
 	Bufferlist[pFi->lastBlock].unlock();
-	for (B_index = pFi->firstBlock; B_index != -1; B_index = Bufferlist[B_index].next){
+	for (B_index = pFi->firstBlock; B_index != -1; B_index = nextblock){
+		nextblock = Bufferlist[B_index].next;
 		Bufferlist[B_index].Initialize();
 		blockCount--;
 	}
@@ -93,7 +94,7 @@ FileInf* BufferManager::getFile(const Table *pTable){
 	}
 
 	ret = openFile(pTable);
-	if ( fileCount == 0 ){
+	if ( fileCount == 1 ){								// Because the fileCount has increased in open
 		flistHead = flistTail = ret;
 	} 
 	else {
@@ -162,21 +163,32 @@ int BufferManager::getFreeBlock(){
  */
 int BufferManager::getBlock(FileInf *pFi, int offset){
 	if ( !pFi ) return -1;
-	if ( offset == 1 ){
+	int block_index = pFi->firstBlock;
+	if ( offset == 1 && pFi->firstBlock != -1 ){
 		return pFi->firstBlock;
 	}
 	else {
-		int block_index = pFi->firstBlock;
-		while ( block_index >= 0 && Bufferlist[block_index].Block_Offset != offset ) 
-			block_index = Bufferlist[block_index].next;
-		if ( block_index == -1 ){
+
+		/* In case of the new first block */ 
+		if ( offset == 1 ){
 			block_index = getFreeBlock();
 			Bufferlist[block_index].Initialize(pFi, offset);
+			Bufferlist[block_index].next = -1;
 		}
+		else{
+			while ( block_index >= 0 && Bufferlist[block_index].Block_Offset != offset ) 
+				block_index = Bufferlist[block_index].next;
+			if ( block_index == -1 ){
+				block_index = getFreeBlock();
+				Bufferlist[block_index].Initialize(pFi, offset);
+			}
 
-		/* To link the node into the file-block queue */
-		Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
-		Bufferlist[pFi->firstBlock].next = block_index;
+			/* To link the node into the file-block queue, except for the case of the lastblock */
+			if ( Bufferlist[block_index].Block_Offset != pFi->Block_Num ){				
+				Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
+				Bufferlist[pFi->firstBlock].next = block_index;
+			}				
+		}
 		return block_index;
 	}
 }
@@ -229,18 +241,23 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 		Bufferlist[file->firstBlock].next = -1;
 		Bufferlist[file->firstBlock].lock();
 	} 
-	int BlockOffset = static_cast<int>(ceil(insert_uuid / file->recordPerBlock));
-	if ( BlockOffset > file->Block_Num ){
-		int block = getBlock(file, BlockOffset);
-		Bufferlist[file->lastBlock].next = block;				// add a block to the table
-		Bufferlist[file->lastBlock].unlock();
-		Bufferlist[block].next = -1;
-		Bufferlist[block].lock();
+	else { 															
+		int BlockOffset = static_cast<int>(ceil((float)insert_uuid / file->recordPerBlock));
+		if ( BlockOffset > file->Block_Num ){						// In case of block overflow
+			file->Block_Num++;
+			int block = getBlock(file, BlockOffset);
+			Bufferlist[file->lastBlock].next = block;				// add a block to the table
+			Bufferlist[file->lastBlock].unlock();
+			Bufferlist[block].next = -1;
+			Bufferlist[block].lock();
+			file->lastBlock = block;
+		}
 	}
+	
 
 	long recordOffset = insert_uuid - file->recordPerBlock * (file->Block_Num - 1);		// Insert in the last block
 	long byteOffset = file->recordLen * (recordOffset - 1);
-	for (int i = 0; i < pTable->attributes.size(); i++){
+	for (unsigned int i = 0; i < pTable->attributes.size(); i++){
 		switch ( pTable->attributes.at(i).dataType ){
 			case Int: {
 				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], rec->data.at(i), sizeof(int));
@@ -255,9 +272,9 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 				break;
 			}
 			case String: {
-				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], rec->data.at(i), strlen((char *)rec->data.at(i)) + 1);
-				byteOffset += strlen((char *)rec->data.at(i));
-				delete [] static_cast<char *>(rec->data.at(i));
+				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen((char *)rec->data.at(i)) + 1);
+				byteOffset += strlen(static_cast<string *>(rec->data.at(i))->c_str());
+				delete static_cast<string *>(rec->data.at(i));
 				break;
 			}
 			case Uuid: {
@@ -268,9 +285,11 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 			}
 			
 		} 
-		rec->data.clear();
+		
 	}
+	rec->data.clear();
 	file->recordNum++;
+	Bufferlist[file->lastBlock].is_Dirty = true;
 	delete rec;
 	return true;
 }
@@ -353,7 +372,8 @@ void BufferManager::quitProgram(){
 	for (fit = flistHead; fit != NULL; fit = nextfit){
 		nextfit = fit->next;
 		closeFile(fit); 						// FileInf deleted in closeFile();
-		/*
+	}	
+	/*
 		Bufferlist[fit->firstBlock].unlock();
 		Bufferlist[fit->lastBlock].unlock();
 		for (int i = fit->firstBlock; i != -1 && i < MAX_BLOCK_NUM; i = Bufferlist[i].next){
@@ -362,7 +382,7 @@ void BufferManager::quitProgram(){
 		}
 		delete fit;								// To get rid of mem-leak
 		*/
-	}
+
 		
 	// There is no need to destruct the block because it is done in the destructor	
 }

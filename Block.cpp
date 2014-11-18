@@ -48,7 +48,7 @@ void Block::Initialize(FileInf *pFi, int offset ){
 	if ( is_Valid && is_Dirty ) Flushback();
 	File_Num 		= pFi->File_id;
 	Block_Offset 	= offset;
-	Pinlock 		= 0;
+	Pinlock 		= false;
 	is_Valid 		= true;
 	is_Dirty 		= false;
 	Fptr 			= pFi;
@@ -72,21 +72,24 @@ void Block::Initialize(FileInf *pFi, int offset ){
 		for (unsigned int i = 0; i < pFi->dataVector->size(); i++){
 			recordHandle[rec_num].data.push_back(reinterpret_cast<void *>(&token[byteOffset]));
 			switch ( pFi->dataVector->at(i).dataType ) {
-				Int: {
+				case Int: {
 					byteOffset += sizeof(int);
 					break;
 				}
-				Float: {
+				case Float: {
 					byteOffset += sizeof(float);
 					break;
 				}
-				String: {
+				case String: {
 					byteOffset += pFi->dataVector->at(i).dataLength * sizeof(char);
 					break;
 				}
-				Uuid: {
+				case Uuid: {
 					byteOffset += sizeof(UUID);
 					break;
+				}
+				default: {
+					;
 				}
 			}
 		}
@@ -101,6 +104,7 @@ void Block::Initialize(FileInf *pFi, int offset ){
  */
 void Block::Flushback(){
 	if (Fptr){
+		Fptr->fd.clear();
 		Fptr->fd.seekp(BLOCK_SIZE * (Block_Offset - 1), ios::beg);
 		Fptr->fd.write(token, BLOCK_SIZE);
 	}
