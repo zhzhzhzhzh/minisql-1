@@ -266,12 +266,13 @@ void RecordManager::InsertRecord(uint table)
     for (int i=0; i<newRecord.size(); i++) {
         record->data.push_back(newRecord[i]);
     }
-    record->next = NULL;
+    record->next = nullptr;
     
     
-    // TODO
-    // call buffer manager's insert function
-    // bufferManager.insert(Table *t, Record *record);
+    // TODO build table vector
+ 	Table *pTable;
+ 	bufferManager.insertRec(pTable, record);
+
     
     #if TEST
     lastRecord->next = record;

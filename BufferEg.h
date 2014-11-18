@@ -1,3 +1,5 @@
+#if 0
+
 /*
  Operation eg.h
  */
@@ -28,3 +30,4 @@
  /* To quit: */
  	BufferManager.quitProgram();
 
+#endif
