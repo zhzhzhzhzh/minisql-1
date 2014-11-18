@@ -73,8 +73,10 @@ void PyEvaluator::PushCondition(uint table_1, uint attribute_1, Operator conditi
 
 void PyEvaluator::PushLogicalOperation(string op)
 {
+    PyObject* pyParams = PyTuple_New(1);
     PyObject* pArgs = Py_BuildValue("s", op.c_str());
-    PyEval_CallObject(pFuncPushLogicalOperation, pArgs);
+    PyTuple_SetItem(pyParams, 0, pArgs);
+    PyEval_CallObject(pFuncPushLogicalOperation, pyParams);
     
     return;
 }

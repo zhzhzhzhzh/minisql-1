@@ -62,7 +62,7 @@ int main(int argc, const char * argv[])
     }
 
     // create a table
-    recordManager.CreateTable(&tableStruct);
+    //recordManager.CreateTable(&tableStruct);
     
  
     
@@ -107,11 +107,26 @@ int main(int argc, const char * argv[])
     recordManager.InsertRecord(T);
     
     recordManager.PrintRecord(T);
-    recordManager.PrintSingle(recordManager.GetRecord(0, 0));
+    //recordManager.PrintSingle(recordManager.GetRecord(0, 0));
+    
+    
     
     recordManager.NewQuery();
-    recordManager.PushCondition(T, 1, NotEqual, 11);
+    recordManager.PushLogicOp("(");
+    recordManager.PushCondition(T, 1, Equal, 10);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 1, Greater, 11);
+    recordManager.PushLogicOp(")");
+    
+    recordManager.PushLogicOp("and");
+
+    recordManager.PushLogicOp("(");
+    recordManager.PushCondition(T, 1, Less, 11);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 1, Equal, 11);
+    recordManager.PushLogicOp(")");
     recordManager.SelectRecord(T);
+
     
     
 

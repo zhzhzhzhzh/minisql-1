@@ -303,7 +303,7 @@ void RecordManager::InsertRecord(uint table)
     record->next = nullptr;
     
     
- 	bufferManager.insertRec(tableStructs[table], record);
+ 	//bufferManager.insertRec(tableStructs[table], record);
 
     
     #if TEST

@@ -43,7 +43,7 @@ conditionsAll = []
 currentRecordData = {}
 isDataNew = {}
 results = {}
-finalResults = set([])
+finalResults = []
 currentTables = []
 
 
@@ -80,7 +80,8 @@ def PushLogicalOperation(operator):
     if operator not in ['(',')','and','or']:
         print 'from eva.py:PushLogicalOperation',operator,'is not right operator'
         
-    conditionsAll.append(operator)
+    conditionsAll.append(operator.strip())
+    print 'from eva.py:PushLogicalOperation',operator,'pushed'
         
     
 
@@ -95,7 +96,7 @@ def NewEvaluation():
     isDataNew = {}
     print 'from eva.py','currentRecordData cleared'
     results = {}
-    finalResults = set([])
+    finalResults = []
     currentTables = []
     
 
@@ -104,7 +105,7 @@ def GetCurrentUUIDTuple():
     uuidTuple = []
     for i in range(0,len(currentTables)):
         uuidTuple.append(currentRecordData[currentTables[i]][-1])
-    return uuidTuple
+    return tuple(uuidTuple)
     
 
 
@@ -164,7 +165,7 @@ def Evaluate(isDone, table, uuid, record):
       
         
         print 'from eva.py:Evaluate', 'results', results
-        return False
+        return True
         
     
         # all expr evaluated in this turn
@@ -184,10 +185,82 @@ def EvaluateFeedingData(isDone, table, *record):
     pass
    
 
+def EvaluateExpr(expr):
+    lop = expr[2]
+    rop = expr[0]
+    if expr[1] == 'and':
+        return lop and rop
+    elif expr[1] == 'or':
+        return lop or rop
+    else:
+        return
+        
 def LogicalEvaluation():
-    for expr in conditionsAll:
-        for res in results[expr]:
-            finalResults.add(tuple(res))
+    global finalResults
+
+    operator = ['or', 'and']
+    parenthesis = ['(', ')']
+    priority = {'or':1, 'and':2}
+    #expr = ['(',1, 'or', 0,')','and','(',0,'or',0,')', 'or','(',1,'or',0,')']
+    expr = []
+
+    for op in conditionsAll:
+        if op in operator or op in parenthesis:
+            expr.append(op)
+        else:
+            expr.append(set(results[op]))
+    
+    
+    
+
+    print 'from eva.py:LogicalEvaluation: expr ',expr
+    stack = []
+    priorityHighestNow = 0
+    for op in expr:
+        print 'op',op
+        
+        if op == ')':
+            res = EvaluateExpr([stack.pop() for i in range(3)])
+            stack.pop()
+            stack.append(res)
+            if len(stack)>2:
+                for index in range(-1,-(len(stack)+1),-1):
+                    topOperatorNow = stack[index]
+                    if topOperatorNow in operator:
+                        break
+                priorityHighestNow = priority[topOperatorNow]
+        else:
+            if op not in operator:
+                stack.append(op)
+                if op == '(':
+                    priorityHighestNow = 0
+            else:
+                if priority[op] > priorityHighestNow:
+                    stack.append(op)
+                    priorityHighestNow = priority[op]
+                else:
+                    while priority[op] <= priorityHighestNow:
+                        res = EvaluateExpr([stack.pop() for i in range(3)])
+                        stack.append(res)
+                    
+                        priorityHighestNow = 0
+                        if len(stack)>2:
+                            for index in range(-1,-(len(stack)+1),-1):
+                                topOperatorNow = stack[index]
+                                if topOperatorNow in operator:
+                                    break
+                            priorityHighestNow = priority[topOperatorNow]
+                    
+                    # if more priority levels, need to loop
+                    stack.append(op)
+        print 'stack now',stack
+        
+    if len(stack)>1:
+        res = EvaluateExpr([stack.pop() for i in range(3)])
+        stack.append(res)
+    
+    print 'stack final ',stack    
+    finalResults = list(stack[0])
     
     print 'from eva.py:LogicalEvaluation', 'finalResults', finalResults
 
@@ -196,9 +269,9 @@ def GetEvaluationResults(isFirstTime):
     if isFirstTime>0:
         LogicalEvaluation()
         return 
-    
+            
     try:  
-        res = finalResults.pop() # a list
+        res = finalResults.pop() # a tuple
     except:
         res = []
         for i in range(0,len(currentTables)):
@@ -210,7 +283,19 @@ def GetEvaluationResults(isFirstTime):
 
     
     
-if __name__ == '__main__':
-    GetEvaluationResults(True)
+    
+
+    
+    
+    
+if __name__ == '__main__': 
+        
+
     pass  
+    
+    
+    
+    
+    
+    
     
