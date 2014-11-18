@@ -48,11 +48,47 @@ void RecordManager::NewQuery(void)
     
     return;
 }
+/*
+
+struct Attribute
+{
+    string attrName;
+    int dataType;//dataType = 0 nchar;dataType = 1,int; dataType = 2,float;
+    int dataLength;
+    int attrType;//attrType = 0 primary;attrType = 1 unique; attrType = 2,null
+    string indexName; // if not exists, indexName = "none"
+};
+
+struct Table
+{
+    string tableName;
+    int attrNumber;
+    int recordNum;
+    int tableNum;
+    vector<Attribute> attributes;
+};
+*/
+
+void RecordManager::LoadTable(struct Table* tableStruct){
+    tableStructs[tableStruct->tableNum] = tableStruct;
+    
+    vector<DataType> dataType;
+    vector<bool> isIndexBuilt;
+    for (int i=0; i<tableStruct->attributes.size(); i++) {
+        dataType.push_back(tableStruct->attributes.at(i).dataType);
+        isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "null");
+    }
+    
+    SetTableAttributeDataType(tableStruct->tableNum, dataType, isIndexBuilt);
+    
+    return;
+}
 
 
 void RecordManager::SetTableAttributeDataType(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt)
 {
     if(tableRecordDataTypes[table] != NULL){
+        // TODO close the former file
         delete tableRecordDataTypes[table];
         Debug("delete former record datatype of table "<<table);
     }

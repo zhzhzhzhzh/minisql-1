@@ -76,10 +76,12 @@ struct Record{
 struct Attribute
 {
     string attrName;
-    int dataType;//dataType = 0 nchar;dataType = 1,int; dataType = 2,float;
+    // TODO change to enum type
+    DataType dataType;//dataType = 0 nchar;dataType = 1,int; dataType = 2,float;
     int dataLength;
+    // TODO use enum type
     int attrType;//attrType = 0 primary;attrType = 1 unique; attrType = 2,null
-    string indexName;
+    string indexName; // if not exists, indexName = "null"
 };
 
 struct Table

@@ -74,8 +74,16 @@ public:
     
     bool BuildIndex(uint table, uint attribute);
     
-	void CreateTable(Table* t){
-        bufferManager.createTable(t);
+    void LoadTable(struct Table* tableStruct);
+
+    
+	void CreateTable(struct Table* tableStruct){
+        LoadTable(tableStruct);
+        bufferManager.createTable(tableStruct);
+    }
+    
+    void DropTable(struct Table* tableStruct){
+        bufferManager.removeTable(tableStruct);
     }
     
     // TODO: add isIndexBuilt
@@ -221,8 +229,9 @@ private:
     bool isTableChosen;
 
     // table description
-    vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER] = {NULL};  // pointers to data type chain, excluding the first UUID at 0
-    vector<bool>* isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {NULL};
+    struct Table* tableStructs[MAX_TABLE_NUMBER] = {nullptr};
+    vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
+    vector<bool>* isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
     
     UUID currentLastUUID = 0;
     //uint currentTables[MAX_CONCURRENT_TABLE];
