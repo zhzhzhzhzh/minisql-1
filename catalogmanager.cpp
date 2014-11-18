@@ -57,7 +57,7 @@ int catalogmanager::dropDatabase(string dataBaseName)
         flag = 1;//can not find the database
     if(flag == 0)
     {
-        for(int j = 0; j < tableNum; j++)
+        for(int j = 0; j < totalTableNum; j++)
         {
             deleteTable(j);
             cout << "delete table " << j << endl;
@@ -70,8 +70,7 @@ int catalogmanager::dropDatabase(string dataBaseName)
         string Info = a + b + dataBaseName + c + dataBaseName + d;
         system(Info.c_str());
         string e = "rmdir ";
-        string f = "-r ";
-        string cmd = e + f + b + dataBaseName;
+        string cmd = e + b + dataBaseName;
         system(cmd.c_str());
         dbV.erase(dbV.begin() + i);
         dataBaseNum--;
@@ -130,7 +129,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
     }
     else
     {
-        if(dataBaseNameNow == "null")
+        if(dataBaseNameNow == "null")//when start the program
         {
 
         }
@@ -142,8 +141,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
             fout.open(FileName.c_str(), fstream::out);
             if(fout.fail() != true)
             {
-                fout << tableNum << endl;
-                for(int i = 0; i < tableNum; i++)
+                fout << totalTableNum << endl;
+                for(int i = 0; i < totalTableNum; i++)
                 {
                     fout << tableV[i].tableName << endl;
                     fout << tableV[i].attrNumber << endl;
@@ -152,7 +151,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
                     for(int j = 0; j < tableV[i].attrNumber; j++)
                     {
                         fout << tableV[i].attributes[j].attrName << " ";
-                        fout << tableV[i].attributes[j].dataType << " ";
+                        fout << switchEnumToInt(tableV[i].attributes[j].dataType)<< " ";
                         fout << tableV[i].attributes[j].dataLength << " ";
                         fout << tableV[i].attributes[j].attrType << " ";
                         fout << tableV[i].attributes[j].indexName << endl;
@@ -172,8 +171,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
         fin.open(FileName.c_str(), fstream::in);
         if(fin.fail() != true)
         {
-            fin >> tableNum;
-            for(int i = 0; i < tableNum; i++)
+            fin >> totalTableNum;
+            for(int i = 0; i < totalTableNum; i++)
             {
                 Table tmp_table;
                 fin >> tmp_table.tableName;
@@ -182,9 +181,11 @@ int catalogmanager::useDataBase(string newDataBaseName)
                 fin >> tmp_table.tableNum;
                 for(int j = 0; j < tmp_table.attrNumber; j++)
                 {
+                    int tmpInt;
                     Attribute tmp_attribute;
                     fin >> tmp_attribute.attrName;
-                    fin >> tmp_attribute.dataType;
+                    fin >> tmpIn;
+                    tmp_attribute.dataType = switchIntToEnum(tmpIn);
                     fin >> tmp_attribute.dataLength;
                     fin >> tmp_attribute.attrType;
                     fin >> tmp_attribute.indexName;
@@ -202,6 +203,24 @@ int catalogmanager::useDataBase(string newDataBaseName)
     }
 return flag;
 }
+DataType catalogmanager::switchIntToEnum(int enumIn)
+{
+    if(enumIn == "0")
+        return In;
+    else if(enumIn == "1")
+        return Float;
+    else if(enumIn == "2")
+        return String;
+}
+int catalogmanager::switchEnumToInt(DataType dataTypeIn)
+{
+    if(dataTypeIn == In)
+        return 0;
+    else if(dataTypeIn == Float)
+        return 1;
+    else if(dataTypeIn == String)
+        return 2;
+}
 int catalogmanager::quit()
 {
     int flag = 0;
@@ -210,8 +229,8 @@ int catalogmanager::quit()
     fout.open(FileName.c_str(), fstream::out);
     if(fout.fail() != true)
     {
-        fout << tableNum << endl;
-        for(int i = 0; i < tableNum; i++)
+        fout << totalTableNum << endl;
+        for(int i = 0; i < totalTableNum; i++)
         {
             fout << tableV[i].tableName << endl;
             fout << tableV[i].attrNumber << endl;
@@ -220,7 +239,7 @@ int catalogmanager::quit()
             for(int j = 0; j < tableV[i].attrNumber; j++)
             {
                 fout << tableV[i].attributes[j].attrName << " ";
-                fout << tableV[i].attributes[j].dataType << " ";
+                fout << switchEnumToInt(tableV[i].attributes[j].dataType)<< " ";
                 fout << tableV[i].attributes[j].dataLength << " ";
                 fout << tableV[i].attributes[j].attrType << " ";
                 fout << tableV[i].attributes[j].indexName << endl;
@@ -234,9 +253,9 @@ int catalogmanager::quit()
     }
     return flag;
 }
-int catalogmanager::createTable(Table& tableName)
+int catalogmanager::createTable(Table& tableNameIn)
 {
-    int flag = 0;
+    /*int flag = 0;
     string newfileName = ".\\" + dataBaseNameNow + "\\" + tableName.tableName + "Info" + ".txt";
     fstream newFile;
     newFile.open(newfileName.c_str(),fstream::out);
@@ -250,40 +269,64 @@ int catalogmanager::createTable(Table& tableName)
     {
         flag = 1;
     }
-    return flag;
+    return flag;*/
+    Table T_temp;
+    T_temp.tableName = tableNameIn.tableName;
+    T_temp.attrNumber = tableNameIn.attrNumber;
+    T_temp.attributes = tableNameIn.attributes;
+    T_temp.recordNum = tableNameIn.recordNum;
+    int i;
+    for(i = 0; i < totalTableNum; i++)
+    {
+        if(i < tableV[i].tableNum)
+            T_temp.tableNum = i;
+
+    }
+    if(i == totalTableNum)
+        T_temp.tableNum = i;
+    totalTableNum++;
+    tableV.push_back(T_temp);
+    return 0;
+
+
 }
 int catalogmanager::deleteTable(int tableIndex)
 {
-    cout << tableIndex << endl;
+    //cout << tableIndex << endl;
 
-    cout << "tableNume is " << tableNum << endl;
+    /*cout << "totalTableNum is " << totalTableNum << endl;
     string a = "del ";
     string b = ".\\";
     string c = "\\";
     string d = "Info.txt";
-    cout << "everthing is OK" << endl;
-    string e = tableV[tableIndex].tableName;
-    cout << e << endl;
-    string cmd = a + b + dataBaseNameNow + c + e + d;
-    system(cmd.c_str());
+    cout << "everthing is OK" << endl;*/
+    //string e = tableV[tableIndex].tableName;
+    //cout << e << endl;
+    //string cmd = a + b + dataBaseNameNow + c + e + d;
+    //system(cmd.c_str());
     tableV.erase(tableV.begin() + tableIndex);
-    tableNum--;
-    return 0;
+    totalTableNum--;
     cout << "delete finished" << endl;
+    return 0;
 }
 
 int catalogmanager::getTableIndex(string tableName)
 {
     int flag = -1;
     int i;
-    for(i = 0; i < tableNum; i++)
+    for(i = 0; i < totalTableNum; i++)
     {
         if(tableV[i].tableName == tableName)
             break;
     }
-    if(i < tableNum)
-        flag = tableV[i].tableNum;
+    if(i < totalTableNum)
+        flag = tableV[i].totalTableNum;
     return flag;
+}
+int catalogmanager::getTableNum(string tableName)
+{
+    int i = getTableIndex(tableName);
+    return tableV[i].tableNum;
 }
 
 int catalogmanager::getAttrIndex(int tableIndex, string attrName)
@@ -302,7 +345,7 @@ int catalogmanager::getAttrIndex(int tableIndex, string attrName)
     return flag;
 }
 
-int catalogmanager::getDataType(int tableIndex, int attrIndex)
+DataType catalogmanager::getDataType(int tableIndex, int attrIndex)
 {
     return tableV[tableIndex].attributes[attrIndex].dataType;
 }
@@ -314,7 +357,84 @@ int catalogmanager::getAttrType(int tableIndex, int attrIndex)
 {
     return tableV[tableIndex].attributes[attrIndex].attrType;
 }
-string catalogmanager::getIndexName(int tableIndex, int attrIndex)
+string catalogmanager::getIndexName(string indexName)
 {
-    return tableV[tableIndex].attributes[attrIndex].indexName;
+    int i ,j;
+    int flag = 0;
+    for(i = 0; i < totalTableNum; i++)
+    {
+        for(j = 0; j < tableV[i].attrNumber; j++)
+        {
+            if(indexName == tableV[i].attributes[j].indexName)
+            {
+                flag = 1;
+                break;
+            }
+            if(flag == 1)
+                break;  
+        }
+    }
+    if(flag == 1)
+        return tableV[i].attributes[j].indexName;
+    else
+        return "null";
+}
+int catalogmanager::createIndex(string indexName, int tableIndex, int attrIndex)//return 1 for success
+{
+    string indexNameTemp = getIndexName(indexName);
+    if(indexNameTemp == "null")
+    {
+        tableV[tableIndex].attributes[attrIndex].indexName = indexName;
+        return 0;
+    }
+    else
+        return 1;
+}
+int catalogmanager::deleteIndex(string indexName)
+{
+    string indexNameTemp = getIndexName(indexName);
+    if(indexNameTemp == "null")
+        return 1;
+    else
+    {
+        int i ,j;
+        int flag = 0;
+        for(i = 0; i < totalTableNum; i++)
+        {
+            for(j = 0; j < tableV[i].attrNumber; j++)
+            {   
+                if(indexName == tableV[i].attributes[j].indexName)
+                {
+                    flag =1;
+                    break;
+                }
+            }
+            if(flag == 1)
+                break;
+        }
+        tableV[i].attributes[j].indexName = "null";
+        return 0;
+    }
+}
+int catalogmanager::addRecord(int tableIndex)
+{
+    tableV[tableIndex].recordNum++;
+}
+int catalogmanager::deleteRecord(int tableIndex)
+{
+    tableV[tableIndex].recordNum--;
+}
+int catalogmanager::getAttrNumber(int tableIndex)
+{
+    return tableV[tableIndex].attrNumber;
+}
+Table const* catalogmanager::getTableInformation(string tableName)
+{
+    int i = 0;
+    for(i = 0; i < totalTableNum; i++)
+    {
+        if(tableV[i].tableName == tableName)
+            break;
+    }
+    return &(tableV[i]);
 }
