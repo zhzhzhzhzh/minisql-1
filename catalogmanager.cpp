@@ -2,7 +2,7 @@
 
 catalogmanager::catalogmanager()
 {
-    //ctor
+    //ctordfdsjj
 }
 
 catalogmanager::~catalogmanager()
