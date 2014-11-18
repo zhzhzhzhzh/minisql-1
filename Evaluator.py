@@ -95,6 +95,7 @@ def NewEvaluation():
     isDataNew = {}
     print 'from eva.py','currentRecordData cleared'
     results = {}
+    finalResults = set([])
     currentTables = []
     
 
@@ -105,6 +106,7 @@ def GetCurrentUUIDTuple():
         uuidTuple.append(currentRecordData[currentTables[i]][-1])
     return uuidTuple
     
+
 
 
 # for conditionsDirectWithIndex
@@ -184,15 +186,16 @@ def EvaluateFeedingData(isDone, table, *record):
 
 def LogicalEvaluation():
     for expr in conditionsAll:
-        finalResults = set(results[expr])
-        
+        for res in results[expr]:
+            finalResults.add(tuple(res))
+    
     print 'from eva.py:LogicalEvaluation', 'finalResults', finalResults
 
-    
+
 def GetEvaluationResults(isFirstTime):
-    if isFirstTime:
+    if isFirstTime>0:
         LogicalEvaluation()
-    
+        return 
     
     try:  
         res = finalResults.pop() # a list
@@ -200,11 +203,14 @@ def GetEvaluationResults(isFirstTime):
         res = []
         for i in range(0,len(currentTables)):
             res.append(-1)
-            
+        res = tuple(res)
+    
+    print 'from eva.py:GetEvaluationResults return', res
     return res
 
     
     
 if __name__ == '__main__':
+    GetEvaluationResults(True)
     pass  
     

@@ -30,7 +30,7 @@ public:
     void PushLogicalOperation(string op);
     
     bool Evaluate(vector<uint>tables, vector<Record*> records, vector<DataType>* tableRecordDataTypes[]);
-    vector<vector<UUID>> GetResult();
+    vector<vector<UUID>> GetResult(int currentTablesCount);
 
 private:
     const char *pBuffer = nullptr;
@@ -43,6 +43,7 @@ private:
     PyObject *pFuncPushLogicalOperation = nullptr;
     PyObject *pFuncNewEvaluation = nullptr;
     PyObject *pFuncEvaluate = nullptr;
+    PyObject *pFuncGetEvaluationResults = nullptr;
 
     
     

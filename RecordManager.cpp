@@ -230,7 +230,8 @@ vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
         }
     }
     
-    return pyEvaluator.GetResult();
+    
+    return pyEvaluator.GetResult(currentTablesCount);
 }
 
 

@@ -22,6 +22,8 @@
 
 #define DEBUG 1
 #define Debug(MESSAGE) {if(DEBUG){cout<<MESSAGE<<endl;}}
+#define DebugS(MESSAGE) {if(DEBUG){cout<<MESSAGE;}}
+
 
 #define TEST 1
 
