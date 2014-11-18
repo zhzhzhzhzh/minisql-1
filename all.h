@@ -5,9 +5,12 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+
+# if 0
 using namespace std;
 
 typedef long unsigned UUID;
+
 
 enum DataType{
     // supported types
@@ -24,13 +27,14 @@ struct Record{
     struct Record * next;
 };
 
+
 struct Attribute
 {
     string attrName;
     int dataType;//dataType = 0 nchar;dataType = 1,int; dataType = 2,float;
     int dataLength;
     int attrType;//attrType = 0 primary;attrType = 1 unique; attrType = 2,null
-    string index_name;
+    string indexName;
 };
 
  struct Table
@@ -43,6 +47,9 @@ struct Attribute
 };
 
 struct FileInf;
+
+
+#endif
 
 #endif /* ALL_H_INCLUDED */
 

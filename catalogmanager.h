@@ -1,6 +1,6 @@
 #ifndef CATALOGMANAGER_H
 #define CATALOGMANAGER_H
-#include "all.h"
+#include "typedefs.h"
 
 using namespace std;
 class catalogmanager
@@ -31,7 +31,7 @@ class catalogmanager
         int getDataType(int tableIndex, int attrIndex);//get
         int getDataLength(int tableIndex, int attrIndex);//get
         int getAttrType(int tableIndex, int attrIndex);//get
-        int getIndexName(int tableIndex, int attrIndex)
+        string getIndexName(int tableIndex, int attrIndex);
 };
 
 #endif // CATALOGMANAGER_H

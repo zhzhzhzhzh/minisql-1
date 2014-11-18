@@ -8,7 +8,8 @@
 #define BLOCK_SIZE 	8192
 #include <ctime>
 #include <cmath>
-#include "all.h"
+#include "typedefs.h"
+
 using namespace std;
 struct FileInf;
 class Block

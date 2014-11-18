@@ -124,7 +124,7 @@ void BufferManager::createTable(Table *pTable){
  @return int describe the block number in the Bufferlist
  */
 int BufferManager::getFreeBlock(){
-	int ret;
+	int ret = 0;
 	if ( blockCount < MAX_BLOCK_NUM ){						// Free block avaliable
 		blockCount++;
 		for (ret = 0; ret < MAX_BLOCK_NUM; ret++){
@@ -191,7 +191,7 @@ Record* BufferManager::getRecord(Table *pTable, UUID uuid) 	// Exception to thro
 	
 	int Block_num = static_cast<int>(ceil(uuid / file->recordPerBlock));
 	int block = getBlock(file, Block_num);
-	int recordOffset = uuid - (Block_num - 1) * file->recordPerBlock - 1;
+	long recordOffset = (int)uuid - (Block_num - 1) * file->recordPerBlock - 1;
 	/*
 	Record *recordHandle, *recnode;
 	recordHandle = new Record;
@@ -235,8 +235,8 @@ void BufferManager::insertRec(Table *pTable, Record* rec){
 		Bufferlist[block].lock();
 	}
 
-	int recordOffset = insert_uuid - file->recordPerBlock * (file->Block_Num - 1);		// Insert in the last block
-	int byteOffset = file->recordLen * (recordOffset - 1);
+	long recordOffset = insert_uuid - file->recordPerBlock * (file->Block_Num - 1);		// Insert in the last block
+	long byteOffset = file->recordLen * (recordOffset - 1);
 	for (int i = 0; i < pTable->attributes.size(); i++){
 		switch ( pTable->attributes.at(i).dataType ){
 			case Int: {
@@ -300,8 +300,8 @@ int BufferManager::deleteRec(Table *pTable, UUID delete_uuid){
 	if ( delete_uuid != pTable->recordNum + 1 ){						// Pre-condition: the catalog has already decrease the number of records
 		/* delete */
 		int blockNum = static_cast<int>(ceil(delete_uuid / file->recordPerBlock));		// 
-		int recordOffset = delete_uuid - file->recordPerBlock * (blockNum - 1);
-		int byteOffset = file->recordLen * (recordOffset - 1);
+		long recordOffset = delete_uuid - file->recordPerBlock * (blockNum - 1);
+		long byteOffset = file->recordLen * (recordOffset - 1);
 		int deleteblockIndex = getBlock(file, blockNum);				// The block to delete 
 
 		/* Cover the deteled record with the last one */

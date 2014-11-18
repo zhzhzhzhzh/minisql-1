@@ -9,7 +9,12 @@
 #ifndef record_index_manager_typedefs_h
 #define record_index_manager_typedefs_h
 
+#include <string>
 #include <vector>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+
 
 #define MAX_CONCURRENT_TABLE 1
 #define MAX_TABLE_NUMBER 32
@@ -50,6 +55,7 @@ enum LogicOp{
  */
 typedef long unsigned UUID;
 
+
 enum DataType{
     // supported types
     Int = 0,
@@ -66,4 +72,25 @@ struct Record{
 };
 
 
-#endif
+
+struct Attribute
+{
+    string attrName;
+    int dataType;//dataType = 0 nchar;dataType = 1,int; dataType = 2,float;
+    int dataLength;
+    int attrType;//attrType = 0 primary;attrType = 1 unique; attrType = 2,null
+    string indexName;
+};
+
+struct Table
+{
+    string tableName;
+    int attrNumber;
+    int recordNum;
+    int tableNum;
+    vector<Attribute> attributes;
+};
+
+struct FileInf;
+
+#endif /* ALL_H_INCLUDED */

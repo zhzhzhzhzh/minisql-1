@@ -147,12 +147,14 @@ int catalogmanager::useDataBase(string newDataBaseName)
                 {
                     fout << tableV[i].tableName << endl;
                     fout << tableV[i].attrNumber << endl;
+                    fout << tableV[i].recordNum << endl;
+                    fout << tableV[i].tableNum << endl;
                     for(int j = 0; j < tableV[i].attrNumber; j++)
                     {
                         fout << tableV[i].attributes[j].attrName << " ";
                         fout << tableV[i].attributes[j].dataType << " ";
                         fout << tableV[i].attributes[j].dataLength << " ";
-                        fout << tableV[i].attributes[j].attrType << " "
+                        fout << tableV[i].attributes[j].attrType << " ";
                         fout << tableV[i].attributes[j].indexName << endl;
                     }//for
                 }//for
@@ -176,6 +178,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
                 Table tmp_table;
                 fin >> tmp_table.tableName;
                 fin >> tmp_table.attrNumber;
+                fin >> tmp_table.recordNum;
+                fin >> tmp_table.tableNum;
                 for(int j = 0; j < tmp_table.attrNumber; j++)
                 {
                     Attribute tmp_attribute;
@@ -211,6 +215,8 @@ int catalogmanager::quit()
         {
             fout << tableV[i].tableName << endl;
             fout << tableV[i].attrNumber << endl;
+            fout << tableV[i].recordNum << endl;
+            fout << tableV[i].tableNum << endl;
             for(int j = 0; j < tableV[i].attrNumber; j++)
             {
                 fout << tableV[i].attributes[j].attrName << " ";
@@ -268,7 +274,7 @@ int catalogmanager::deleteTable(int tableIndex)
 
 int catalogmanager::getTableIndex(string tableName)
 {
-    int flag = 0;
+    int flag = -1;
     int i;
     for(i = 0; i < tableNum; i++)
     {
@@ -276,13 +282,13 @@ int catalogmanager::getTableIndex(string tableName)
             break;
     }
     if(i < tableNum)
-        flag = i;
+        flag = tableV[i].tableNum;
     return flag;
 }
 
 int catalogmanager::getAttrIndex(int tableIndex, string attrName)
 {
-    int flag = 0;
+    int flag = -1;
     int i;
     for(i = 0; i < tableV[tableIndex].attrNumber; i++)
     {
@@ -308,7 +314,7 @@ int catalogmanager::getAttrType(int tableIndex, int attrIndex)
 {
     return tableV[tableIndex].attributes[attrIndex].attrType;
 }
-int catalogmanager::getIndexName(int tableIndex, int attrIndex)
+string catalogmanager::getIndexName(int tableIndex, int attrIndex)
 {
     return tableV[tableIndex].attributes[attrIndex].indexName;
 }

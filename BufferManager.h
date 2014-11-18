@@ -7,7 +7,11 @@
 #define _BUFFERMANAGER_H_
 #define MAX_BLOCK_NUM 	256
 #define MAX_FILE_NUM 	5
+
 #include "Block.h"
+#include "typedefs.h"
+
+
 //#include "Exceptions.h"
 using namespace std;
 //struct FileInf;
