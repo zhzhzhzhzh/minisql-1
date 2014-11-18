@@ -48,6 +48,7 @@ public:
 	void 		createTable(Table* );
 	void 		insertRec(Table* , Record* );
 	int   		deleteRec(Table* , UUID );
+	UUID 		getMaxuuid(Table *);
 	void 		quitProgram();
 private:
 	/* data */

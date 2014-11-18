@@ -310,6 +310,11 @@ int BufferManager::deleteRec(Table *pTable, UUID delete_uuid){
 	return pTable->recordNum;
 }
 
+UUID BufferManager::getMaxuuid(Table *pTable){
+	FileInf *file;
+	file = getFile(pTable);
+	return file->recordNum;
+}	
 
 void BufferManager::quitProgram(){
 	FileInf *fit, *nextfit;
