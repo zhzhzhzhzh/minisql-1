@@ -1,6 +1,6 @@
 #ifndef CATALOGMANAGER_H
 #define CATALOGMANAGER_H
-#include "all.h"
+#include "typedefs.h"
 
 using namespace std;
 class catalogmanager
