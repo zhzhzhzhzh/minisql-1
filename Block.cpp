@@ -65,13 +65,13 @@ void Block::Initialize(FileInf *pFi, int offset){
 	}
 
 	/*Create record pointers */ 
-	recordHandle = new Record[file->recordPerBlock];
+	recordHandle = new Record[pFi->recordPerBlock];
 	uint byteOffset = 0;
 	uint rec_num = 0;
-	for (; (byteOffset + file->recordLen) < BLOCK_SIZE; byteOffset += file->recordLen){
-		for (uint i = 0; i < pTable->attributes.size(); i++){
+	for (; (byteOffset + pFi->recordLen) < BLOCK_SIZE; byteOffset += file->recordLen){
+		for (uint i = 0; i < pFi->dataVector.size(); i++){
 			recordHandle[rec_num].data.pushback(reinterpret_cast<void *>(&Bufferlist[block].token[byteOffset]));
-			switch ( pTable->attributes.at(i).dataType ) {
+			switch ( pFi->dataVector.at(i).dataType ) {
 				Int: {
 					byteOffset += sizeof(int);
 					break;
@@ -81,7 +81,7 @@ void Block::Initialize(FileInf *pFi, int offset){
 					break;
 				}
 				String: {
-					byteOffset += pTable->attributes.at(i).dataLength * sizeof(char);
+					byteOffset += pFi->dataVector.at(i).dataLength * sizeof(char);
 					break;
 				}
 				Uuid: {

@@ -55,8 +55,7 @@ public:
 	int  		recordPerBlock;
 	int 		firstBlock;
 	int  		lastBlock;
-	/* No need anymore */
-	//std::vector<DataType> dataVector;
+	std::vector<Attribute> *dataVector;
 	FileInf		*next;
 
 	FileInf(Table* pTable):
@@ -69,6 +68,9 @@ public:
 			return;
 		}
 
+		/* To do: mind the mem-leak */
+		dataVector = new std::vector<Attribute>(pTable->attributes);
+		
 		/* Create or/and Open the file *.table */
 		char *fileName;
 		fileName = new char[10];

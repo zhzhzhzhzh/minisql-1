@@ -20,6 +20,7 @@ void BufferManager::closeFile(FileInf *pFi){
 		blockCount--;
 	}
 	pFi->fd.close();				// This is the time when it actually flushback from system io
+	delete pFi->dataVector;
 	delete pFi;						// get rid of leak
 }
 
