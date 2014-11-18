@@ -1,3 +1,6 @@
+#define WIN 1
+#define MACOS 0
+
 #include "catalogmanager.h"
 
 catalogmanager::catalogmanager()
@@ -48,16 +51,27 @@ int catalogmanager::dropDatabase(string dataBaseName)
     int i;
     for(i = 0; i < dataBaseNum; i++)
     {
-        cout << dbV[i] << endl;
+        //cout << dbV[i] << endl;
         if(dbV[i] == dataBaseName)
             break;
     }
-    cout << i << endl;
+    //cout << i << endl;
     if(i == dataBaseNum)
         flag = 1;//can not find the database
     if(flag == 0)
     {
-        for(int j = 0; j < totalTableNum; j++)
+        #if WIN
+        quit();
+        string a = "rmdir ";
+        string b = "/S /Q ";
+        string c = a + b + dataBaseName;
+        system(c.c_str());
+        #endif
+
+        #if MACOS
+        system("rm -rf ")
+        #endif
+        /*for(int j = 0; j < totalTableNum; j++)
         {
             deleteTable(j);
             cout << "delete table " << j << endl;
@@ -71,7 +85,7 @@ int catalogmanager::dropDatabase(string dataBaseName)
         system(Info.c_str());
         string e = "rmdir ";
         string cmd = e + b + dataBaseName;
-        system(cmd.c_str());
+        system(cmd.c_str());*/
         dbV.erase(dbV.begin() + i);
         dataBaseNum--;
     }
@@ -201,6 +215,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
             flag = 1;
         }
     }
+    cout << "use some dataBase successfully" << endl;
 return flag;
 }
 
@@ -210,10 +225,8 @@ DataType catalogmanager::switchIntToEnum(int enumIn)
         return Int;
     else if(enumIn == 1)
         return Float;
-    else if(enumIn == 2)
+    else //if(enumIn == 2)
         return String;
-    
-    return Int;
 }
 
 int catalogmanager::switchEnumToInt(DataType dataTypeIn)
@@ -222,10 +235,8 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
         return 0;
     else if(dataTypeIn == Float)
         return 1;
-    else if(dataTypeIn == String)
+    else //if(dataTypeIn == String)
         return 2;
-    
-    return 0;
 }
 
 int catalogmanager::quit()
@@ -258,9 +269,10 @@ int catalogmanager::quit()
     {
         flag = 1;
     }
+    cout << "quit the database successfully!!" << endl;
     return flag;
 }
-int catalogmanager::createTable(Table& tableNameIn)
+int catalogmanager::createTable(Table& tableNameIn)//TODO datalength increment
 {
     /*int flag = 0;
     string newfileName = ".\\" + dataBaseNameNow + "\\" + tableName.tableName + "Info" + ".txt";
@@ -282,17 +294,30 @@ int catalogmanager::createTable(Table& tableNameIn)
     T_temp.attrNumber = tableNameIn.attrNumber;
     T_temp.attributes = tableNameIn.attributes;
     T_temp.recordNum = tableNameIn.recordNum;
-    int i;
+    int i,j;
+    int tableNumArray[32];
+    //int flag = 0;
+    for(i = 0; i < 32; i++)
+    {
+        tableNumArray[i] = i;
+    }
     for(i = 0; i < totalTableNum; i++)
     {
-        if(i < tableV[i].tableNum)
+        j = tableV[i].tableNum;
+        tableNumArray[j] = -1;
+    }
+    for(i = 0; i < 32; i++)
+    {
+        if(tableNumArray[i] != -1)
+        {
             T_temp.tableNum = i;
+            i = 32;
+        }
 
     }
-    if(i == totalTableNum)
-        T_temp.tableNum = i;
     totalTableNum++;
     tableV.push_back(T_temp);
+    cout << "create a table successfully!!" << endl;
     return 0;
 
 
@@ -375,14 +400,11 @@ string catalogmanager::getIndexName(string indexName)
             if(indexName == tableV[i].attributes[j].indexName)
             {
                 flag = 1;
-                break;
             }
-            if(flag == 1)
-                break;  
         }
     }
     if(flag == 1)
-        return tableV[i].attributes[j].indexName;
+        return indexName;
     else
         return "null";
 }
@@ -409,7 +431,7 @@ int catalogmanager::deleteIndex(string indexName)
         for(i = 0; i < totalTableNum; i++)
         {
             for(j = 0; j < tableV[i].attrNumber; j++)
-            {   
+            {
                 if(indexName == tableV[i].attributes[j].indexName)
                 {
                     flag =1;
