@@ -49,7 +49,7 @@ struct FileInf{
 public:
 	fstream 	fd;
 	int			File_id;
-	int 		recordNum; 				
+	UUID 		recordNum; 				
 	int			recordLen; 		
 	int 		Block_Num;
 	int 		Attr_Num;

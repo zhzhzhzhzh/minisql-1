@@ -6,7 +6,7 @@
 #ifndef _BUFFERMANAGER_H_
 #define _BUFFERMANAGER_H_
 #define MAX_BLOCK_NUM 	256
-#define MAX_FILE_NUM 	5
+#define MAX_FILE_NUM 	MAX_CONCURRENT_TABLE
 
 #include "Block.h"
 #include "typedefs.h"
@@ -48,7 +48,8 @@ public:
 	void 		createTable(Table* );
 	void 		insertRec(Table* , Record* );
 	int   		deleteRec(Table* , UUID );
-	UUID 		getMaxuuid(Table *);
+	UUID 		getMaxuuid(Table* );
+	void 		removeTable(Table *);
 	void 		quitProgram();
 private:
 	/* data */
