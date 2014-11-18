@@ -58,10 +58,6 @@ struct ConditionExpr{
 };
 
 
-
-
-
-    
     
 class RecordManager{
 public:
@@ -104,7 +100,7 @@ public:
     
     
     void InsertRecord(uint table);
-    // TODO tables not in where
+    // TODO tables not in where clause
     vector<vector<UUID>> SelectRecord(uint table, uint *attributes = NULL); // attributes is not needed, return all and selected by interpreter
     void DeleteRecord(uint table);
 
@@ -205,6 +201,7 @@ public:
         }
     }
     
+    /* no longer used
     bool Eva(){
         vector<Record *> records;
         vector<uint> tables;
@@ -214,6 +211,7 @@ public:
         tables.push_back(0);
         return pyEvaluator.Evaluate(tables, records, tableRecordDataTypes);
     }
+     */
 
     
 #endif // end of if TEST

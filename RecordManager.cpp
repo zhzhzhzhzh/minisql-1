@@ -44,6 +44,9 @@ void RecordManager::NewQuery(void)
 }
 
 void RecordManager::LoadTable(struct Table* tableStruct){
+    if(tableStructs[tableStruct->tableNum] == tableStruct)
+        return;
+    
     tableStructs[tableStruct->tableNum] = tableStruct;
     
     vector<DataType> dataType;
@@ -270,6 +273,10 @@ bool RecordManager::AppendValue(string recordData)
     return true;
 }
 
+void ddd(Record* r){
+    
+}
+
 void RecordManager::InsertRecord(uint table)
 {
 //    if(currentTablesCount != 1){
@@ -292,9 +299,7 @@ void RecordManager::InsertRecord(uint table)
     record->next = nullptr;
     
     
-    // TODO build table vector
- 	Table *pTable;
- 	bufferManager.insertRec(pTable, record);
+ 	//bufferManager.insertRec(tableStructs[table], record);
 
     
     #if TEST

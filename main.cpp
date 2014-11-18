@@ -20,7 +20,10 @@ int main(int argc, const char * argv[])
 {
 
     RecordManager recordManager;
+    
+    // must initialize
     recordManager.Initialize();
+    
     
     
     recordManager.root = new Record;
@@ -28,24 +31,57 @@ int main(int argc, const char * argv[])
     recordManager.lastRecord = recordManager.root;
     
     
+    
+    
+    struct Table tableStruct;
+    
+    {
+        tableStruct.tableName = "test";
+        tableStruct.attrNumber = 3;
+        tableStruct.recordNum = 3;
+        tableStruct.tableNum = 0;
+        
+        vector<Attribute> attributes;
+        struct Attribute attr;
+        attr.attrName = "id";
+        attr.dataType = String;
+        attr.dataLength = 10;
+        attr.attrType = 0;
+        attr.indexName = "null";
+        attributes.push_back(attr);
+        attr.attrName = "num";
+        attr.dataType = Int;
+        attr.dataLength = 8;
+        attr.attrType = 0;
+        attr.indexName = "null";
+        attributes.push_back(attr);
+        attr.attrName = "name";
+        attr.dataType = String;
+        attr.dataLength = 5;
+        attr.attrType = 0;
+        attr.indexName = "null";
+        attributes.push_back(attr);
+        
+        tableStruct.attributes = attributes;
+    }
 
-    uint T = 0;
-    vector<DataType> dataT;
-    dataT.push_back(String);
-    dataT.push_back(Int);
-    dataT.push_back(String);
-    vector<bool> isIndexBuilt;
-    isIndexBuilt.push_back(true);
-    isIndexBuilt.push_back(false);
-    isIndexBuilt.push_back(false);
-    recordManager.SetTableAttributeDataType(T, dataT, isIndexBuilt);
+    // create a table
+    //recordManager.CreateTable(&tableStruct);
+    
+ 
     
     
-    //recordManager.PushCondition(0, 0, Less, "hello");
+    // must load tables
+    recordManager.LoadTable(&tableStruct);
+
+    // drop a table
+    //recordManager.DropTable(&tableStruct);
+
+
     
     
-    //return 0;
     
+    uint T = tableStruct.tableNum;
     
     string id = "qwerty12";
     int num = 10;
@@ -78,29 +114,27 @@ int main(int argc, const char * argv[])
     recordManager.PrintSingle(recordManager.GetRecord(0, 0));
     
     recordManager.NewQuery();
-    recordManager.PushCondition(T, 1, Equal, 11);
+    recordManager.PushCondition(T, 1, NotEqual, 11);
     recordManager.SelectRecord(T);
     
     
-    //recordManager.Eva();
 
     
     return 0;
-
-    // create a table
-    Table *t;
-    recordManager.CreateTable(t);
-    /*
-    uint T = 0;
-    vector<DataType> dataT;
-    dataT.push_back(String);
-    dataT.push_back(Int);
-    dataT.push_back(String);
-    vector<bool> isIndexBuilt;
-    isIndexBuilt.push_back(true);
-    isIndexBuilt.push_back(false);
-    isIndexBuilt.push_back(false);
-    recordManager.SetTableAttributeDataType(T, dataT, isIndexBuilt);
+    
+    
+    
+    /* no longer used test codes
+     uint T = 0;
+     vector<DataType> dataT;
+     dataT.push_back(String);
+     dataT.push_back(Int);
+     dataT.push_back(String);
+     vector<bool> isIndexBuilt;
+     isIndexBuilt.push_back(true);
+     isIndexBuilt.push_back(false);
+     isIndexBuilt.push_back(false);
+     recordManager.SetTableDescriptions(T, dataT, isIndexBuilt);
      */
     
     
