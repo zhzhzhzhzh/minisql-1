@@ -87,7 +87,8 @@ public:
     }
     
     // TODO: add isIndexBuilt
-    void SetTableAttributeDataType(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);
+    void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);
+    void UnsetTableDescriptions(uint table);
     void ChooseTable(uint table);   // reentrant
     
     void PushCondition(uint table, uint attribute, Operator condition, int value);

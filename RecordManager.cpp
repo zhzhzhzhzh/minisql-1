@@ -11,13 +11,7 @@
 void RecordManager::Initialize()
 {
     for(int i=0; i<MAX_TABLE_NUMBER; i++){
-        // is attribute set
-        isTableAttributeSet[i] = false;
-        // is record datatype set
-        if(tableRecordDataTypes[i]!=NULL){
-            delete tableRecordDataTypes[i];
-            tableRecordDataTypes[i] = NULL;
-        }
+        UnsetTableDescriptions(i);
     }
     
     // is table chosen
@@ -48,26 +42,6 @@ void RecordManager::NewQuery(void)
     
     return;
 }
-/*
-
-struct Attribute
-{
-    string attrName;
-    int dataType;//dataType = 0 nchar;dataType = 1,int; dataType = 2,float;
-    int dataLength;
-    int attrType;//attrType = 0 primary;attrType = 1 unique; attrType = 2,null
-    string indexName; // if not exists, indexName = "none"
-};
-
-struct Table
-{
-    string tableName;
-    int attrNumber;
-    int recordNum;
-    int tableNum;
-    vector<Attribute> attributes;
-};
-*/
 
 void RecordManager::LoadTable(struct Table* tableStruct){
     tableStructs[tableStruct->tableNum] = tableStruct;
@@ -79,23 +53,22 @@ void RecordManager::LoadTable(struct Table* tableStruct){
         isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "null");
     }
     
-    SetTableAttributeDataType(tableStruct->tableNum, dataType, isIndexBuilt);
+    SetTableDescriptions(tableStruct->tableNum, dataType, isIndexBuilt);
     
     return;
 }
 
 
-void RecordManager::SetTableAttributeDataType(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt)
+void RecordManager::SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt)
 {
-    if(tableRecordDataTypes[table] != NULL){
-        // TODO close the former file
+    if(tableRecordDataTypes[table] != nullptr){
         delete tableRecordDataTypes[table];
         Debug("delete former record datatype of table "<<table);
     }
     tableRecordDataTypes[table] = new vector<DataType>(dataType);
     
     
-    if(isTableAttributeIndexBuilt[table] != NULL){
+    if(isTableAttributeIndexBuilt[table] != nullptr){
         delete isTableAttributeIndexBuilt[table];
         Debug("delete former index description of table "<<table);
     }
@@ -111,6 +84,20 @@ void RecordManager::SetTableAttributeDataType(uint table, vector<DataType> dataT
     }
     
     return;
+}
+
+
+void RecordManager::UnsetTableDescriptions(uint table)
+{
+    // record datatype
+    if (tableRecordDataTypes[table] != nullptr) {
+        delete tableRecordDataTypes[table];
+        tableRecordDataTypes[table] = nullptr;
+    }
+    
+    // is attribute set
+    isTableAttributeSet[table] = false;
+
 }
 
 
