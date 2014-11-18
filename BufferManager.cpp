@@ -13,8 +13,8 @@
 void BufferManager::closeFile(FileInf *pFi){
 	int B_index, nextblock;
 	if ( !pFi ) return;
-	Bufferlist[pFi->firstBlock].unlock();
-	Bufferlist[pFi->lastBlock].unlock();
+	if ( pFi->firstBlock >= 0 ) Bufferlist[pFi->firstBlock].unlock();
+	if ( pFi->lastBlock >= 0 )	Bufferlist[pFi->lastBlock].unlock();
 	for (B_index = pFi->firstBlock; B_index != -1; B_index = nextblock){
 		nextblock = Bufferlist[B_index].next;
 		Bufferlist[B_index].Initialize();
@@ -146,11 +146,11 @@ int BufferManager::getFreeBlock(){
 		}
 
 		/* Remove block ret from the file it belongs to */
-	 	int i = Bufferlist[ret].Fptr->firstBlock;
-	 	while ( i >= 0 && Bufferlist[i].next != ret && i < MAX_BLOCK_NUM ) 
-	 		i = Bufferlist[i].next; 						// Find the former block
-	 	if ( i >= 0 && i < MAX_BLOCK_NUM )					// Just in case
-			Bufferlist[i].next = Bufferlist[ret].next;		// Remove the block node off the fileblocks	
+	 	int former_block = Bufferlist[ret].Fptr->firstBlock;
+	 	while ( former_block >= 0 && Bufferlist[former_block].next != ret && former_block < MAX_BLOCK_NUM ) 
+	 		former_block = Bufferlist[former_block].next; 						// Find the formerBlock
+	 	if ( former_block >= 0 && former_block < MAX_BLOCK_NUM )					// Just in case
+			Bufferlist[former_block].next = Bufferlist[ret].next;		// Remove the block node off the fileblocks	
 	}
 	return ret;
 }
@@ -160,6 +160,7 @@ int BufferManager::getFreeBlock(){
  @param FileInf *pFi: FileInfomation
  @param int 	offset: block offset in the file
  @return int 	block_index in Bufferlist 
+ TODO: revise...
  */
 int BufferManager::getBlock(FileInf *pFi, int offset){
 	if ( !pFi ) return -1;
@@ -167,27 +168,44 @@ int BufferManager::getBlock(FileInf *pFi, int offset){
 	if ( offset == 1 && pFi->firstBlock != -1 ){
 		return pFi->firstBlock;
 	}
+	else if ( offset == pFi->Block_Num && pFi->lastBlock != -1 && Bufferlist[pFi->lastBlock].Block_Offset == offset ){
+		// lastBlock stays as is
+		return pFi->lastBlock;
+	}
 	else {
-
-		/* In case of the new first block */ 
+		/* In case of the first block in a new file*/ 
 		if ( offset == 1 ){
 			block_index = getFreeBlock();
 			Bufferlist[block_index].Initialize(pFi, offset);
+			Bufferlist[block_index].lock();
 			Bufferlist[block_index].next = -1;
 		}
 		else{
-			while ( block_index >= 0 && Bufferlist[block_index].Block_Offset != offset ) 
+			int former_block = -1;
+			while ( block_index >= 0 && Bufferlist[block_index].Block_Offset != offset ){
+				former_block = block_index;
 				block_index = Bufferlist[block_index].next;
+			}
 			if ( block_index == -1 ){
 				block_index = getFreeBlock();
 				Bufferlist[block_index].Initialize(pFi, offset);
-			}
 
-			/* To link the node into the file-block queue, except for the case of the lastblock */
-			if ( Bufferlist[block_index].Block_Offset != pFi->Block_Num ){				
-				Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
-				Bufferlist[pFi->firstBlock].next = block_index;
-			}				
+				/*  
+					To link the node into the file-block queue, except for the case of 
+					the lastBlock when lastblock move forward
+				 */
+				if ( offset != pFi->Block_Num ){				
+					Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
+					Bufferlist[pFi->firstBlock].next = block_index;
+				}
+				else {
+
+				}
+			}
+			else if ( offset == pFi->Block_Num ){								// lastBlock not in the list, i.e. lastBlock withdraw
+				Bufferlist[former_block].next = Bufferlist[block_index].next;	// remove the node inside 
+				Bufferlist[block_index].next = -1;								// linked in later
+			}					
 		}
 		return block_index;
 	}
@@ -217,14 +235,11 @@ Record* BufferManager::getRecord(const Table *pTable, UUID uuid) 	// Exception t
 	return &Bufferlist[block].recordHandle[recordOffset];
 }
 
-
-
-
-
 /*
  Insert a new tuple into the table described by pTable
  @param Table 	*pTable: describe the table
  @param Record 	*rec: record to insert 
+ Almost bugless, report ASAP, if any.
  */
 bool BufferManager::insertRec(const Table *pTable, Record* rec){
 	FileInf *file;
@@ -236,7 +251,7 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 
 	/* Insert a record */
 	if ( file->Block_Num == 0 ){
-		file->Block_Num = 1;
+		file->Block_Num++;
 		file->firstBlock = file->lastBlock = getBlock(file, 1);
 		Bufferlist[file->firstBlock].next = -1;
 		Bufferlist[file->firstBlock].lock();
@@ -247,7 +262,8 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 			file->Block_Num++;
 			int block = getBlock(file, BlockOffset);
 			Bufferlist[file->lastBlock].next = block;				// add a block to the table
-			Bufferlist[file->lastBlock].unlock();
+			if ( file->lastBlock != file->firstBlock )				// Equals when one-block evolve two
+				Bufferlist[file->lastBlock].unlock();
 			Bufferlist[block].next = -1;
 			Bufferlist[block].lock();
 			file->lastBlock = block;
@@ -302,38 +318,60 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 int BufferManager::deleteRec(const Table *pTable, UUID delete_uuid){
 	FileInf *file;
 	file = getFile(pTable);
+	long last_recOff = file->recordNum - file->recordPerBlock * (file->Block_Num - 1);
+	long last_byteOff = file->recordLen * (last_recOff - 1);
+	if ( delete_uuid != file->recordNum ){							// The record to delete is not the last one
 
-	/* In case of block withdraw i.e. delete the last tuple */
-	int CurBlkNum_in_File = static_cast<int>(ceil(pTable->recordNum / file->recordPerBlock));
-	if ( CurBlkNum_in_File != Bufferlist[file->lastBlock].Block_Offset ){
+		/* delete */
+		int del_blockNum = static_cast<int>(ceil(delete_uuid / file->recordPerBlock));		// 
+		long del_recordOffset = delete_uuid - file->recordPerBlock * (del_blockNum - 1);
+		long del_byteOffset = file->recordLen * (del_recordOffset - 1);
+		int del_blkIndex = getBlock(file, del_blockNum);				// The block to delete 
+
+		/* Cover the deteled record with the last one */
+		memcpy(&Bufferlist[del_blkIndex].token[del_byteOffset + sizeof(UUID)], 
+				&Bufferlist[file->lastBlock].token[last_byteOff + sizeof(UUID)], 
+				file->recordLen - sizeof(UUID));
+		Bufferlist[del_blkIndex].is_Dirty = true;
+	} 
+
+	/* To delete the last block */
+	memset(&Bufferlist[file->lastBlock].token[last_byteOff], EMPTY, file->recordLen);
+	Bufferlist[file->lastBlock].is_Dirty = true;
+
+	/* 	
+	  	In case of block withdraw i.e. the last tuple 
+	   	unluckily the tuple being the first in its the block
+	 */   
+	int CurBlkNum_in_File = static_cast<int>(ceil((float)(file->recordNum - 1) / file->recordPerBlock));
+	if ( CurBlkNum_in_File < file->Block_Num ){
+		file->Block_Num--;
+		blockCount--;
 		Bufferlist[file->lastBlock].unlock();
-		Bufferlist[file->lastBlock].is_Valid = false;
-		//Bufferlist[file->lastBlock].Initialize(); 					// redundent operation
-		int block = getBlock(file, CurBlkNum_in_File);
-		if ( block != file->firstBlock ){
-			int i = file->firstBlock;
-			for (; i != -1 && Bufferlist[i].next != file->lastBlock; i = Bufferlist[i].next);
-			if ( i != -1 ){
-				Bufferlist[i].next = block;	
+		Bufferlist[file->lastBlock].Initialize();
+		if ( CurBlkNum_in_File == 0 ){
+			file->firstBlock = file->lastBlock = -1;
+		}
+		else {
+			int block = getBlock(file, CurBlkNum_in_File);					
+			if ( block != file->firstBlock ){								// Equals when two-blocks reduce to one
+				int i = file->firstBlock;
+				while ( i >= 0 && i < MAX_BLOCK_NUM && Bufferlist[i].next != file->lastBlock )
+					i = Bufferlist[i].next;
+				if ( i != -1 ){
+					Bufferlist[i].next = block;								// Link the lastBlock back to the list
+				}
 			}
 			Bufferlist[block].next = -1;
 			Bufferlist[block].lock();
+			file->lastBlock = block;	
 		}
 	}
 
-
-	if ( delete_uuid != pTable->recordNum ){						// Pre-condition: the catalog has already decrease the number of records
-																	// In case of the deletion of the last one
-		/* delete */
-		int blockNum = static_cast<int>(ceil(delete_uuid / file->recordPerBlock));		// 
-		long recordOffset = delete_uuid - file->recordPerBlock * (blockNum - 1);
-		long byteOffset = file->recordLen * (recordOffset - 1);
-		int deleteblockIndex = getBlock(file, blockNum);				// The block to delete 
-
-		/* Cover the deteled record with the last one */
-		// Todo calculate the byteoffset of the origin
-		memcpy(&Bufferlist[deleteblockIndex].token[byteOffset], &Bufferlist[file->lastBlock].token[byteOffset], file->recordLen);
-	} 
+	/* 
+	 	Descrease the number in FileInf while 
+	 	pTable is maintained by the CatalogManager 
+	 */ 
 	file->recordNum--;
 	return pTable->recordNum;
 }
@@ -357,32 +395,23 @@ UUID BufferManager::getMaxuuid(const Table *pTable){
 /* 
  remove the table directly
  @param Table *pTable
+ TODO: IF THE FILE IS CURRENTLY IN THE FILELIST, UPDATE THE LIST 
  */
 void BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
 		FileInf *file = getFile(pTable);
+		// closeFile(file);
 		char s[20];
-		sprintf(s, "rm %s.table", file->File_id);
+		sprintf(s, "rm %d.table", file->File_id);
 		system(s);	
 	}
 }
 
-void BufferManager::quitProgram(){
+void BufferManager::quitDB(){
 	FileInf *fit, *nextfit;
 	for (fit = flistHead; fit != NULL; fit = nextfit){
 		nextfit = fit->next;
 		closeFile(fit); 						// FileInf deleted in closeFile();
 	}	
-	/*
-		Bufferlist[fit->firstBlock].unlock();
-		Bufferlist[fit->lastBlock].unlock();
-		for (int i = fit->firstBlock; i != -1 && i < MAX_BLOCK_NUM; i = Bufferlist[i].next){
-			Bufferlist[i].Flushback();
-			Bufferlist[i].is_Valid = false;
-		}
-		delete fit;								// To get rid of mem-leak
-		*/
-
-		
 	// There is no need to destruct the block because it is done in the destructor	
 }

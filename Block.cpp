@@ -103,7 +103,7 @@ void Block::Initialize(FileInf *pFi, int offset ){
 
  */
 void Block::Flushback(){
-	if (Fptr){
+	if ( Fptr != NULL && Fptr->fd.is_open() ){
 		Fptr->fd.clear();
 		Fptr->fd.seekp(BLOCK_SIZE * (Block_Offset - 1), ios::beg);
 		Fptr->fd.write(token, BLOCK_SIZE);
