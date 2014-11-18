@@ -32,7 +32,7 @@ void BufferManager::closeFile(FileInf *pFi){
  @param Table 	*pTable
  @return FileInf*file: file descriptor
  */
-FileInf* BufferManager::openFile(Table *pTable){
+FileInf* BufferManager::openFile(const Table *pTable){
 	FileInf *ret;
 	ret = new FileInf(pTable);		
 	if ( ret->Block_Num != 0){								// In case of new created table
@@ -62,7 +62,7 @@ FileInf* BufferManager::openFile(Table *pTable){
  @param Table 	*pTable
  @return FileInf*file: file descriptor
  */
-FileInf* BufferManager::getFile(Table *pTable){
+FileInf* BufferManager::getFile(const Table *pTable){
 	FileInf *ret = NULL, *former_it = NULL;
 	former_it = ret = flistHead;
 
@@ -110,7 +110,7 @@ FileInf* BufferManager::getFile(Table *pTable){
  	add the FileInf pointer to the file list
 	
  */
-void BufferManager::createTable(Table *pTable){
+void BufferManager::createTable(const Table *pTable){
 	/*
 	FileInf *file;
 	file = 
@@ -187,7 +187,7 @@ int BufferManager::getBlock(FileInf *pFi, int offset){
  @param uuid 	Unique record id for each tuple
  @return Record*  
  */
-Record* BufferManager::getRecord(Table *pTable, UUID uuid) 	// Exception to throw
+Record* BufferManager::getRecord(const Table *pTable, UUID uuid) 	// Exception to throw
 {	
 	FileInf *file;
 	file = getFile(pTable);
@@ -214,7 +214,7 @@ Record* BufferManager::getRecord(Table *pTable, UUID uuid) 	// Exception to thro
  @param Table 	*pTable: describe the table
  @param Record 	*rec: record to insert 
  */
-bool BufferManager::insertRec(Table *pTable, Record* rec){
+bool BufferManager::insertRec(const Table *pTable, Record* rec){
 	FileInf *file;
 	file = getFile(pTable);
 	// TODO: Update FileInf
@@ -280,7 +280,7 @@ bool BufferManager::insertRec(Table *pTable, Record* rec){
  @param Table 	*pTable
  @param UUID 	delete_uuid
  */
-int BufferManager::deleteRec(Table *pTable, UUID delete_uuid){
+int BufferManager::deleteRec(const Table *pTable, UUID delete_uuid){
 	FileInf *file;
 	file = getFile(pTable);
 
@@ -324,7 +324,7 @@ int BufferManager::deleteRec(Table *pTable, UUID delete_uuid){
  @param Table *pTable
  @return UUID the recordNum
  */
-UUID BufferManager::getMaxuuid(Table *pTable){
+UUID BufferManager::getMaxuuid(const Table *pTable){
 	if ( pTable ){
 		FileInf *file;
 		file = getFile(pTable);
@@ -339,7 +339,7 @@ UUID BufferManager::getMaxuuid(Table *pTable){
  remove the table directly
  @param Table *pTable
  */
-void BufferManager::removeTable(Table *pTable){
+void BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
 		FileInf *file = getFile(pTable);
 		char s[20];

@@ -4,11 +4,11 @@
 
 #ifndef _BLOCK_H_
 #define _BLOCK_H_
-#define EMPTY 		0x00
-#define BLOCK_SIZE 	8192
 #include <ctime>
 #include <cmath>
 #include "typedefs.h"
+#define EMPTY 		0x00
+#define BLOCK_SIZE 	8192
 
 using namespace std;
 struct FileInf;
@@ -59,7 +59,7 @@ public:
 	std::vector<Attribute> *dataVector;
 	FileInf		*next;
 
-	FileInf(Table* pTable):
+	FileInf(const Table* pTable):
 		File_id(pTable->tableNum), recordNum(pTable->recordNum), Attr_Num(pTable->attrNumber)
 	{
 		next = NULL;
