@@ -1,0 +1,114 @@
+/*
+	Block.h 
+ */
+
+#ifndef _BLOCK_H_
+#define _BLOCK_H_
+#define EMPTY 		0x00
+#define BLOCK_SIZE 	8192
+#include <ctime>
+#include <cmath>
+#include "all.h"
+using namespace std;
+struct FileInf;
+class Block
+{
+	/* Friend class */ 		// Too lazy a coder ^_^
+	friend class BufferManager;
+	char 		token[BLOCK_SIZE];
+	int     	next;			// Pointer to the next block
+	int 		File_Num;		// Associated file
+	bool 		Pinlock;		// Pinlocked to prevent blcok from replacing 
+	bool 		is_Valid;		// Block in use
+	bool		is_Dirty;		// Write Back required
+	time_t 		LRU_Value;		// To implement Least Recent Used Algorithm
+	int 		Block_Offset;	// Offset in the file 
+	FileInf 	*Fptr;			// The file this block belongs to
+	Record 		*recordHandle;
+	
+public:
+		
+	/* Void Constructor, initiate the block with empty value */
+	Block();
+	~Block();
+	void Initialize();
+	void Initialize(FileInf *, int);
+	inline void lock(){			// Lock and unlock to special for first and last blocks of a file
+		Pinlock = true;
+	};			
+	inline void unlock(){
+		Pinlock = false;
+	};
+
+private:
+	void Flushback();
+};
+
+struct FileInf{
+public:
+	fstream 	fd;
+	int			File_id;
+	int 		recordNum; 				
+	int			recordLen; 		
+	int 		Block_Num;
+	int 		Attr_Num;
+	int  		recordPerBlock;
+	int 		firstBlock;
+	int  		lastBlock;
+	/* No need anymore */
+	//std::vector<DataType> dataVector;
+	FileInf		*next;
+
+	FileInf(Table* pTable):
+		File_id(pTable->tableNum), recordNum(pTable->recordNum), Attr_Num(pTable->attrNumber)
+	{
+		next = NULL;
+		firstBlock = -1;
+		lastBlock = -1;
+		if ( !pTable ){
+			return;
+		}
+
+		/* Create or/and Open the file *.table */
+		char *fileName;
+		fileName = new char[10];
+		sprintf(fileName, "%d.table", File_id);
+		fd.open(fileName, ios::in | ios::out | ios::binary);	
+		if ( !fd ){
+			fd.open(fileName, ios::in | ios::out | ios::binary | ios::trunc);
+		}
+
+		/* Calculating recordLen and blockNum */
+		int len = pTable->attributes.size();
+		recordLen = 0;
+		for (int i = 0; i < len; i++){
+			switch( pTable->attributes.at(i).dataType ){
+				case Int: {
+					recordLen += sizeof(int);
+					break;
+				}
+				case Float: {
+					recordLen += sizeof(float);
+					break;
+				}
+				case String: {
+					recordLen += pTable->attributes.at(i).dataLength * sizeof(char);
+					break;
+				}
+				case Uuid: {
+					recordLen += sizeof(UUID);
+					break;
+				}
+			}
+		}
+		recordPerBlock = BLOCK_SIZE / recordLen;
+		Block_Num = static_cast<int>(ceil(recordNum / recordPerBlock));
+
+		/* Pointer to Blocks remains unsolved */
+		delete [] fileName; 				
+	}	
+};
+
+#endif /* _BLOCK_H_ */
+
+
