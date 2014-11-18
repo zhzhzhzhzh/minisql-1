@@ -6,7 +6,7 @@
 #ifndef _BUFFERMANAGER_H_
 #define _BUFFERMANAGER_H_
 #include "Block.h"
-#define MAX_BLOCK_NUM 	256
+#define MAX_BLOCK_NUM 	4
 #define MAX_FILE_NUM 	MAX_CONCURRENT_TABLE
 //#include "Exceptions.h"
 using namespace std;
@@ -34,7 +34,7 @@ public:
 	//BufferManager(arguments);
 	~BufferManager(){
 		for (int i = 0; i < MAX_BLOCK_NUM; i++)
-			Bufferlist[i].Flushback();
+			Bufferlist[i].Initialize();
 		delete [] Bufferlist;
 		//delete [] Tablelist;
 	};
@@ -46,7 +46,7 @@ public:
 	int   		deleteRec(const Table* , UUID );
 	UUID 		getMaxuuid(const Table* );
 	void 		removeTable(const Table *);
-	void 		quitProgram();
+	void 		quitDB();
 private:
 	/* data */
 	Block* 		Bufferlist;
