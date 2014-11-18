@@ -44,7 +44,7 @@ void Block::Initialize(){
  @param pFi 	- pointer to FileInf 
  @param offset  - blockoffset 
  */
-void Block::Initialize(FileInf *pFi, int offset){
+void Block::Initialize(FileInf *pFi, int offset ){
 	if ( is_Valid && is_Dirty ) Flushback();
 	File_Num 		= pFi->File_id;
 	Block_Offset 	= offset;
@@ -66,12 +66,12 @@ void Block::Initialize(FileInf *pFi, int offset){
 
 	/*Create record pointers */ 
 	recordHandle = new Record[pFi->recordPerBlock];
-	uint byteOffset = 0;
-	uint rec_num = 0;
-	for (; (byteOffset + pFi->recordLen) < BLOCK_SIZE; byteOffset += file->recordLen){
-		for (uint i = 0; i < pFi->dataVector.size(); i++){
-			recordHandle[rec_num].data.pushback(reinterpret_cast<void *>(&Bufferlist[block].token[byteOffset]));
-			switch ( pFi->dataVector.at(i).dataType ) {
+	unsigned int byteOffset = 0;
+	unsigned int rec_num = 0;
+	for (; (byteOffset + pFi->recordLen) < BLOCK_SIZE; byteOffset += pFi->recordLen){
+		for (unsigned int i = 0; i < pFi->dataVector->size(); i++){
+			recordHandle[rec_num].data.push_back(reinterpret_cast<void *>(&token[byteOffset]));
+			switch ( pFi->dataVector->at(i).dataType ) {
 				Int: {
 					byteOffset += sizeof(int);
 					break;
@@ -81,7 +81,7 @@ void Block::Initialize(FileInf *pFi, int offset){
 					break;
 				}
 				String: {
-					byteOffset += pFi->dataVector.at(i).dataLength * sizeof(char);
+					byteOffset += pFi->dataVector->at(i).dataLength * sizeof(char);
 					break;
 				}
 				Uuid: {
