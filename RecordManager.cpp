@@ -249,10 +249,11 @@ void RecordManager::DeleteRecord(uint table)
 
 
 
-UUID RecordManager::NextUUID(void)
+UUID RecordManager::NextUUID(Table* tableStruct)
 {
     // TODO
     // read record number from table description structure
+    return UUID(tableStruct->recordNum + 1);
     return currentLastUUID+=1;
 }
 
@@ -294,7 +295,7 @@ void RecordManager::InsertRecord(uint table)
     
     Record* record = new Record;
 
-    UUID *uuid = new UUID(NextUUID());
+    UUID *uuid = new UUID(NextUUID(tableStructs[table]));
     record->data.push_back(uuid);
     
     for (int i=0; i<newRecord.size(); i++) {
@@ -303,7 +304,8 @@ void RecordManager::InsertRecord(uint table)
     record->next = nullptr;
     
     
- 	//bufferManager.insertRec(tableStructs[table], record);
+    PrintSingle(record);
+ 	bufferManager.insertRec(tableStructs[table], record);
 
     
     #if TEST

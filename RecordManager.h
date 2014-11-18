@@ -250,7 +250,7 @@ private:
     // function
     void AddCurrentTable(uint table);
     
-    UUID NextUUID(void);
+    UUID NextUUID(Table* tableStruct);
 
     bool Evaluate();
     

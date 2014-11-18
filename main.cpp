@@ -33,36 +33,36 @@ int main(int argc, const char * argv[])
     
     {
         tableStruct.tableName = "test";
-        tableStruct.attrNumber = 3;
-        tableStruct.recordNum = 3;
+        tableStruct.attrNumber = 1;
+        tableStruct.recordNum = 0;
         tableStruct.tableNum = 0;
         
         vector<Attribute> attributes;
         struct Attribute attr;
-        attr.attrName = "id";
-        attr.dataType = String;
-        attr.dataLength = 10;
-        attr.attrType = 0;
-        attr.indexName = "null";
-        attributes.push_back(attr);
+//        attr.attrName = "id";
+//        attr.dataType = String;
+//        attr.dataLength = 10;
+//        attr.attrType = 0;
+//        attr.indexName = "null";
+//        attributes.push_back(attr);
         attr.attrName = "num";
         attr.dataType = Int;
         attr.dataLength = 8;
         attr.attrType = 0;
         attr.indexName = "null";
         attributes.push_back(attr);
-        attr.attrName = "name";
-        attr.dataType = String;
-        attr.dataLength = 5;
-        attr.attrType = 0;
-        attr.indexName = "null";
-        attributes.push_back(attr);
+//        attr.attrName = "name";
+//        attr.dataType = String;
+//        attr.dataLength = 5;
+//        attr.attrType = 0;
+//        attr.indexName = "null";
+//        attributes.push_back(attr);
         
         tableStruct.attributes = attributes;
     }
 
     // create a table
-    //recordManager.CreateTable(&tableStruct);
+    recordManager.CreateTable(&tableStruct);
     
  
     
@@ -83,28 +83,33 @@ int main(int argc, const char * argv[])
     int num = 10;
     string name = "abcde";
     recordManager.NewQuery();
-    recordManager.AppendValue(id);
+    //recordManager.AppendValue(id);
     recordManager.AppendValue(num);
-    recordManager.AppendValue(name);
+    //recordManager.AppendValue(name);
     //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
     
+    return 0;
+    
     num = 11;
     recordManager.NewQuery();
-    recordManager.AppendValue(id);
+    //recordManager.AppendValue(id);
     recordManager.AppendValue(num);
-    recordManager.AppendValue(name);
+    //recordManager.AppendValue(name);
     //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
     
     
     num = 12;
     recordManager.NewQuery();
-    recordManager.AppendValue(id);
+    //recordManager.AppendValue(id);
     recordManager.AppendValue(num);
-    recordManager.AppendValue(name);
+    //recordManager.AppendValue(name);
     //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
+    
+    
+    
     
     recordManager.PrintRecord(T);
     //recordManager.PrintSingle(recordManager.GetRecord(0, 0));
