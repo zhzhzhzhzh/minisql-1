@@ -69,6 +69,7 @@ public:
     void NewQuery(void);
     
     bool BuildIndex(uint table, uint attribute);
+    bool DropIndex(uint table, uint attribute);
     
     void LoadTable(struct Table* tableStruct);
 
@@ -103,6 +104,8 @@ public:
     // TODO tables not in where clause
     vector<vector<UUID>> SelectRecord(uint table, uint *attributes = NULL); // attributes is not needed, return all and selected by interpreter
     void DeleteRecord(uint table);
+    
+    void OnQuit();
 
     
     //void Commit(void);  not needed, insert or delete implies this

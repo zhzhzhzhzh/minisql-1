@@ -12,13 +12,9 @@
 
 #include "RecordManager.h"
 
-void fun(int a[]){
-    cout<<a[0];
-}
 
 int main(int argc, const char * argv[])
 {
-
     RecordManager recordManager;
     
     // must initialize

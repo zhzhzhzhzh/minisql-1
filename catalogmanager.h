@@ -34,14 +34,14 @@ class catalogmanager
         int getDataLength(int tableIndex, int attrIndex);
         int getAttrType(int tableIndex, int attrIndex);
         string getIndexName(string indexName);//TODO
-        int createIndex(string indexName);//TODO
+        int createIndex(string indexName, int tableIndex, int attrIndex);//TODO
         int deleteIndex(string indexName);//TODO
         DataType switchIntToEnum(int enumIn);
-        int switchEnumToInt(int DataType);
+        int switchEnumToInt(DataType DataType);
         int addRecord(int tableIndex);//TODO
         int deleteRecord(int tableIndex);//TODO
         vector<const Table*> getTableStructs(){
-            vector<Table*> v;
+            vector<const Table*> v;
             for (int i = 0; i < tableV.size(); ++i)
             {
                 v.push_back(&(tableV.at(i)));

@@ -273,9 +273,6 @@ bool RecordManager::AppendValue(string recordData)
     return true;
 }
 
-void ddd(Record* r){
-    
-}
 
 void RecordManager::InsertRecord(uint table)
 {

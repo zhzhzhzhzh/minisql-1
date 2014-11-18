@@ -184,8 +184,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
                     int tmpInt;
                     Attribute tmp_attribute;
                     fin >> tmp_attribute.attrName;
-                    fin >> tmpIn;
-                    tmp_attribute.dataType = switchIntToEnum(tmpIn);
+                    fin >> tmpInt;
+                    tmp_attribute.dataType = switchIntToEnum(tmpInt);
                     fin >> tmp_attribute.dataLength;
                     fin >> tmp_attribute.attrType;
                     fin >> tmp_attribute.indexName;
@@ -203,24 +203,31 @@ int catalogmanager::useDataBase(string newDataBaseName)
     }
 return flag;
 }
+
 DataType catalogmanager::switchIntToEnum(int enumIn)
 {
-    if(enumIn == "0")
-        return In;
-    else if(enumIn == "1")
+    if(enumIn == 0)
+        return Int;
+    else if(enumIn == 1)
         return Float;
-    else if(enumIn == "2")
+    else if(enumIn == 2)
         return String;
+    
+    return Int;
 }
+
 int catalogmanager::switchEnumToInt(DataType dataTypeIn)
 {
-    if(dataTypeIn == In)
+    if(dataTypeIn == Int)
         return 0;
     else if(dataTypeIn == Float)
         return 1;
     else if(dataTypeIn == String)
         return 2;
+    
+    return 0;
 }
+
 int catalogmanager::quit()
 {
     int flag = 0;
