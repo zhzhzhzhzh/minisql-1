@@ -62,7 +62,7 @@ int main(int argc, const char * argv[])
     }
 
     // create a table
-    //recordManager.CreateTable(&tableStruct);
+    recordManager.CreateTable(&tableStruct);
     
  
     
