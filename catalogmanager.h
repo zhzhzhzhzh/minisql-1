@@ -1,6 +1,6 @@
 #ifndef CATALOGMANAGER_H
 #define CATALOGMANAGER_H
-#include "typedefs.h"
+#include "all.h"
 
 using namespace std;
 class catalogmanager
@@ -8,7 +8,7 @@ class catalogmanager
     public:
         catalogmanager();
         virtual ~catalogmanager();
-        
+
         int dataBaseNum;
         int totalTableNum;
         string dataBaseNameNow;
@@ -19,7 +19,7 @@ class catalogmanager
 
     public:
         int createDatabase(string dataBaseName);
-        int dropDatabase(string dataBaseName);
+        int dropDatabase(string dataBaseName);//TODO test again
         int useDataBase(string dataBaseName);
         int quit();
         int createTable(Table& tableName);
