@@ -107,7 +107,9 @@ public:
     vector<vector<UUID>> SelectRecord(uint table, uint *attributes = NULL); // attributes is not needed, return all and selected by interpreter
     void DeleteRecord(uint table);
     
-    void OnQuit();
+    void OnQuit(){
+        bufferManager.quitDB();
+    }
 
     
     //void Commit(void);  not needed, insert or delete implies this
@@ -151,10 +153,10 @@ public:
 
     }
     
-    void PrintSingle(Record* r)
+    void PrintSingle(Table*t, Record* r)
     {
-        for(int i=1;i<r->data.size();i++){
-            DataType type = tableRecordDataTypes[0]->at(i-1);
+        for(int i=0;i<r->data.size();i++){
+            DataType type = tableRecordDataTypes[t->tableNum]->at(i);
             switch (type) {
                 case Int:
                     cout<<*(int*)r->data[i]<<endl;
@@ -258,6 +260,8 @@ private:
     IndexManager in;
     
     // buffer
+public:
+    
     BufferManager bufferManager;
     
 };

@@ -22,6 +22,94 @@ int main(int argc, const char * argv[])
     
     
     
+    
+    Table InsT;
+	Attribute a;
+	BufferManager bufferM;
+	InsT.attrNumber = 4;
+    
+	a.attrName = "uuid";
+	a.dataType = Uuid;
+	a.attrType = 1;
+	InsT.attributes.push_back(a);
+    
+	a.attrName = "att1";
+	a.dataType = Int;
+	InsT.attributes.push_back(a);
+    
+	a.attrName = "att2";
+	a.dataType = Int;
+	InsT.attributes.push_back(a);
+    
+	a.attrName = "att3";
+	a.dataType = String;
+	a.dataLength = 5;
+	InsT.attributes.push_back(a);
+    
+	InsT.tableName = "table1";
+	InsT.recordNum = 0;
+	InsT.tableNum  = 1;
+    
+	Record *rec = new Record;
+	UUID  *uuid = new UUID(1);
+	int *aaa = new int(255);
+	int *bbb = new int(0xabcd);
+	string *str = new string("wxyz");
+	rec->data.push_back(static_cast<void *>(uuid));
+	rec->data.push_back(static_cast<void *>(aaa));
+	rec->data.push_back(static_cast<void *>(bbb));
+	rec->data.push_back(static_cast<void *>(str));
+	rec->next = NULL;
+    
+
+    
+    
+    recordManager.CreateTable(&InsT);
+    recordManager.LoadTable(&InsT);
+
+    
+    uint T = InsT.tableNum;
+    
+
+    recordManager.NewQuery();
+    recordManager.AppendValue(255);
+    recordManager.AppendValue(0xabcd);
+    recordManager.AppendValue("wxyz");
+    //recordManager.ChooseTable(T);
+    recordManager.InsertRecord(T);
+	InsT.recordNum++;
+    
+    recordManager.NewQuery();
+    recordManager.AppendValue(255);
+    recordManager.AppendValue(0xabcd);
+    recordManager.AppendValue("wxyz");
+    //recordManager.ChooseTable(T);
+    recordManager.InsertRecord(T);
+	InsT.recordNum++;
+    
+    recordManager.NewQuery();
+    recordManager.AppendValue(255);
+    recordManager.AppendValue(0xabcd);
+    recordManager.AppendValue("wxyz");
+    //recordManager.ChooseTable(T);
+    recordManager.InsertRecord(T);
+	InsT.recordNum++;
+
+    
+    recordManager.OnQuit();
+    
+    return 0;
+    
+    
+    // TODO merge select and add select from no where
+    
+    
+    
+    
+    
+    
+    
+    
     recordManager.root = new Record;
     recordManager.root->next = NULL;
     recordManager.lastRecord = recordManager.root;
@@ -61,11 +149,11 @@ int main(int argc, const char * argv[])
         tableStruct.attributes = attributes;
     }
 
+
     // create a table
     recordManager.CreateTable(&tableStruct);
     
  
-    
     
     // must load tables
     recordManager.LoadTable(&tableStruct);
@@ -77,7 +165,7 @@ int main(int argc, const char * argv[])
     
     
     
-    uint T = tableStruct.tableNum;
+//    uint T = tableStruct.tableNum;
     
     string id = "qwerty12";
     int num = 10;
@@ -133,7 +221,7 @@ int main(int argc, const char * argv[])
     recordManager.SelectRecord(T);
 
     
-    
+    recordManager.OnQuit();
 
     
     return 0;

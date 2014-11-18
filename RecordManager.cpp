@@ -259,24 +259,27 @@ UUID RecordManager::NextUUID(Table* tableStruct)
 
 bool RecordManager::AppendValue(int recordData)
 {
+    Debug("value append int: "<<recordData);
     int *value = new int(recordData);
-    newRecord.push_back(value);
+    newRecord.push_back(static_cast<void*>(value));
     
     return true;
 }
 
 bool RecordManager::AppendValue(float recordData)
 {
+    Debug("value append float: "<<recordData);
     float *value = new float(recordData);
-    newRecord.push_back(value);
+    newRecord.push_back(static_cast<void*>(value));
     
     return true;
 }
 
 bool RecordManager::AppendValue(string recordData)
 {
+    Debug("value append string: "<<recordData);
     string *value = new string(recordData);
-    newRecord.push_back(value);
+    newRecord.push_back(static_cast<void*>(value));
     
     return true;
 }
@@ -295,8 +298,8 @@ void RecordManager::InsertRecord(uint table)
     
     Record* record = new Record;
 
-    UUID *uuid = new UUID(NextUUID(tableStructs[table]));
-    record->data.push_back(uuid);
+    UUID *puuid = new UUID(NextUUID(tableStructs[table]));
+    record->data.push_back(static_cast<void*>(puuid));
     
     for (int i=0; i<newRecord.size(); i++) {
         record->data.push_back(newRecord[i]);
@@ -304,7 +307,11 @@ void RecordManager::InsertRecord(uint table)
     record->next = nullptr;
     
     
-    PrintSingle(record);
+    Debug("insert, uuid: "<<*puuid);
+#if TEST
+    PrintSingle(tableStructs[table],record);
+#endif
+    
  	bufferManager.insertRec(tableStructs[table], record);
 
     
