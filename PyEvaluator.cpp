@@ -18,8 +18,11 @@ PyEvaluator::PyEvaluator()
     pModule = PyImport_ImportModule("Evaluator");
     
     pFuncPushCondition = PyObject_GetAttrString(pModule, "PushCondition");
+    pFuncPushLogicalOperation = PyObject_GetAttrString(pModule, "PushLogicalOperation");
     pFuncNewEvaluation = PyObject_GetAttrString(pModule, "NewEvaluation");
     pFuncEvaluate = PyObject_GetAttrString(pModule, "Evaluate");
+    pFuncGetEvaluationResults = PyObject_GetAttrString(pModule, "GetEvaluationResults");
+
 }
 
 
@@ -68,6 +71,15 @@ void PyEvaluator::PushCondition(uint table_1, uint attribute_1, Operator conditi
     return;
 }
 
+void PyEvaluator::PushLogicalOperation(string op)
+{
+    PyObject* pArgs = Py_BuildValue("s", op.c_str());
+    PyEval_CallObject(pFuncPushLogicalOperation, pArgs);
+    
+    return;
+}
+
+
 // return true if all expr are evaluated
 // always feed data, if return true, just stop
 bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<DataType>* tableRecordDataTypes[])
@@ -96,7 +108,7 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
         // def EvaluateFeedingData(isDone, table, *record):
         
         PyObject* pyParamsRecordData = PyTuple_New(paramCount);
-        PyObject* pyParam = NULL;
+        PyObject* pyParam = nullptr;
         
         for (int i=1; i<=paramCount; i++) {
             type = tableRecordDataTypes[table]->at(i-1);
@@ -136,14 +148,49 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
     return false;
 }
 
-vector<vector<UUID>> PyEvaluator::GetResult()
+vector<vector<UUID>> PyEvaluator::GetResult(int currentTablesCount)
 {
+    bool isFirstTime = true;
+    
+    int uuid = 0;
     vector<vector<UUID>> results;
-    vector<UUID> onetablere;
-    onetablere.push_back(0);
+    vector<UUID> oneTableRes;
     
-    results.push_back(onetablere);
+    {
+        PyObject* pyParams = PyTuple_New(1);
+        PyObject* pArgs = Py_BuildValue("b", isFirstTime);
+        PyTuple_SetItem(pyParams, 0, pArgs);
+        PyEval_CallObject(pFuncGetEvaluationResults, pyParams);
+    }
     
+    isFirstTime = false;
+    PyObject* pyParams = PyTuple_New(1);
+    PyObject* pArgs = Py_BuildValue("b", isFirstTime);
+    PyTuple_SetItem(pyParams, 0, pArgs);
+    PyObject* pBuffer = PyTuple_New(currentTablesCount);
+    while(1){
+        pRetValue = PyEval_CallObject(pFuncGetEvaluationResults, pyParams);
+        
+        PyArg_Parse(pRetValue, "O", &pBuffer);
+        
+        oneTableRes.clear();
+        for (int i=0; i<currentTablesCount; i++) {
+            PyArg_Parse(PyTuple_GetItem(pBuffer, i), "i", &uuid);
+            oneTableRes.push_back((UUID)uuid);
+            if (uuid<=0) {
+                for (int i=0; i<results.size(); i++) {
+                    for (int j=0; j<results.at(i).size(); j++) {
+                        DebugS("Get result: "<<results.at(i).at(j)<<" ");
+                    }
+                    DebugS(endl);
+                }
+                return results;
+            }
+        }
+        results.push_back(oneTableRes);
+    }
+    
+
     return results;
 }
 

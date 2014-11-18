@@ -93,7 +93,9 @@ public:
     void PushCondition(uint table, uint attribute, Operator condition, string value);
     void PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2);
     
-    void PushLogicOp(LogicOp op);
+    void PushLogicOp(string op){
+        pyEvaluator.PushLogicalOperation(op);
+    }
 
     bool AppendValue(int recordData);
     bool AppendValue(float recordData);
