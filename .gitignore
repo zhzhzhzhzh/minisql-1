@@ -1,0 +1,5 @@
+*.1
+bak/
+Self*
+*.pyc
+*.so
