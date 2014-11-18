@@ -19,10 +19,11 @@ void RecordManager::Initialize()
             tableRecordDataTypes[i] = NULL;
         }
     }
+    
     // is table chosen
     //isTableChosen = false;
     // clear chosen table
-    //currentTableCount = 0;
+    currentTablesCount = 0;
     
     // clear UUID count
     currentLastUUID = 0;
@@ -36,67 +37,189 @@ void RecordManager::Initialize()
 void RecordManager::NewQuery(void)
 {
     //isTableChosen = false;
-    //currentTableCount = 0;
+    currentTablesCount = 0;
 
     conditions.clear();
     
     
     newRecord.clear();
     
+    pyEvaluator.ClearConditions();
+    
     return;
 }
 
 
-void RecordManager::SetTableAttributeDataType(uint table, vector<DataType> dataType)
+void RecordManager::SetTableAttributeDataType(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt)
 {
     if(tableRecordDataTypes[table] != NULL){
         delete tableRecordDataTypes[table];
         Debug("delete former record datatype of table "<<table);
     }
     tableRecordDataTypes[table] = new vector<DataType>(dataType);
+    
+    
+    if(isTableAttributeIndexBuilt[table] != NULL){
+        delete isTableAttributeIndexBuilt[table];
+        Debug("delete former index description of table "<<table);
+    }
+    isTableAttributeIndexBuilt[table] = new vector<bool>(isIndexBuilt);
+    
     isTableAttributeSet[table] = true;
     
 
     Debug("table "<<table<<" attributes set to: ");
     for(int i=0;i<tableRecordDataTypes[table]->size();i++){
-        Debug(tableRecordDataTypes[table]->at(i));
+        Debug("datatype:"<<tableRecordDataTypes[table]->at(i));
+        Debug("index set:"<<isTableAttributeIndexBuilt[table]->at(i));
     }
     
     return;
 }
 
-void RecordManager::PushCondition(uint table, uint attribute, Conditions condition, int value)
+
+void RecordManager::ChooseTable(uint table)
 {
-    /*
-    ConditionExpr* expr = new ConditionExpr;
-    expr.table_1 = table;
-    expr.table_2 = attribute;
-    expr.condition=condition;
-    expr.op2.valueInt = value;
+    Debug("this function is deprecated");
+    AddCurrentTable(table);
+}
+
+void RecordManager::AddCurrentTable(uint table)
+{
+    if (currentTablesCount>=MAX_CONCURRENT_TABLE){
+        Debug("too many tables; TODO: use throw");
+        return;
+    }
     
-    conditions.push_back(expr);
-     */
+    for (int i=0; i<currentTablesCount; i++) {
+        if(currentTables[i]==table)
+            return;
+    }
+    currentTables[currentTablesCount++] = table;
+    
     return;
 }
 
-void RecordManager::PushCondition(uint table, uint attribute, Conditions condition, float value)
+void RecordManager::PushCondition(uint table, uint attribute, Operator condition, int value)
 {
+
+    AddCurrentTable(table);
+    
+    pyEvaluator.PushCondition(table, attribute, condition, value,
+                              isTableAttributeIndexBuilt[table]->at(attribute));
+
     return;
 }
 
-void RecordManager::PushCondition(uint table, uint attribute, Conditions condition, string value)
+void RecordManager::PushCondition(uint table, uint attribute, Operator condition, float value)
 {
+    AddCurrentTable(table);
+    
+    pyEvaluator.PushCondition(table, attribute, condition, value,
+                              isTableAttributeIndexBuilt[table]->at(attribute));
+
     return;
 }
 
-void RecordManager::PushCondition(uint table_1, uint attribute_1, Conditions condition, uint table_2, uint attribute_2)
+void RecordManager::PushCondition(uint table, uint attribute, Operator condition, string value)
 {
+    AddCurrentTable(table);
+
+    pyEvaluator.PushCondition(table, attribute, condition, value,
+                              isTableAttributeIndexBuilt[table]->at(attribute));
+
     return;
 }
+
+void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2)
+{
+    AddCurrentTable(table_1);
+    AddCurrentTable(table_2);
+    
+    
+    if(getBlockCount(table_1)<getBlockCount(table_2)){
+        pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
+                                  isTableAttributeIndexBuilt[table_2]->at(attribute_2));
+    }
+    else{
+        pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
+                                  isTableAttributeIndexBuilt[table_1]->at(attribute_1));
+    }
+    
+    return;
+}
+
+
+#define FIRSTUUID 1
+
+vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
+{
+    vector<Record*> records;
+    vector<uint> tables;
+    
+    UUID underEvaluateUUID[currentTablesCount];
+    
+    // TODO
+    // optimization can be done here, to reorder the table order
+    for (int i=0; i<currentTablesCount; i++) {
+        underEvaluateUUID[i] = FIRSTUUID;
+    }
+    
+    bool isDone = false;
+    while (1) {
+        records.clear();
+        tables.clear();
+        
+        for (int i=0; i<currentTablesCount; i++) {
+            records.push_back(GetRecord(currentTables[i], underEvaluateUUID[i]));
+            tables.push_back(currentTables[i]);
+            Debug("record of table "<<currentTables[i]<<" uuid "<<underEvaluateUUID[i]-1<<" transfered");
+            
+            // no carry
+            if((++underEvaluateUUID[i] - FIRSTUUID) < GetRecordCount(currentTables[i])){
+                break;
+            }
+            // carry
+            else{
+                if(i == currentTablesCount-1) isDone = true; // highest carry
+                underEvaluateUUID[i] = FIRSTUUID;
+            }
+            
+        }
+        
+        if(pyEvaluator.Evaluate(tables, records, tableRecordDataTypes)) {
+            Debug("evaluation finished early");
+            break;
+        }
+        
+        if(isDone) {
+            Debug("evaluation finished by feeding all records");
+            break;
+        }
+    }
+    
+    return pyEvaluator.GetResult();
+}
+
+
+void RecordManager::DeleteRecord(uint table)
+{
+//    vector<UUID> toDelete = SelectRecord(table);
+//    
+//    for (int i=0; i<toDelete.size(); i++) {
+//        // TODO
+//        //bufferManager.deleteRec(Table *t, toDelete.at(i));
+//    }
+    
+    return;
+}
+
 
 
 UUID RecordManager::NextUUID(void)
 {
+    // TODO
+    // read record number from table description structure
     return currentLastUUID+=1;
 }
 
@@ -126,6 +249,10 @@ bool RecordManager::AppendValue(string recordData)
 
 void RecordManager::InsertRecord(uint table)
 {
+//    if(currentTablesCount != 1){
+//        Debug("insert needs exactly one table");
+//        return;
+//    }
     if(isTableAttributeSet[table] == false){
         Debug("table attribute not set");
         return;
@@ -141,9 +268,15 @@ void RecordManager::InsertRecord(uint table)
     }
     record->next = NULL;
     
-
+    
+    // TODO
+    // call buffer manager's insert function
+    // bufferManager.insert(Table *t, Record *record);
+    
+    #if TEST
     lastRecord->next = record;
     lastRecord = record;
+    #endif
     
     
     newRecord.clear(); 

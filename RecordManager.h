@@ -13,77 +13,56 @@
 #include <string>
 #include <vector>
 
-#define DEBUG 1
-#define Debug(MESSAGE) {if(DEBUG){cout<<MESSAGE<<endl;}}
 
+#include "PyEvaluator.h"
+#include "typedefs.h"
+#include "IndexManager.h"
 
-#define MAX_CONCURRENT_TABLE 4
-#define MAX_TABLE_NUMBER 32
 
 using std::string;
 using namespace std;
 
-enum Conditions{
-    Equal = 0,
-    Less = 1,
-    Greater = 2,
-    LessEqual = 3,
-    GreaterEqual = 4,
-    NotEqual = 5
-};
 
-enum LogicOp{
-    And = 0,
-    Or = 1
-};
 
-/* 
- uuid is used to uniquely identify every record in the table.
- This is useful when it involves the index.
- Because we cannot store pointer value to every record,
- we can store the uuid of every record.
- 
- When the records are written to the file, the uuids are saved.
- When the records are read from the file, the uuid are read,
-    and thus pointers can point to the correct records.
- */
-typedef long unsigned UUID;
-
-enum DataType{
-    // supported types
-    Int = 0,
-    Float = 1,
-    String =2,
-    
-    // uuid type
-    Uuid = 3
-};
-
-struct Record{
-    vector<void *> data;
-    struct Record * next;
-};
-
-struct Value{
+struct FetchedValue{
     uint table;
     uint attribute;
 };
 
-union ConditionOp2{
-    int valueInt;
-    float valueFloat;
-    string valueString;
-    Value value_2;
+
+
+enum ValueType{
+    FetchValue = 0,
+    IntValue = 1,
+    FloatValue = 2,
+    StringValue = 3
+};
+
+
+
+union Operand{
+    int intv;
+    float floatv;
+    //string stringv;
+    FetchedValue fetchv;
 };
 
 struct ConditionExpr{
-    Value value_1;
-    Conditions condition;
-    ConditionOp2 op2;
+    //ValueType value1Type;
+    Operand v1;
+    //void* value1;
+    Operator condition;
+    ValueType value2Type;
+    void* value2;
+    
 };
 
 
 
+
+
+    
+    
 class RecordManager{
 public:
     RecordManager() {};
@@ -93,13 +72,16 @@ public:
     
     void NewQuery(void);
     
-    void SetTableAttributeDataType(uint table, vector<DataType> dataType);
+    bool BuildIndex(uint table, uint attribute);
+    
+    // TODO: add isIndexBuilt
+    void SetTableAttributeDataType(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);
     void ChooseTable(uint table);   // reentrant
     
-    void PushCondition(uint table, uint attribute, Conditions condition, int value);
-    void PushCondition(uint table, uint attribute, Conditions condition, float value);
-    void PushCondition(uint table, uint attribute, Conditions condition, string value);
-    void PushCondition(uint table_1, uint attribute_1, Conditions condition, uint table_2, uint attribute_2);
+    void PushCondition(uint table, uint attribute, Operator condition, int value);
+    void PushCondition(uint table, uint attribute, Operator condition, float value);
+    void PushCondition(uint table, uint attribute, Operator condition, string value);
+    void PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2);
     
     void PushLogicOp(LogicOp op);
 
@@ -109,15 +91,17 @@ public:
     
     
     void InsertRecord(uint table);
+    // TODO tables not in where
+    vector<vector<UUID>> SelectRecord(uint table, uint *attributes = NULL); // attributes is not needed, return all and selected by interpreter
     void DeleteRecord(uint table);
-    void SelectRecord(uint table, uint *attributes = NULL);
+
     
-    void Commit(void);
-    
-    
+    //void Commit(void);  not needed, insert or delete implies this
     
     
-    // test=======================
+    
+    
+#if TEST
     Record* root;
     Record* lastRecord;
 
@@ -153,25 +137,88 @@ public:
 
     }
     
-    Record* GetRecord(uint table, UUID uuid)
+    void PrintSingle(Record* r)
     {
-        ;
+        for(int i=1;i<r->data.size();i++){
+            DataType type = tableRecordDataTypes[0]->at(i-1);
+            switch (type) {
+                case Int:
+                    cout<<*(int*)r->data[i]<<endl;
+                    break;
+                    
+                case Float:
+                    cout<<*(float*)r->data[i]<<endl;
+                    break;
+                    
+                case String:
+                    cout<<*(string*)r->data[i]<<endl;
+                    break;
+                    
+                default:
+                    break;
+            }
+        }
     }
     
-    // test=======================
+    Record* GetRecord(uint table, UUID uuid)
+    {
+        Record* r;
+        r = root;
+        for (int i = 0; i<uuid; i++) {
+            r = r->next;
+        }
+        return r;
+    }
+    
+    int GetRecordCount(uint table)
+    {
+        return 3;
+    }
+    
+    int getBlockCount(uint table)
+    {
+        switch (table) {
+            case 0:
+                return 100;
+                break;
+            case 1:
+                return 200;
+                break;
+            default:
+                Debug("get block returned -1");
+                return -1;
+                break;
+        }
+    }
+    
+    bool Eva(){
+        vector<Record *> records;
+        vector<uint> tables;
+        records.push_back(root->next);
+        records.push_back(root->next);
+        tables.push_back(0);
+        tables.push_back(0);
+        return pyEvaluator.Evaluate(tables, records, tableRecordDataTypes);
+    }
 
+    
+#endif // end of if TEST
     
     
 private:
     uint currentTables[MAX_CONCURRENT_TABLE];
-    //int tableCount;
+    int currentTablesCount;
+    PyEvaluator pyEvaluator;
+
     
     // logic control
     bool isTableAttributeSet[MAX_TABLE_NUMBER];
     bool isTableChosen;
 
     // table description
-    vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER];
+    vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER] = {NULL};  // pointers to data type chain, excluding the first UUID at 0
+    vector<bool>* isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {NULL};
+    
     UUID currentLastUUID = 0;
     //uint currentTables[MAX_CONCURRENT_TABLE];
     //int currentTableCount;
@@ -179,17 +226,18 @@ private:
     // data
     vector<void*> newRecord;
     
-
     vector<void*> conditions;
     
     
     // function
+    void AddCurrentTable(uint table);
+    
     UUID NextUUID(void);
 
     bool Evaluate();
     
-    
-
+    // index
+    IndexManager in;
     
 };
 

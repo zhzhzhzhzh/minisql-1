@@ -6,30 +6,47 @@
 //  Copyright (c) 2014 ying. All rights reserved.
 //
 
+
 #include <iostream>
 #include <string>
 
 #include "RecordManager.h"
 
-
+void fun(int a[]){
+    cout<<a[0];
+}
 
 int main(int argc, const char * argv[])
 {
-    
+
     RecordManager recordManager;
     recordManager.Initialize();
+    
     
     recordManager.root = new Record;
     recordManager.root->next = NULL;
     recordManager.lastRecord = recordManager.root;
     
+    
 
-    uint T = 2;
+    uint T = 0;
     vector<DataType> dataT;
     dataT.push_back(String);
     dataT.push_back(Int);
     dataT.push_back(String);
-    recordManager.SetTableAttributeDataType(T, dataT);
+    vector<bool> isIndexBuilt;
+    isIndexBuilt.push_back(true);
+    isIndexBuilt.push_back(false);
+    isIndexBuilt.push_back(false);
+    recordManager.SetTableAttributeDataType(T, dataT, isIndexBuilt);
+    
+    
+    //recordManager.PushCondition(0, 0, Less, "hello");
+    
+    
+    //return 0;
+    
+    
     string id = "qwerty12";
     int num = 10;
     string name = "abcde";
@@ -37,15 +54,35 @@ int main(int argc, const char * argv[])
     recordManager.AppendValue(id);
     recordManager.AppendValue(num);
     recordManager.AppendValue(name);
+    //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
     
+    num = 11;
     recordManager.NewQuery();
     recordManager.AppendValue(id);
     recordManager.AppendValue(num);
     recordManager.AppendValue(name);
+    //recordManager.ChooseTable(T);
+    recordManager.InsertRecord(T);
+    
+    
+    num = 12;
+    recordManager.NewQuery();
+    recordManager.AppendValue(id);
+    recordManager.AppendValue(num);
+    recordManager.AppendValue(name);
+    //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
     
     recordManager.PrintRecord(T);
+    recordManager.PrintSingle(recordManager.GetRecord(0, 0));
+    
+    recordManager.NewQuery();
+    recordManager.PushCondition(T, 1, Equal, 11);
+    recordManager.SelectRecord(T);
+    
+    
+    //recordManager.Eva();
 
     
     return 0;
