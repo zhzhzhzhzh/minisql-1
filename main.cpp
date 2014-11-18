@@ -87,6 +87,23 @@ int main(int argc, const char * argv[])
     
     return 0;
 
+    // create a table
+    Table *t;
+    recordManager.CreateTable(t);
+    /*
+    uint T = 0;
+    vector<DataType> dataT;
+    dataT.push_back(String);
+    dataT.push_back(Int);
+    dataT.push_back(String);
+    vector<bool> isIndexBuilt;
+    isIndexBuilt.push_back(true);
+    isIndexBuilt.push_back(false);
+    isIndexBuilt.push_back(false);
+    recordManager.SetTableAttributeDataType(T, dataT, isIndexBuilt);
+     */
+    
+    
 
     
     /*

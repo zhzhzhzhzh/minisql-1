@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-
+#include "BufferManager.h"
 #include "PyEvaluator.h"
 #include "typedefs.h"
 #include "IndexManager.h"
@@ -73,6 +73,10 @@ public:
     void NewQuery(void);
     
     bool BuildIndex(uint table, uint attribute);
+    
+	void CreateTable(Table* t){
+        bufferManager.createTable(t);
+    }
     
     // TODO: add isIndexBuilt
     void SetTableAttributeDataType(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);
@@ -162,6 +166,7 @@ public:
     
     Record* GetRecord(uint table, UUID uuid)
     {
+
         Record* r;
         r = root;
         for (int i = 0; i<uuid; i++) {
@@ -238,6 +243,9 @@ private:
     
     // index
     IndexManager in;
+    
+    // buffer
+    BufferManager bufferManager;
     
 };
 

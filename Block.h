@@ -81,7 +81,7 @@ public:
 		}
 
 		/* Calculating recordLen and blockNum */
-		int len = pTable->attributes.size();
+		long len = pTable->attributes.size();
 		recordLen = 0;
 		for (int i = 0; i < len; i++){
 			switch( pTable->attributes.at(i).dataType ){

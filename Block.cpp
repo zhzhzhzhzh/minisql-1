@@ -58,7 +58,7 @@ void Block::Initialize(FileInf *pFi, int offset ){
 	pFi->fd.read(token, BLOCK_SIZE);
 
 	/* Check the End Of File with gcount smaller than BLOCK_SIZE */
-	int i = pFi->fd.gcount();
+	long i = pFi->fd.gcount();
 	if ( i != BLOCK_SIZE ){
 		for(; i < BLOCK_SIZE; i++)
 			token[i] = EMPTY;
