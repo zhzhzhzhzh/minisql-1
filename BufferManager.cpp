@@ -22,6 +22,7 @@ void BufferManager::closeFile(FileInf *pFi){
 	pFi->fd.close();				// This is the time when it actually flushback from system io
 	delete pFi->dataVector;
 	delete pFi;						// get rid of leak
+	fileCount--;
 }
 
 /*
@@ -51,6 +52,7 @@ FileInf* BufferManager::openFile(Table *pTable){
 	else {
 		; 			// Do nothing 
 	}
+	fileCount++;
 	return ret;
 }
 
@@ -81,15 +83,16 @@ FileInf* BufferManager::getFile(Table *pTable){
 		return ret;
 	}
 
-	ret = openFile(pTable);
 
 	/* In case active files exceed MAX_FILE_NUM */
 	if ( fileCount > MAX_FILE_NUM ){ 				
 		FileInf *pFi = flistHead;
 		flistHead = flistHead->next;
 		closeFile(pFi); 								// Close the Least Recently used
-		fileCount--;
+		//fileCount--;
 	}
+
+	ret = openFile(pTable);
 	if ( fileCount == 0 ){
 		flistHead = flistTail = ret;
 	} 
@@ -98,7 +101,7 @@ FileInf* BufferManager::getFile(Table *pTable){
 		flistTail = ret; 
 	}
 	ret->next = NULL;
-	fileCount++;
+	//fileCount++;
 	return ret;
 }
 
@@ -211,11 +214,11 @@ Record* BufferManager::getRecord(Table *pTable, UUID uuid) 	// Exception to thro
  @param Table 	*pTable: describe the table
  @param Record 	*rec: record to insert 
  */
-void BufferManager::insertRec(Table *pTable, Record* rec){
+bool BufferManager::insertRec(Table *pTable, Record* rec){
 	FileInf *file;
 	file = getFile(pTable);
-	file->recordNum = pTable->recordNum;
-	UUID insert_uuid = pTable->recordNum;				// Pre-condition: catalog has already update the record number
+	// TODO: Update FileInf
+	UUID insert_uuid = pTable->recordNum + 1;				// Pre-condition: catalog has already update the record number
 
 	//insert(file, insert_uuid, rec);
 
@@ -267,7 +270,9 @@ void BufferManager::insertRec(Table *pTable, Record* rec){
 		} 
 		rec->data.clear();
 	}
+	file->recordNum++;
 	delete rec;
+	return true;
 }
 
 /*
@@ -297,7 +302,9 @@ int BufferManager::deleteRec(Table *pTable, UUID delete_uuid){
 		}
 	}
 
-	if ( delete_uuid != pTable->recordNum + 1 ){						// Pre-condition: the catalog has already decrease the number of records
+
+	if ( delete_uuid != pTable->recordNum ){						// Pre-condition: the catalog has already decrease the number of records
+																	// In case of the deletion of the last one
 		/* delete */
 		int blockNum = static_cast<int>(ceil(delete_uuid / file->recordPerBlock));		// 
 		long recordOffset = delete_uuid - file->recordPerBlock * (blockNum - 1);
@@ -305,16 +312,41 @@ int BufferManager::deleteRec(Table *pTable, UUID delete_uuid){
 		int deleteblockIndex = getBlock(file, blockNum);				// The block to delete 
 
 		/* Cover the deteled record with the last one */
+		// Todo calculate the byteoffset of the origin
 		memcpy(&Bufferlist[deleteblockIndex].token[byteOffset], &Bufferlist[file->lastBlock].token[byteOffset], file->recordLen);
 	} 
+	file->recordNum--;
 	return pTable->recordNum;
 }
 
+/*
+ Get the maximum uuid in the table described, i.e. recordNum
+ @param Table *pTable
+ @return UUID the recordNum
+ */
 UUID BufferManager::getMaxuuid(Table *pTable){
-	FileInf *file;
-	file = getFile(pTable);
-	return file->recordNum;
+	if ( pTable ){
+		FileInf *file;
+		file = getFile(pTable);
+		return file->recordNum;
+	}
+	else {
+		return 0;
+	}
 }	
+
+/* 
+ remove the table directly
+ @param Table *pTable
+ */
+void BufferManager::removeTable(Table *pTable){
+	if ( pTable ){
+		FileInf *file = getFile(pTable);
+		char s[20];
+		sprintf(s, "rm %s.table", file->File_id);
+		system(s);	
+	}
+}
 
 void BufferManager::quitProgram(){
 	FileInf *fit, *nextfit;
