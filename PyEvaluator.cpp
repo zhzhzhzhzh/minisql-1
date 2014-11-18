@@ -18,8 +18,10 @@ PyEvaluator::PyEvaluator()
     pModule = PyImport_ImportModule("Evaluator");
     
     pFuncPushCondition = PyObject_GetAttrString(pModule, "PushCondition");
+    pFuncPushLogicalOperation = PyObject_GetAttrString(pModule, "PushLogicalOperation");
     pFuncNewEvaluation = PyObject_GetAttrString(pModule, "NewEvaluation");
     pFuncEvaluate = PyObject_GetAttrString(pModule, "Evaluate");
+
 }
 
 
@@ -67,6 +69,15 @@ void PyEvaluator::PushCondition(uint table_1, uint attribute_1, Operator conditi
     
     return;
 }
+
+void PyEvaluator::PushLogicalOperation(string op)
+{
+    PyObject* pArgs = Py_BuildValue("s", op.c_str());
+    PyEval_CallObject(pFuncPushLogicalOperation, pArgs);
+    
+    return;
+}
+
 
 // return true if all expr are evaluated
 // always feed data, if return true, just stop

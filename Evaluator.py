@@ -35,7 +35,16 @@ def OnQuit():
 '''
 
     
-
+conditionsDirectWithIndex = []
+conditionsDirectWithoutIndex = []
+conditionsIndirectWithIndex = []
+conditionsIndirectWithoutIndex = []
+conditionsAll = []
+currentRecordData = {}
+isDataNew = {}
+results = {}
+finalResults = set([])
+currentTables = []
 
 
 def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table2=-1, attribute2=-1):
@@ -45,14 +54,18 @@ def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table
         # second operand direct value
         if withIndex:
             conditionsDirectWithIndex.append((table1, attribute1, condition, value))
+            conditionsAll.append((table1, attribute1, condition, value))
         else:
             conditionsDirectWithoutIndex.append((table1, attribute1, condition, value))
+            conditionsAll.append((table1, attribute1, condition, value))
     else:
         # second value table value
         if withIndex:
             conditionsIndirectWithIndex.append((table1, attribute1, condition, table2, attribute2))
+            conditionsAll.append((table1, attribute1, condition, table2, attribute2))
         else:
             conditionsIndirectWithoutIndex.append((table1, attribute1, condition, table2, attribute2))
+            conditionsAll.append((table1, attribute1, condition, table2, attribute2))
 
     
     print 'from eva.py:PushCondition',conditionsDirectWithIndex
@@ -62,44 +75,48 @@ def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table
     return
     
     
+def PushLogicalOperation(operator):
+    operator = operator.lower()
+    if operator not in ['(',')','and','or']:
+        print 'from eva.py:PushLogicalOperation',operator,'is not right operator'
+        
+    conditionsAll.append(operator)
+        
     
-
-'''    
-conditionsDirectWithIndex = []
-conditionsDirectWithoutIndex = [] # feed data to evaluate
-conditionsIndirectWithIndex = []
-conditionsIndirectWithoutIndex = []
-currentRecordData = {}
-currentRecordDataNew = {}
-results = {}
-'''
-
-# for feeding data
-hasMoreData = True
 
 def NewEvaluation():
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []
     conditionsIndirectWithIndex = []
     conditionsIndirectWithoutIndex = []
+    conditionsAll = []
     print 'from eva.py','conditions cleared'
     currentRecordData = {}
-    currentRecordDataNew = {}
-    results = {}
+    isDataNew = {}
     print 'from eva.py','currentRecordData cleared'
+    results = {}
     currentTables = []
     
+
+
+def GetCurrentUUIDTuple():
+    uuidTuple = []
+    for i in range(0,len(currentTables)):
+        uuidTuple.append(currentRecordData[currentTables[i]][-1])
+    return uuidTuple
+    
+
 
 # for conditionsDirectWithIndex
 def Evaluate(isDone, table, uuid, record): 
     if table not in currentTables:
         currentTables.append(table)
-        
-    currentRecordDataNew[table] = [data for data in record] # to a list
-    currentRecordDataNew[table].append(uuid)
     
-    if table not in results.keys():
-        results[table] = set([])
+    
+    isDataNew[table] = True    
+    currentRecordData[table] = [data for data in record] # to a list
+    currentRecordData[table].append(uuid)
+    
     
     print 'from eva.py:Evaluate', 'isDone',isDone
     print 'from eva.py:Evaluate', 'table',table
@@ -113,44 +130,45 @@ def Evaluate(isDone, table, uuid, record):
         GreaterEqual = 4
         NotEqual = 5
         
+        
         # format: [table1, attribute1, condition, value]
         for expr in conditionsDirectWithoutIndex:
+            if expr not in results.keys():
+                results[expr] = []
+                
             table,attribute,condition,value = expr
             
             print 'from eva.py:Evaluate table,attribute,condition,value', table,attribute,condition,value
             
+            # TODO decide from where to fetch data
             if condition == Equal:
-                if currentRecordDataNew[table][attribute] == value:
-                    results[table].add(currentRecordDataNew[table][-1])
-                    print 'from eva.py:Evaluate','added uuid: ',table,currentRecordDataNew[table][-1]
+                if currentRecordData[table][attribute] == value:
+                    results[expr].append(GetCurrentUUIDTuple())
             elif condition == Less:
-                if currentRecordDataNew[table][attribute] < value:
-                    results[table].add(currentRecordDataNew[table][-1])
+                if currentRecordData[table][attribute] < value:
+                    results[expr].append(GetCurrentUUIDTuple())
             elif condition == Greater:
-                if currentRecordDataNew[table][attribute] > value:
-                    results[table].add(currentRecordDataNew[table][-1])
+                if currentRecordData[table][attribute] > value:
+                    results[expr].append(GetCurrentUUIDTuple())
             elif condition == LessEqual:
-                if currentRecordDataNew[table][attribute] <= value:
-                    results[table].add(currentRecordDataNew[table][-1])
+                if currentRecordData[table][attribute] <= value:
+                    results[expr].append(GetCurrentUUIDTuple())
             elif condition == GreaterEqual:
-                if currentRecordDataNew[table][attribute] >= value:
-                    results[table].add(currentRecordDataNew[table][-1])
+                if currentRecordData[table][attribute] >= value:
+                    results[expr].append(GetCurrentUUIDTuple())
             else: # not equal
-                if currentRecordDataNew[table][attribute] != value:
-                    results[table].add(currentRecordDataNew[table][-1])
+                if currentRecordData[table][attribute] != value:
+                    results[expr].append(GetCurrentUUIDTuple())
       
         
         print 'from eva.py:Evaluate', 'results', results
         return False
         
-        
-        
-        
-        
-        
+    
         # all expr evaluated in this turn
-        
-                            
+        for key in isDataNew.keys():
+            isDataNew[key] = False
+                       
     else:
         return False
         
@@ -162,9 +180,31 @@ def Evaluate(isDone, table, uuid, record):
 # for conditionsIndirectWithoutIndex
 def EvaluateFeedingData(isDone, table, *record):
     pass
+   
+
+def LogicalEvaluation():
+    for expr in conditionsAll:
+        finalResults = set(results[expr])
+        
+    print 'from eva.py:LogicalEvaluation', 'finalResults', finalResults
+
+    
+def GetEvaluationResults(isFirstTime):
+    if isFirstTime:
+        LogicalEvaluation()
     
     
+    try:  
+        res = finalResults.pop() # a list
+    except:
+        res = []
+        for i in range(0,len(currentTables)):
+            res.append(-1)
+            
+    return res
+
     
     
-    
+if __name__ == '__main__':
+    pass  
     

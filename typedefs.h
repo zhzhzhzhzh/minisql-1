@@ -37,10 +37,7 @@ enum Operator{
     NotEqual = 5
 };
 
-enum LogicOp{
-    And = 0,
-    Or = 1
-};
+
 
 
 /*
