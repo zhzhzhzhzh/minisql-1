@@ -38,7 +38,6 @@ void RecordManager::NewQuery(void)
     
     newRecord.clear();
     
-    pyEvaluator.ClearConditions();
     
     return;
 }
@@ -183,10 +182,17 @@ vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
     vector<Record*> records;
     vector<uint> tables;
     
+    // TODO no where, return all
+    
+    pyEvaluator.NewEvaluation();
+    
     UUID underEvaluateUUID[currentTablesCount];
     
     // TODO
-    // optimization can be done here, to reorder the table order
+    // optimization can be done here, to reorder the table order in currentTables
+    // at 0 changes frequently most
+    
+    
     for (int i=0; i<currentTablesCount; i++) {
         underEvaluateUUID[i] = FIRSTUUID;
     }

@@ -5,7 +5,9 @@ import os
 
 indicies = {} # (T,A):root
 
+'''
 def BuildIndex(table, attribute):
+    pass
     indices[(table, attribute)] = BPlusTree(table, attribute)
     
     IndexManager.IndexInsertNode(table, attribute)
@@ -30,19 +32,10 @@ def OnQuit():
     pass
     
     
-
+'''
 
     
-conditionsDirectWithIndex = []
-conditionsDirectWithoutIndex = [] # feed data to evaluate
-conditionsIndirectWithIndex = []
-conditionsIndirectWithoutIndex = []
-currentRecordData = {}
-currentRecordDataNew = {}
-results = {}
 
-# for feeding data
-hasMoreData = True
 
 
 def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table2=-1, attribute2=-1):
@@ -68,7 +61,23 @@ def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table
     print 'from eva.py:PushCondition',conditionsIndirectWithoutIndex
     return
     
-def ClearConditions():
+    
+    
+
+'''    
+conditionsDirectWithIndex = []
+conditionsDirectWithoutIndex = [] # feed data to evaluate
+conditionsIndirectWithIndex = []
+conditionsIndirectWithoutIndex = []
+currentRecordData = {}
+currentRecordDataNew = {}
+results = {}
+'''
+
+# for feeding data
+hasMoreData = True
+
+def NewEvaluation():
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []
     conditionsIndirectWithIndex = []
@@ -78,10 +87,14 @@ def ClearConditions():
     currentRecordDataNew = {}
     results = {}
     print 'from eva.py','currentRecordData cleared'
+    currentTables = []
     
 
 # for conditionsDirectWithIndex
 def Evaluate(isDone, table, uuid, record): 
+    if table not in currentTables:
+        currentTables.append(table)
+        
     currentRecordDataNew[table] = [data for data in record] # to a list
     currentRecordDataNew[table].append(uuid)
     
@@ -129,6 +142,14 @@ def Evaluate(isDone, table, uuid, record):
         
         print 'from eva.py:Evaluate', 'results', results
         return False
+        
+        
+        
+        
+        
+        
+        # all expr evaluated in this turn
+        
                             
     else:
         return False

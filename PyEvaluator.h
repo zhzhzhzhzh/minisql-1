@@ -26,23 +26,23 @@ public:
     void PushCondition(uint table, uint attribute, Operator condition, float value, bool withIndex=false);
     void PushCondition(uint table, uint attribute, Operator condition, string value, bool withIndex=false);
     void PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2, bool withIndex=false);
-    void ClearConditions();
+    void NewEvaluation();
     
     bool Evaluate(vector<uint>tables, vector<Record*> records, vector<DataType>* tableRecordDataTypes[]);
     vector<vector<UUID>> GetResult();
 
 private:
-    const char *pBuffer = NULL;
+    const char *pBuffer = nullptr;
     int iBufferSize = 0;
     
-    PyObject *pModule = NULL;
+    PyObject *pModule = nullptr;
     
-    PyObject *pFuncPushCondition = NULL;
-    PyObject *pFuncClearConditions = NULL;
-    PyObject *pFuncEvaluate = NULL;
+    PyObject *pFuncPushCondition = nullptr;
+    PyObject *pFuncNewEvaluation = nullptr;
+    PyObject *pFuncEvaluate = nullptr;
 
     
-    PyObject *pRetValue = NULL;
+    PyObject *pRetValue = nullptr;
     
 //    PyObject* pArgs = Py_BuildValue("ii", 12, 14);
 //    

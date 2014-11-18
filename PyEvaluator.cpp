@@ -18,14 +18,14 @@ PyEvaluator::PyEvaluator()
     pModule = PyImport_ImportModule("Evaluator");
     
     pFuncPushCondition = PyObject_GetAttrString(pModule, "PushCondition");
-    pFuncClearConditions = PyObject_GetAttrString(pModule, "ClearConditions");
+    pFuncNewEvaluation = PyObject_GetAttrString(pModule, "NewEvaluation");
     pFuncEvaluate = PyObject_GetAttrString(pModule, "Evaluate");
 }
 
 
-void PyEvaluator::ClearConditions()
+void PyEvaluator::NewEvaluation()
 {
-    PyEval_CallObject(pFuncClearConditions, NULL);
+    PyEval_CallObject(pFuncNewEvaluation, NULL);
 }
 
 void PyEvaluator::PushCondition(uint table, uint attribute, Operator condition, int value, bool withIndex)
