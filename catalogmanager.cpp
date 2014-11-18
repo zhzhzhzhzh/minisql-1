@@ -327,7 +327,7 @@ int catalogmanager::getTableIndex(string tableName)
             break;
     }
     if(i < totalTableNum)
-        flag = tableV[i].totalTableNum;
+        flag = i;
     return flag;
 }
 int catalogmanager::getTableNum(string tableName)
@@ -366,7 +366,7 @@ int catalogmanager::getAttrType(int tableIndex, int attrIndex)
 }
 string catalogmanager::getIndexName(string indexName)
 {
-    int i ,j;
+    int i=0 ,j=0;
     int flag = 0;
     for(i = 0; i < totalTableNum; i++)
     {
@@ -404,7 +404,7 @@ int catalogmanager::deleteIndex(string indexName)
         return 1;
     else
     {
-        int i ,j;
+        int i=0 ,j=0;
         int flag = 0;
         for(i = 0; i < totalTableNum; i++)
         {
@@ -426,10 +426,12 @@ int catalogmanager::deleteIndex(string indexName)
 int catalogmanager::addRecord(int tableIndex)
 {
     tableV[tableIndex].recordNum++;
+    return 0;
 }
 int catalogmanager::deleteRecord(int tableIndex)
 {
     tableV[tableIndex].recordNum--;
+    return 0;
 }
 int catalogmanager::getAttrNumber(int tableIndex)
 {
