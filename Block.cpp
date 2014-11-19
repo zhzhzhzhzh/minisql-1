@@ -54,7 +54,7 @@ void Block::Initialize(FileInf *pFi, int offset ){
 	Fptr 			= pFi;
 	next	 		= -1;
 	time(&LRU_Value);
-	pFi->fd.seekg(BLOCK_SIZE * Block_Offset, ios::beg);
+	pFi->fd.seekg(BLOCK_SIZE * (Block_Offset - 1), ios::beg);
 	pFi->fd.read(token, BLOCK_SIZE);
 
 	/* Check the End Of File with gcount smaller than BLOCK_SIZE */

@@ -38,10 +38,10 @@ FileInf* BufferManager::openFile(const Table *pTable){
 	ret = new FileInf(pTable);		
 	if ( ret->Block_Num != 0){								// In case of new created table
 		ret->firstBlock = getFreeBlock();							
-		Bufferlist[ret->firstBlock].Initialize(ret, 0);
+		Bufferlist[ret->firstBlock].Initialize(ret, 1);		// Bug fixed, should init first block with 1 instead of 0
 		Bufferlist[ret->firstBlock].lock();
 		if ( ret->Block_Num != 1 ){
-			ret->lastBlock = getFreeBlock();
+			ret->lastBlock = getFreeBlock();		
 			Bufferlist[ret->lastBlock].Initialize(ret, ret->Block_Num);
 			Bufferlist[ret->lastBlock].lock();
 			Bufferlist[ret->firstBlock].next = ret->lastBlock;	
