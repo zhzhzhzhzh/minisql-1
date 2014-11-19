@@ -13,6 +13,20 @@ catalogmanager::~catalogmanager()
     //dtor
 }
 //flag=1,database already exist;flag=0,create a database successfully
+int catalogmanager::isDBExisted(string db_name)//return 1,find
+{
+    int flag = 0;
+    int i;
+    for(i = 0; i < dataBaseNum; i++)
+    {
+        if(dbV[i] == db_name)
+        {
+            flag = 1;
+            i = dataBaseNum;
+        }
+    }
+    return flag;
+}
 int catalogmanager::createDatabase(string dataBaseName)
 {
     openDbFile();

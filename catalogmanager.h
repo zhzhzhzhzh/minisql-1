@@ -18,6 +18,7 @@ class catalogmanager
         vector<Attribute> attrV;
 
     public:
+        int isDBExisted(string db_name);
         int createDatabase(string dataBaseName);
         int dropDatabase(string dataBaseName);//TODO test again
         int useDataBase(string dataBaseName);
