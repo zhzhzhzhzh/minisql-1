@@ -402,7 +402,13 @@ void BufferManager::removeTable(const Table *pTable){
 		FileInf *file = getFile(pTable);
 		// closeFile(file);
 		char s[20];
-		sprintf(s, "rm %d.table", file->File_id);
+		#ifdef WIN 
+		sprintf(s, "del -s -q %d.table", file->File_id);
+		#endif 
+		#else
+		#ifdef MACOS
+		sprintf(s, "rm -r %d.table", file->File_id);
+		#endif
 		system(s);	
 	}
 }
