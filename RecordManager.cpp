@@ -36,7 +36,8 @@ void RecordManager::NewQuery(void)
     isWhereUsed = false;
 
     conditions.clear();
-    
+    pyEvaluator.NewEvaluation();
+
     
     newRecord.clear();
     
@@ -188,7 +189,6 @@ vector<set<UUID>> RecordManager::SelectUUID()
     vector<Record*> records;
     vector<uint> tables;
     
-    pyEvaluator.NewEvaluation();
     
     UUID underEvaluateUUID[currentTablesCount];
     
@@ -208,7 +208,8 @@ vector<set<UUID>> RecordManager::SelectUUID()
         tables.clear();
         
         for (int i=0; i<currentTablesCount; i++) {
-            records.push_back(GetRecord(currentTables[i], underEvaluateUUID[i]));
+            records.push_back(bufferManager.getRecord(tableStructs[currentTables[i]], underEvaluateUUID[i]));
+            //records.push_back(GetRecord(currentTables[i], underEvaluateUUID[i]));
             tables.push_back(currentTables[i]);
             Debug("record of table "<<currentTables[i]<<" uuid "<<underEvaluateUUID[i]-1<<" transfered");
             
@@ -291,9 +292,9 @@ vector<vector<Record*>> RecordManager::SelectRecord()
 void RecordManager::DeleteRecord(uint table)
 {
     
-    // TODO call delete all
+    // call delete all
     if(isWhereUsed == false){
-        return;
+        bufferManager.deleteAll(tableStructs[table]);
     }
     
     vector<set<UUID>> toDelete = SelectUUID();

@@ -88,7 +88,7 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
 {
     // only changed records are pushed
     
-    Debug("PyEvaluator::Evaluate:changed value "<<records.size());
+    Debug("PyEvaluator::Evaluate:changed value count "<<records.size());
     
     bool isDone;
     for (int i=0; i<records.size(); i++) {
@@ -139,6 +139,7 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
         // def Evaluate(isDone, table, uuid, record)
         PyObject* pArgs = Py_BuildValue("biiO", isDone, table, *((UUID*)recordData.at(0)), pyParamsRecordData);
         
+
         pRetValue = PyEval_CallObject(pFuncEvaluate, pArgs);
         
         bool pBuffer;

@@ -95,6 +95,38 @@ int main(int argc, const char * argv[])
     //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
 	InsT.recordNum++;
+    
+    
+    /*
+    Record *rec = new Record;
+	UUID  *uuid = new UUID(1);
+	int *aaa = new int(255);
+	int *bbb = new int(0xabcd);
+	string *str = new string("wxyz");
+    */
+    
+    
+    // TODO TODO if select choose table needed
+    recordManager.NewQuery();
+    recordManager.ChooseTable(T);
+    
+    recordManager.PushLogicOp("(");
+    recordManager.PushCondition(T, 1, Equal, 10);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 1, Greater, 11);
+    recordManager.PushLogicOp(")");
+    
+    recordManager.PushLogicOp("and");
+    
+    recordManager.PushLogicOp("(");
+    recordManager.PushCondition(T, 1, Less, 11);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 1, Equal, 11);
+    recordManager.PushLogicOp(")");
+    recordManager.SelectRecord();
+    
+    
+    
 
     
     recordManager.OnQuit();
@@ -205,23 +237,11 @@ int main(int argc, const char * argv[])
     
     
     
-    // TODO TODO if select choose table needed
-    recordManager.NewQuery();
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Equal, 10);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Greater, 11);
-    recordManager.PushLogicOp(")");
+
+
     
-    recordManager.PushLogicOp("and");
-
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Less, 11);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Equal, 11);
-    recordManager.PushLogicOp(")");
-    recordManager.SelectRecord();
-
+    
+    
     
     recordManager.OnQuit();
 

@@ -115,7 +115,6 @@ def Evaluate(isDone, table, uuid, record):
     if table not in currentTables:
         currentTables.append(table)
     
-    
     isDataNew[table] = True    
     currentRecordData[table] = [data for data in record] # to a list
     currentRecordData[table].append(uuid)

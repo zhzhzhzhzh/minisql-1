@@ -84,8 +84,6 @@ public:
         UnsetTableDescriptions(tableStruct->tableNum);
     }
     
-    // TODO: add isIndexBuilt
-    void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);    // reentrant
     void ChooseTable(uint table);   // reentrant
     
     void PushCondition(uint table, uint attribute, Operator condition, int value);  // reentrant
@@ -239,6 +237,7 @@ private:
     vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
     vector<bool>* isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
     
+    void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);    // reentrant
     void UnsetTableDescriptions(uint table);
 
     
