@@ -470,7 +470,7 @@ int catalogmanager::getAttrNumber(int tableIndex)
 {
     return tableV[tableIndex].attrNumber;
 }
-Table const* catalogmanager::getTableInformation(string tableName)
+Table catalogmanager::getTableInformation(string tableName)
 {
     int i = 0;
     for(i = 0; i < totalTableNum; i++)
@@ -478,5 +478,9 @@ Table const* catalogmanager::getTableInformation(string tableName)
         if(tableV[i].tableName == tableName)
             break;
     }
-    return &(tableV[i]);
+    Table temp_table;
+    //temp_table.tableName = tableV[i].tableName;
+    //temp_table.attrNumber = tableV[i].attrNumber;
+    temp_table = tableV[i];
+    return temp_table;
 }
