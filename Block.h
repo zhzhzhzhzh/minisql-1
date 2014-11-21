@@ -9,8 +9,8 @@
 #include <cstring>
 #include "typedefs.h"
 #define EMPTY 		0x00
-#define BLOCK_SIZE 	30
-#define _CRT_SECURE_NO_WARNINGS 1
+#define BLOCK_SIZE 	4096
+
 
 using namespace std;
 struct FileInf;
