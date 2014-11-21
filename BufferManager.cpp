@@ -409,8 +409,11 @@ bool BufferManager::deleteAll(const Table *pTable ){
  */
 bool BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
-		FileInf *file = getFile(pTable);								// After the operation of getFile the file is definitly to be at the end of the list
-		//TODO: remove the table from file listTail
+		/* 
+		 After the operation of getFile the file 
+			is definitly to be at the end of the list 
+		 */
+		FileInf *file = getFile(pTable);								 
 		FileInf *fit = flistHead;
 		for (; fit != NULL && fit->next != flistTail; fit = fit->next);
 		if ( fit != NULL ){
