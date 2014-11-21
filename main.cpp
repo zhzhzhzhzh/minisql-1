@@ -47,7 +47,7 @@ int main(int argc, const char * argv[])
 	a.dataLength = 5;
 	InsT.attributes.push_back(a);
     
-	InsT.tableName = "table1";
+	InsT.tableName = "table_test";
 	InsT.recordNum = 0;
 	InsT.tableNum  = 1;
     
@@ -81,17 +81,17 @@ int main(int argc, const char * argv[])
 	InsT.recordNum++;
     
     recordManager.NewQuery();
-    recordManager.AppendValue(255);
-    recordManager.AppendValue(0xabcd);
-    recordManager.AppendValue("wxyz");
+    recordManager.AppendValue(2200);
+    recordManager.AppendValue(0xcd);
+    recordManager.AppendValue("ying");
     //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
 	InsT.recordNum++;
     
     recordManager.NewQuery();
-    recordManager.AppendValue(255);
-    recordManager.AppendValue(0xabcd);
-    recordManager.AppendValue("wxyz");
+    recordManager.AppendValue(25);
+    recordManager.AppendValue(0xab);
+    recordManager.AppendValue("wdff");
     //recordManager.ChooseTable(T);
     recordManager.InsertRecord(T);
 	InsT.recordNum++;
@@ -124,10 +124,40 @@ int main(int argc, const char * argv[])
     recordManager.PushCondition(T, 1, Equal, 11);
     recordManager.PushLogicOp(")");
     recordManager.SelectRecord();
-    
-    
-    
 
+    
+    
+    recordManager.NewQuery();
+    recordManager.ChooseTable(T);
+    
+    //recordManager.PushLogicOp("(");
+    recordManager.PushCondition(T, 0, Equal, 25);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 2, Equal, "ying");
+    //recordManager.PushLogicOp(")");
+    
+    recordManager.SelectRecord();
+    
+    
+    
+    
+    
+    
+    recordManager.NewQuery();
+    //recordManager.ChooseTable(T);
+    recordManager.PushCondition(T, 0, Equal, 25);
+    recordManager.DeleteRecord(T);
+    
+    
+    
+    // select *
+    recordManager.NewQuery();
+    recordManager.ChooseTable(T);
+    recordManager.SelectRecord();
+    
+    
+    
+    
     
     recordManager.OnQuit();
     

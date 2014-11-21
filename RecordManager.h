@@ -257,10 +257,7 @@ private:
     vector<set<UUID>> SelectUUID();
 
     //bool Evaluate();
-    
-    // index
-    IndexManager in;
-    
+
     // buffer
 public:
     

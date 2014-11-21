@@ -112,34 +112,36 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
         PyObject* pyParamsRecordData = PyTuple_New(paramCount);
         PyObject* pyParam = nullptr;
         
+        
+
+        // start from 1 (uuid)
         for (int i=1; i<=paramCount; i++) {
-            type = tableRecordDataTypes[table]->at(i-1);
-            
+            type = tableRecordDataTypes[table]->at(i);
             switch (type) {
                 case Int:
-                    pyParam = Py_BuildValue("i", *((int*)recordData.at(i)));
+                    pyParam = Py_BuildValue("i", *(static_cast<int*>(recordData.at(i))));
                     PyTuple_SetItem(pyParamsRecordData, i-1, pyParam);
                     break;
                     
                 case Float:
-                    pyParam = Py_BuildValue("f", *((float*)recordData.at(i)));
+                    pyParam = Py_BuildValue("f", *(static_cast<float*>(recordData.at(i))));
                     PyTuple_SetItem(pyParamsRecordData, i-1, pyParam);
                     break;
                     
                 case String:
-                    pyParam = Py_BuildValue("s", (*((string*)recordData.at(i))).c_str());
+                    pyParam = Py_BuildValue("s", (static_cast<char*>(recordData.at(i))));
                     PyTuple_SetItem(pyParamsRecordData, i-1, pyParam);
                     break;
                     
                 default:
+                    Debug("PyEvaluator::Evaluate: unknown type built");
                     break;
             }
         }
         
         // def Evaluate(isDone, table, uuid, record)
-        PyObject* pArgs = Py_BuildValue("biiO", isDone, table, *((UUID*)recordData.at(0)), pyParamsRecordData);
+        PyObject* pArgs = Py_BuildValue("biiO", isDone, table, *(static_cast<UUID*>(recordData.at(0))), pyParamsRecordData);
         
-
         pRetValue = PyEval_CallObject(pFuncEvaluate, pArgs);
         
         bool pBuffer;
@@ -170,7 +172,7 @@ vector<set<UUID>> PyEvaluator::GetResult(int currentTablesCount)
         PyTuple_SetItem(pyParams, 0, pArgs);
         PyEval_CallObject(pFuncGetEvaluationResults, pyParams);
     }
-    
+
     isFirstTime = false;
     PyObject* pyParams = PyTuple_New(1);
     PyObject* pArgs = Py_BuildValue("b", isFirstTime);
@@ -183,22 +185,17 @@ vector<set<UUID>> PyEvaluator::GetResult(int currentTablesCount)
         
         for (int i=0; i<currentTablesCount; i++) {
             PyArg_Parse(PyTuple_GetItem(pBuffer, i), "i", &uuid);
-            results.at(i).insert(((UUID)uuid));
             if (uuid<=0) {
                 for (int i=0; i<results.size(); i++) {
-                    
                     set<UUID>::iterator it;
                     for(it=results.at(i).begin();it!=results.at(i).end();it++){
                         DebugS("Get result: "<<(*it)<<" ");
-                    }
-                    
-                    for (int j=0; j<results.at(i).size(); j++) {
-                        //DebugS("Get result: "<<results.at(i).<<" ");
                     }
                     DebugS(endl);
                 }
                 return results;
             }
+            results.at(i).insert(((UUID)uuid));
         }
     }
     

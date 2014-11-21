@@ -55,7 +55,8 @@ void RecordManager::LoadTable(struct Table* tableStruct){
     vector<bool> isIndexBuilt;
     for (int i=0; i<tableStruct->attributes.size(); i++) {
         dataType.push_back(tableStruct->attributes.at(i).dataType);
-        isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "null");
+        // TODO agree on there is no index
+        isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "");
     }
     
     SetTableDescriptions(tableStruct->tableNum, dataType, isIndexBuilt);
@@ -207,12 +208,15 @@ vector<set<UUID>> RecordManager::SelectUUID()
         records.clear();
         tables.clear();
         
+        Record * r;
         for (int i=0; i<currentTablesCount; i++) {
-            records.push_back(bufferManager.getRecord(tableStructs[currentTables[i]], underEvaluateUUID[i]));
-            //records.push_back(GetRecord(currentTables[i], underEvaluateUUID[i]));
-            tables.push_back(currentTables[i]);
-            Debug("record of table "<<currentTables[i]<<" uuid "<<underEvaluateUUID[i]-1<<" transfered");
-            
+            r = bufferManager.getRecord(tableStructs[currentTables[i]], underEvaluateUUID[i]);
+            if(r!=nullptr){
+                records.push_back(r);
+                tables.push_back(currentTables[i]);
+                Debug("record of table "<<currentTables[i]<<" uuid "<<underEvaluateUUID[i]-1<<" transfered");
+            }
+ 
             // no carry
             if((++underEvaluateUUID[i] - FIRSTUUID) < GetRecordCount(currentTables[i])){
                 break;
@@ -251,10 +255,15 @@ vector<vector<Record*>> RecordManager::SelectRecord()
             Table * tableStr = tableStructs[currentTables[i]];
             oneTableResults.clear();
             for (UUID uuid=FIRSTUUID; uuid<=tableStr->recordNum; uuid++) {
-                oneTableResults.push_back(bufferManager.getRecord(tableStr, uuid));
+                Record * r=bufferManager.getRecord(tableStr, uuid);
+                if (r!=nullptr) {
+                    oneTableResults.push_back(r);
+                    Debug("uuid: "<<uuid<<" selected");
+                }
             }
             results.push_back(oneTableResults);
         }
+        Debug("All selected");
         return results;
     }
     
@@ -266,6 +275,12 @@ vector<vector<Record*>> RecordManager::SelectRecord()
     }
     
     vector<set<UUID>> resultsUUID = SelectUUID();
+    
+    
+#if TEST
+    if(resultsUUID.at(0).size() == 0)
+        Debug("This evaluation got nothing");
+#endif
     
     
     // NOTE need to restore to original order
@@ -291,11 +306,14 @@ vector<vector<Record*>> RecordManager::SelectRecord()
 
 void RecordManager::DeleteRecord(uint table)
 {
+    if(currentTablesCount == 0)
+        ChooseTable(table);
     
     // call delete all
     if(isWhereUsed == false){
         bufferManager.deleteAll(tableStructs[table]);
     }
+    
     
     vector<set<UUID>> toDelete = SelectUUID();
     
@@ -304,9 +322,10 @@ void RecordManager::DeleteRecord(uint table)
         if(currentTables[i] == table)
             break;
     }
-    
-    for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); i++) {
+    for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); it++) {
+        Debug("try to delete uuid: "<<*it);
         bufferManager.deleteRec(tableStructs[table], *it);
+        Debug("uuid: "<<*it<<" deleted");
     }
     
     return;
@@ -342,7 +361,7 @@ bool RecordManager::AppendValue(string recordData)
     Debug("value append string: "<<recordData);
     string *value = new string(recordData);
     newRecord.push_back(static_cast<void*>(value));
-    
+   
     return true;
 }
 

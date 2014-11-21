@@ -86,6 +86,18 @@ def PushLogicalOperation(operator):
     
 
 def NewEvaluation():
+    global conditionsDirectWithIndex
+    global conditionsDirectWithoutIndex
+    global conditionsIndirectWithIndex
+    global conditionsIndirectWithoutIndex
+    global conditionsAll
+    global currentRecordData
+    global isDataNew
+    global results
+    global finalResults
+    global currentTables
+
+    
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []
     conditionsIndirectWithIndex = []
@@ -141,6 +153,7 @@ def Evaluate(isDone, table, uuid, record):
             table,attribute,condition,value = expr
             
             print 'from eva.py:Evaluate table,attribute,condition,value', table,attribute,condition,value
+            print 'from eva.py:Evaluate',currentRecordData[table][attribute], 'compares to', value
             
             # TODO decide from where to fetch data
             if condition == Equal:
@@ -158,7 +171,7 @@ def Evaluate(isDone, table, uuid, record):
             elif condition == GreaterEqual:
                 if currentRecordData[table][attribute] >= value:
                     results[expr].append(GetCurrentUUIDTuple())
-            else: # not equal
+            elif condition == NotEqual:
                 if currentRecordData[table][attribute] != value:
                     results[expr].append(GetCurrentUUIDTuple())
       
@@ -188,9 +201,9 @@ def EvaluateExpr(expr):
     lop = expr[2]
     rop = expr[0]
     if expr[1] == 'and':
-        return lop and rop
+        return lop.intersection(rop)
     elif expr[1] == 'or':
-        return lop or rop
+        return lop.union(rop)
     else:
         return
         
