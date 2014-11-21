@@ -409,9 +409,7 @@ bool BufferManager::deleteAll(const Table *pTable ){
  */
 bool BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
-        ;
-	}
-    return false;
+
 }
 
 void BufferManager::quitDB(){
