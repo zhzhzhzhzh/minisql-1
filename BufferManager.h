@@ -41,11 +41,12 @@ public:
 
 	/* function */
 	Record* 	getRecord(const Table*, UUID );
-	void 		createTable(const Table* );
+	bool 		createTable(const Table* );
 	bool 		insertRec(const Table* , Record* );
+	bool 		deleteAll(const Table* );
 	int   		deleteRec(const Table* , UUID );
 	UUID 		getMaxuuid(const Table* );
-	void 		removeTable(const Table *);
+	bool 		removeTable(const Table *);
 	void 		quitDB();
 private:
 	/* data */

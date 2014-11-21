@@ -111,12 +111,17 @@ FileInf* BufferManager::getFile(const Table *pTable){
  	add the FileInf pointer to the file list
 	
  */
-void BufferManager::createTable(const Table *pTable){
+bool BufferManager::createTable(const Table *pTable){
 	/*
 	FileInf *file;
 	file = 
 	*/ 
-	getFile(pTable);					// Empty file init in openFile as well
+	if ( getFile(pTable) != NULL ){ 					// Empty file init in openFile as well
+		return true;
+	}			
+	else {
+		return false;
+	}
 	/* Blahblah */
 	/* file->firstBlock = -1;
 	file->lastBlock = -1; 	*/
@@ -392,24 +397,37 @@ UUID BufferManager::getMaxuuid(const Table *pTable){
 	}
 }	
 
+
+bool BufferManager::deleteAll(const Table *pTable ){
+	return removeTable(pTable) && createTable(pTable);
+}
+
 /* 
  remove the table directly
  @param Table *pTable
  TODO: IF THE FILE IS CURRENTLY IN THE FILELIST, UPDATE THE LIST 
  */
-void BufferManager::removeTable(const Table *pTable){
+bool BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
-		FileInf *file = getFile(pTable);
-		// closeFile(file);
-		char s[20];
-		#ifdef WIN 
-		sprintf(s, "del -s -q %d.table", file->File_id);
-		#endif 
-		#else
-		#ifdef MACOS
-		sprintf(s, "rm -r %d.table", file->File_id);
-		#endif
-		system(s);	
+		FileInf *file = getFile(pTable);								// After the operation of getFile the file is definitly to be at the end of the list
+		//TODO: remove the table from file listTail
+		FileInf *fit = flistHead;
+		for (; fit != NULL && fit->next != flistTail; fit = fit->next);
+		if ( fit != NULL ){
+			flistTail = fit;
+			flistTail->next = NULL;
+			closeFile(file);
+			char s[20];
+			/*
+			#ifdef WIN 
+			sprintf(s, "del -s -q %d.table", file->File_id);
+			#endif 
+			*/
+			sprintf(s, "rm -r %d.table", file->File_id);
+			system(s);	
+		}
+		else return false;
+		
 	}
 }
 
