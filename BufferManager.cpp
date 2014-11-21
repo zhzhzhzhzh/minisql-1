@@ -412,7 +412,10 @@ bool BufferManager::removeTable(const Table *pTable){
 		/* 
 		 After the operation of getFile the file 
 			is definitly to be at the end of the list 
+
+		 Whatever to avoid merge
 		 */
+
 		FileInf *file = getFile(pTable);								 
 		FileInf *fit = flistHead;
 		for (; fit != NULL && fit->next != flistTail; fit = fit->next);
