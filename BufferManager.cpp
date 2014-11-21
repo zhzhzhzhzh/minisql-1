@@ -409,39 +409,7 @@ bool BufferManager::deleteAll(const Table *pTable ){
  */
 bool BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
-<<<<<<< HEAD
-		FileInf *file = getFile(pTable);
-		// closeFile(file);
-		char s[20];
-		#ifdef WIN 
-		sprintf(s, "del -s -q %d.table", file->File_id);
-		#endif 
 
-        #ifdef MACOS
-		sprintf(s, "rm -r %d.table", file->File_id);
-		#endif
-		system(s);	
-=======
-		FileInf *file = getFile(pTable);								// After the operation of getFile the file is definitly to be at the end of the list
-		//TODO: remove the table from file listTail
-		FileInf *fit = flistHead;
-		for (; fit != NULL && fit->next != flistTail; fit = fit->next);
-		if ( fit != NULL ){
-			flistTail = fit;
-			flistTail->next = NULL;
-			closeFile(file);
-			char s[20];
-			/*
-			#ifdef WIN 
-			sprintf(s, "del -s -q %d.table", file->File_id);
-			#endif 
-			*/
-			sprintf(s, "rm -r %d.table", file->File_id);
-			system(s);	
-		}
-		else return false;
-		
->>>>>>> 8184f129fd4815c4e6dfba78e0da873b6aa72f23
 	}
 }
 
