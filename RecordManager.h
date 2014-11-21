@@ -184,10 +184,7 @@ public:
         return r;
     }
     
-    int GetRecordCount(uint table)
-    {
-        return 3;
-    }
+    
     
     int getBlockCount(uint table)
     {
@@ -255,6 +252,11 @@ private:
     void AddCurrentTable(uint table);
     UUID NextUUID(Table* tableStruct);
     vector<set<UUID>> SelectUUID();
+    
+    
+    int GetRecordCount(struct Table *table){
+        return table->recordNum;
+    }
 
     //bool Evaluate();
 

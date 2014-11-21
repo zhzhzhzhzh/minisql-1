@@ -14,8 +14,10 @@
 #include "RecordManager.h"
 
 
+
 int main(int argc, const char * argv[])
 {
+
 
     RecordManager recordManager;
     
@@ -27,7 +29,6 @@ int main(int argc, const char * argv[])
     // Table structure definition
     Table InsT;
 	Attribute a;
-	BufferManager bufferM;
 	InsT.attrNumber = 4;
     
 	a.attrName = "uuid";
@@ -80,15 +81,15 @@ int main(int argc, const char * argv[])
     
     uint T = InsT.tableNum;
     
-    
+#define N 4
     
     // insert record
     // let's do a stress testing
-    for (int i=0; i<1000000; i++) {
+    for (int i=0; i<N; i++) {
         recordManager.NewQuery();
         recordManager.AppendValue(i);
         recordManager.AppendValue(0xab);
-        recordManager.AppendValue("ooops");
+        recordManager.AppendValue("ops");
         //recordManager.ChooseTable(T); // NOTE: optional
         recordManager.InsertRecord(T);
         InsT.recordNum++;
@@ -97,22 +98,22 @@ int main(int argc, const char * argv[])
     
 
     
-//
-//    recordManager.NewQuery();
-//    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
-//    
-//    recordManager.PushLogicOp("(");
-//    recordManager.PushCondition(T, 1, Equal, 10);
-//    recordManager.PushLogicOp("or");
-//    recordManager.PushCondition(T, 1, Greater, 11);
-//    recordManager.PushLogicOp(")");
-//    recordManager.PushLogicOp("and");
-//    recordManager.PushLogicOp("(");
-//    recordManager.PushCondition(T, 1, Less, 11);
-//    recordManager.PushLogicOp("or");
-//    recordManager.PushCondition(T, 1, Equal, 11);
-//    recordManager.PushLogicOp(")");
-//    recordManager.SelectRecord();
+
+    recordManager.NewQuery();
+    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
+    
+    recordManager.PushLogicOp("(");
+    recordManager.PushCondition(T, 1, Equal, 10);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 1, Greater, 11);
+    recordManager.PushLogicOp(")");
+    recordManager.PushLogicOp("and");
+    recordManager.PushLogicOp("(");
+    recordManager.PushCondition(T, 1, Less, 11);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 1, Equal, 11);
+    recordManager.PushLogicOp(")");
+    recordManager.SelectRecord();
 
     
     
@@ -127,17 +128,18 @@ int main(int argc, const char * argv[])
     
     
     
-    // delete record
-    recordManager.NewQuery();
-    //recordManager.ChooseTable(T);
-    recordManager.PushCondition(T, 0, Equal, 25);
-    recordManager.DeleteRecord(T);
     
-    
-    // should be updated in the catalog
-    InsT.recordNum--;
-
-    
+    for (int i=0; i<N-3; i++) {
+        // delete record
+        recordManager.NewQuery();
+        //recordManager.ChooseTable(T);
+        recordManager.PushCondition(T, 0, Equal, i);
+        recordManager.DeleteRecord(T);
+        
+        
+        // should be updated in the catalog
+        InsT.recordNum--;
+    }
     
     
     // select * from T

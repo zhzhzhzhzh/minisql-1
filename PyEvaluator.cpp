@@ -101,8 +101,17 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
          };
          */
         uint table = tables.at(i);
-        vector<void *> recordData = records.at(i)->data;
-        unsigned long paramCount = recordData.size() - 1; //minus the first UUID, plus the first leading isDone, table
+        
+        //vector<void *> recordData(records.at(i)->data);
+
+#if TEST
+        if (records.at(i)->data.size()<=0) {
+            Debug("Records read from the buffer is not correct");
+            return false;
+        }
+#endif
+
+        unsigned long paramCount = records.at(i)->data.size() - 1; //minus the first UUID
         string paramsPattern = "";
         DataType type;
         
@@ -113,23 +122,22 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
         PyObject* pyParam = nullptr;
         
         
-
         // start from 1 (uuid)
         for (int i=1; i<=paramCount; i++) {
             type = tableRecordDataTypes[table]->at(i);
             switch (type) {
                 case Int:
-                    pyParam = Py_BuildValue("i", *(static_cast<int*>(recordData.at(i))));
+                    pyParam = Py_BuildValue("i", *(static_cast<int*>(records.at(i)->data.at(i))));
                     PyTuple_SetItem(pyParamsRecordData, i-1, pyParam);
                     break;
                     
                 case Float:
-                    pyParam = Py_BuildValue("f", *(static_cast<float*>(recordData.at(i))));
+                    pyParam = Py_BuildValue("f", *(static_cast<float*>(records.at(i)->data.at(i))));
                     PyTuple_SetItem(pyParamsRecordData, i-1, pyParam);
                     break;
                     
                 case String:
-                    pyParam = Py_BuildValue("s", (static_cast<char*>(recordData.at(i))));
+                    pyParam = Py_BuildValue("s", (static_cast<char*>(records.at(i)->data.at(i))));
                     PyTuple_SetItem(pyParamsRecordData, i-1, pyParam);
                     break;
                     
@@ -140,7 +148,7 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
         }
         
         // def Evaluate(isDone, table, uuid, record)
-        PyObject* pArgs = Py_BuildValue("biiO", isDone, table, *(static_cast<UUID*>(recordData.at(0))), pyParamsRecordData);
+        PyObject* pArgs = Py_BuildValue("biiO", isDone, table, *(static_cast<UUID*>(records.at(i)->data.at(0))), pyParamsRecordData);
         
         pRetValue = PyEval_CallObject(pFuncEvaluate, pArgs);
         

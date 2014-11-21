@@ -169,6 +169,7 @@ void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condi
     //AddCurrentTable(table_2);
     isWhereUsed = true;
     
+    // TODO getBlockCount
     if(getBlockCount(table_1)<getBlockCount(table_2)){
         pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
                                   isTableAttributeIndexBuilt[table_2]->at(attribute_2));
@@ -208,7 +209,7 @@ vector<set<UUID>> RecordManager::SelectUUID()
         records.clear();
         tables.clear();
         
-        Record * r;
+        Record *r = nullptr;
         for (int i=0; i<currentTablesCount; i++) {
             r = bufferManager.getRecord(tableStructs[currentTables[i]], underEvaluateUUID[i]);
             if(r!=nullptr){
@@ -218,7 +219,7 @@ vector<set<UUID>> RecordManager::SelectUUID()
             }
  
             // no carry
-            if((++underEvaluateUUID[i] - FIRSTUUID) < GetRecordCount(currentTables[i])){
+            if((++underEvaluateUUID[i] - FIRSTUUID) < GetRecordCount(tableStructs[currentTables[i]])){
                 break;
             }
             // carry
@@ -226,9 +227,9 @@ vector<set<UUID>> RecordManager::SelectUUID()
                 if(i == currentTablesCount-1) isDone = true; // highest carry
                 underEvaluateUUID[i] = FIRSTUUID;
             }
-            
         }
         
+
         if(pyEvaluator.Evaluate(tables, records, tableRecordDataTypes)) {
             Debug("evaluation finished early");
             break;
@@ -250,9 +251,9 @@ vector<vector<Record*>> RecordManager::SelectRecord()
     vector<Record*> oneTableResults;
     
     // no where, return all
-    if(isWhereUsed == false){
+    if(isWhereUsed == false){        
         for (int i=0; i<currentTablesCount; i++) {
-            Table * tableStr = tableStructs[currentTables[i]];
+            struct Table * tableStr = tableStructs[currentTables[i]];
             oneTableResults.clear();
             for (UUID uuid=FIRSTUUID; uuid<=tableStr->recordNum; uuid++) {
                 Record * r=bufferManager.getRecord(tableStr, uuid);
