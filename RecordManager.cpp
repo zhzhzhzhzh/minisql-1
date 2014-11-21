@@ -18,9 +18,10 @@ void RecordManager::Initialize()
     //isTableChosen = false;
     // clear chosen table
     currentTablesCount = 0;
+    isWhereUsed = false;
     
     // clear UUID count
-    currentLastUUID = 0;
+    //currentLastUUID = 0;
     
     // clear new record
     newRecord.clear();
@@ -32,6 +33,7 @@ void RecordManager::NewQuery(void)
 {
     //isTableChosen = false;
     currentTablesCount = 0;
+    isWhereUsed = false;
 
     conditions.clear();
     
@@ -105,7 +107,7 @@ void RecordManager::UnsetTableDescriptions(uint table)
 
 void RecordManager::ChooseTable(uint table)
 {
-    Debug("this function is deprecated");
+    //Debug("this function is deprecated");
     AddCurrentTable(table);
 }
 
@@ -128,7 +130,8 @@ void RecordManager::AddCurrentTable(uint table)
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, int value)
 {
 
-    AddCurrentTable(table);
+    //AddCurrentTable(table);
+    isWhereUsed = true;
     
     pyEvaluator.PushCondition(table, attribute, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
@@ -138,7 +141,8 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, float value)
 {
-    AddCurrentTable(table);
+    //AddCurrentTable(table);
+    isWhereUsed = true;
     
     pyEvaluator.PushCondition(table, attribute, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
@@ -148,7 +152,8 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, string value)
 {
-    AddCurrentTable(table);
+    //AddCurrentTable(table);
+    isWhereUsed = true;
 
     pyEvaluator.PushCondition(table, attribute, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
@@ -158,9 +163,9 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2)
 {
-    AddCurrentTable(table_1);
-    AddCurrentTable(table_2);
-    
+    //AddCurrentTable(table_1);
+    //AddCurrentTable(table_2);
+    isWhereUsed = true;
     
     if(getBlockCount(table_1)<getBlockCount(table_2)){
         pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
@@ -177,16 +182,16 @@ void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condi
 
 #define FIRSTUUID 1
 
-vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
+
+vector<set<UUID>> RecordManager::SelectUUID()
 {
     vector<Record*> records;
     vector<uint> tables;
     
-    // TODO no where, return all
-    
     pyEvaluator.NewEvaluation();
     
     UUID underEvaluateUUID[currentTablesCount];
+    
     
     // TODO
     // optimization can be done here, to reorder the table order in currentTables
@@ -229,20 +234,79 @@ vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
             break;
         }
     }
-    
-    
+
     return pyEvaluator.GetResult(currentTablesCount);
+}
+
+
+vector<vector<Record*>> RecordManager::SelectRecord()
+{
+    vector<vector<Record*>> results;
+    vector<Record*> oneTableResults;
+    
+    // no where, return all
+    if(isWhereUsed == false){
+        for (int i=0; i<currentTablesCount; i++) {
+            Table * tableStr = tableStructs[currentTables[i]];
+            oneTableResults.clear();
+            for (UUID uuid=FIRSTUUID; uuid<=tableStr->recordNum; uuid++) {
+                oneTableResults.push_back(bufferManager.getRecord(tableStr, uuid));
+            }
+            results.push_back(oneTableResults);
+        }
+        return results;
+    }
+    
+    
+    // save original table order
+    uint currentTablesOrigin[currentTablesCount];
+    for (int i=0; i<currentTablesCount; i++) {
+        currentTablesOrigin[i] = currentTables[i];
+    }
+    
+    vector<set<UUID>> resultsUUID = SelectUUID();
+    
+    
+    // NOTE need to restore to original order
+    // can be reduced if a Table struct is included in each set of UUID
+    for (int i=0; i<currentTablesCount; i++) {
+        Table * tableStr = tableStructs[currentTablesOrigin[i]];
+        oneTableResults.clear();
+        
+        int positionNow = 0;
+        for (positionNow=0; positionNow<currentTablesCount; positionNow++) {
+            if(currentTables[positionNow] == currentTablesOrigin[i])
+                break;
+        }
+
+        for (set<UUID>::iterator it=resultsUUID.at(positionNow).begin(); it!=resultsUUID.at(positionNow).end(); it++) {
+            oneTableResults.push_back(bufferManager.getRecord(tableStr, *it));
+        }
+        results.push_back(oneTableResults);
+    }
+    return results;
 }
 
 
 void RecordManager::DeleteRecord(uint table)
 {
-//    vector<UUID> toDelete = SelectRecord(table);
-//    
-//    for (int i=0; i<toDelete.size(); i++) {
-//        // TODO
-//        //bufferManager.deleteRec(Table *t, toDelete.at(i));
-//    }
+    
+    // TODO call delete all
+    if(isWhereUsed == false){
+        return;
+    }
+    
+    vector<set<UUID>> toDelete = SelectUUID();
+    
+    int i = 0;
+    for (i = 0; i<currentTablesCount; i++) {
+        if(currentTables[i] == table)
+            break;
+    }
+    
+    for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); i++) {
+        bufferManager.deleteRec(tableStructs[table], *it);
+    }
     
     return;
 }
@@ -251,10 +315,7 @@ void RecordManager::DeleteRecord(uint table)
 
 UUID RecordManager::NextUUID(Table* tableStruct)
 {
-    // TODO
-    // read record number from table description structure
     return UUID(tableStruct->recordNum + 1);
-    return currentLastUUID+=1;
 }
 
 bool RecordManager::AppendValue(int recordData)
@@ -315,7 +376,7 @@ void RecordManager::InsertRecord(uint table)
  	bufferManager.insertRec(tableStructs[table], record);
 
     
-    #if TEST
+    #if 0
     lastRecord->next = record;
     lastRecord = record;
     #endif

@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <string>
+#include <set>
 
 #include "RecordManager.h"
 
@@ -204,6 +205,7 @@ int main(int argc, const char * argv[])
     
     
     
+    // TODO TODO if select choose table needed
     recordManager.NewQuery();
     recordManager.PushLogicOp("(");
     recordManager.PushCondition(T, 1, Equal, 10);
@@ -218,7 +220,7 @@ int main(int argc, const char * argv[])
     recordManager.PushLogicOp("or");
     recordManager.PushCondition(T, 1, Equal, 11);
     recordManager.PushLogicOp(")");
-    recordManager.SelectRecord(T);
+    recordManager.SelectRecord();
 
     
     recordManager.OnQuit();

@@ -405,8 +405,8 @@ void BufferManager::removeTable(const Table *pTable){
 		#ifdef WIN 
 		sprintf(s, "del -s -q %d.table", file->File_id);
 		#endif 
-		#else
-		#ifdef MACOS
+
+        #ifdef MACOS
 		sprintf(s, "rm -r %d.table", file->File_id);
 		#endif
 		system(s);	

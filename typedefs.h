@@ -28,6 +28,10 @@
 #define TEST 1
 
 
+#define WIN 1
+#define MACOS 0
+
+
 using namespace std;
 
 enum Operator{

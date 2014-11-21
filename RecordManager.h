@@ -66,12 +66,12 @@ public:
     
     void Initialize();
     
-    void NewQuery(void);
+    void NewQuery(void);    // reentrant
     
     bool BuildIndex(uint table, uint attribute);
     bool DropIndex(uint table, uint attribute);
     
-    void LoadTable(struct Table* tableStruct);
+    void LoadTable(struct Table* tableStruct);  // reentrant
 
     
 	void CreateTable(struct Table* tableStruct){
@@ -81,30 +81,29 @@ public:
     
     void DropTable(struct Table* tableStruct){
         bufferManager.removeTable(tableStruct);
+        UnsetTableDescriptions(tableStruct->tableNum);
     }
     
     // TODO: add isIndexBuilt
-    void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);
-    void UnsetTableDescriptions(uint table);
+    void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);    // reentrant
     void ChooseTable(uint table);   // reentrant
     
-    void PushCondition(uint table, uint attribute, Operator condition, int value);
-    void PushCondition(uint table, uint attribute, Operator condition, float value);
-    void PushCondition(uint table, uint attribute, Operator condition, string value);
-    void PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2);
+    void PushCondition(uint table, uint attribute, Operator condition, int value);  // reentrant
+    void PushCondition(uint table, uint attribute, Operator condition, float value);    // reentrant
+    void PushCondition(uint table, uint attribute, Operator condition, string value);   // reentrant
+    void PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2); // reentrant
     
     void PushLogicOp(string op){
         pyEvaluator.PushLogicalOperation(op);
-    }
+    }   // reentrant
 
-    bool AppendValue(int recordData);
-    bool AppendValue(float recordData);
-    bool AppendValue(string recordData);
+    bool AppendValue(int recordData);   // reentrant
+    bool AppendValue(float recordData); // reentrant
+    bool AppendValue(string recordData);    // reentrant
     
     
     void InsertRecord(uint table);
-    // TODO tables not in where clause
-    vector<vector<UUID>> SelectRecord(uint table, uint *attributes = NULL); // attributes is not needed, return all and selected by interpreter
+    vector<vector<Record*>> SelectRecord();
     void DeleteRecord(uint table);
     
     void OnQuit(){
@@ -227,6 +226,7 @@ public:
 private:
     uint currentTables[MAX_CONCURRENT_TABLE];
     int currentTablesCount;
+    bool isWhereUsed;
     PyEvaluator pyEvaluator;
 
     
@@ -239,7 +239,10 @@ private:
     vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
     vector<bool>* isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
     
-    UUID currentLastUUID = 0;
+    void UnsetTableDescriptions(uint table);
+
+    
+    //UUID currentLastUUID = 0; 
     //uint currentTables[MAX_CONCURRENT_TABLE];
     //int currentTableCount;
     
@@ -251,10 +254,10 @@ private:
     
     // function
     void AddCurrentTable(uint table);
-    
     UUID NextUUID(Table* tableStruct);
+    vector<set<UUID>> SelectUUID();
 
-    bool Evaluate();
+    //bool Evaluate();
     
     // index
     IndexManager in;

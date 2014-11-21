@@ -150,13 +150,18 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
     return false;
 }
 
-vector<vector<UUID>> PyEvaluator::GetResult(int currentTablesCount)
+
+vector<set<UUID>> PyEvaluator::GetResult(int currentTablesCount)
 {
     bool isFirstTime = true;
     
     int uuid = 0;
-    vector<vector<UUID>> results;
-    vector<UUID> oneTableRes;
+    vector<set<UUID>> results;
+    
+    for (int i=0; i<currentTablesCount; i++) {
+        set<UUID> emptySet;
+        results.push_back(emptySet);
+    }
     
     {
         PyObject* pyParams = PyTuple_New(1);
@@ -175,21 +180,25 @@ vector<vector<UUID>> PyEvaluator::GetResult(int currentTablesCount)
         
         PyArg_Parse(pRetValue, "O", &pBuffer);
         
-        oneTableRes.clear();
         for (int i=0; i<currentTablesCount; i++) {
             PyArg_Parse(PyTuple_GetItem(pBuffer, i), "i", &uuid);
-            oneTableRes.push_back((UUID)uuid);
+            results.at(i).insert(((UUID)uuid));
             if (uuid<=0) {
                 for (int i=0; i<results.size(); i++) {
+                    
+                    set<UUID>::iterator it;
+                    for(it=results.at(i).begin();it!=results.at(i).end();it++){
+                        DebugS("Get result: "<<(*it)<<" ");
+                    }
+                    
                     for (int j=0; j<results.at(i).size(); j++) {
-                        DebugS("Get result: "<<results.at(i).at(j)<<" ");
+                        //DebugS("Get result: "<<results.at(i).<<" ");
                     }
                     DebugS(endl);
                 }
                 return results;
             }
         }
-        results.push_back(oneTableRes);
     }
     
 
