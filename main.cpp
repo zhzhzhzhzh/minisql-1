@@ -16,6 +16,7 @@
 
 int main(int argc, const char * argv[])
 {
+
     RecordManager recordManager;
     
     // must initialize
@@ -65,8 +66,16 @@ int main(int argc, const char * argv[])
 
     
     
+    // create a table
     recordManager.CreateTable(&InsT);
+    
+    
+    
+    // must load tables
     recordManager.LoadTable(&InsT);
+    
+    
+
 
     
     uint T = InsT.tableNum;
@@ -150,12 +159,20 @@ int main(int argc, const char * argv[])
     
     
     
+    InsT.recordNum--;
+
+    
+    
+    
     // select *
     recordManager.NewQuery();
     recordManager.ChooseTable(T);
     recordManager.SelectRecord();
     
     
+    
+    // drop a table
+    recordManager.DropTable(&InsT);
     
     
     
@@ -212,17 +229,6 @@ int main(int argc, const char * argv[])
         tableStruct.attributes = attributes;
     }
 
-
-    // create a table
-    recordManager.CreateTable(&tableStruct);
-    
- 
-    
-    // must load tables
-    recordManager.LoadTable(&tableStruct);
-
-    // drop a table
-    //recordManager.DropTable(&tableStruct);
 
 
     
