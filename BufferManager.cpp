@@ -409,7 +409,36 @@ bool BufferManager::deleteAll(const Table *pTable ){
  */
 bool BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
+		/* 
+		 After the operation of getFile the file 
+			is definitly to be at the end of the list 
 
+		 Whatever to avoid merge
+		 */
+
+		FileInf *file = getFile(pTable);								 
+		FileInf *fit = flistHead;
+		for (; fit != NULL && fit->next != flistTail; fit = fit->next);
+		if ( fit != NULL ){
+			flistTail = fit;
+			flistTail->next = NULL;
+			closeFile(file);
+			char s[20];
+			/*
+			#ifdef WIN 
+			sprintf(s, "del -s -q %d.table", file->File_id);
+			#endif 
+			*/
+			sprintf(s, "rm -r %d.table", file->File_id);
+			system(s);
+            
+            return true;
+		}
+		else return false;
+		
+	}
+    
+    return false;
 }
 
 void BufferManager::quitDB(){
