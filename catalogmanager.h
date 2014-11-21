@@ -49,7 +49,7 @@ class catalogmanager
             }
             return v;
         }
-        Table const* getTableInformation(string tableName);//TODO
+        Table getTableInformation(string tableName);//TODO
 };
 
 #endif // CATALOGMANAGER_H
