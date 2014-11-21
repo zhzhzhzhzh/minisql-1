@@ -79,14 +79,14 @@ FileInf* BufferManager::getFile(const Table *pTable){
 			}
 			flistTail->next = ret; 						// link node to the tail
 			flistTail = ret;
-			ret->next = NULL;
+			flistTail->next = NULL;
 		}
 		return ret;
 	}
 
 
 	/* In case active files exceed MAX_FILE_NUM */
-	if ( fileCount > MAX_FILE_NUM ){ 				
+	if ( fileCount >= MAX_FILE_NUM ){ 				
 		FileInf *pFi = flistHead;
 		flistHead = flistHead->next;
 		closeFile(pFi); 								// Close the Least Recently used
@@ -422,25 +422,49 @@ bool BufferManager::removeTable(const Table *pTable){
 		 Whatever to avoid merge
 		 */
 
-		FileInf *file = getFile(pTable);								 
-		FileInf *fit = flistHead;
-		for (; fit != NULL && fit->next != flistTail; fit = fit->next);
+		FileInf *file = getFile(pTable);	
+		//if ( file == NULL )	cout << "Table not found " << endl;
+		if ( flistHead == flistTail ){				// In case the file to delete is the only one file in the filelist
+			flistHead = flistTail = NULL;
+		}
+		else {
+			FileInf *fit = flistHead;				// To find the pre-node of flistTail
+			for (; fit != NULL && fit->next != flistTail; fit = fit->next);	
+			if ( fit != NULL ){
+				flistTail = fit;					// Move the tailnode forward
+				flistTail->next = NULL;	
+			}
+			else return false;
+		} 
+		closeFile(file);
+		char s[20];
+		/*
+		#ifdef WIN 
+		sprintf(s, "del -s -q %d.table", file->File_id);
+		#endif 
+		*/
+		sprintf(s, "rm -r %d.table", file->File_id);
+		system(s);
+
+
+		/*
+		
 		if ( fit != NULL ){
-			flistTail = fit;
-			flistTail->next = NULL;
+			
 			closeFile(file);
 			char s[20];
-			/*
+			
 			#ifdef WIN 
 			sprintf(s, "del -s -q %d.table", file->File_id);
 			#endif 
-			*/
+			
 			sprintf(s, "rm -r %d.table", file->File_id);
 			system(s);
             
             return true;
 		}
 		else return false;
+		*/
 		
 	}
     
