@@ -224,20 +224,26 @@ int BufferManager::getBlock(FileInf *pFi, int offset){
  */
 Record* BufferManager::getRecord(const Table *pTable, UUID uuid) 	// Exception to throw
 {	
-	FileInf *file;
-	file = getFile(pTable);
+	if ( uuid > pTable->recordNum ){
+		return NULL;
+	}
+	else {
+		FileInf *file;
+		file = getFile(pTable);
+		
+		int Block_num = static_cast<int>(ceil(uuid / file->recordPerBlock));
+		int block = getBlock(file, Block_num);
+		long recordOffset = (int)uuid - (Block_num - 1) * file->recordPerBlock - 1;
+		/*
+		Record *recordHandle, *recnode;
+		recordHandle = new Record;
+		recnode = recordHandle;
+		recnode->next = NULL;
+		recordHandle = new Record[]
+		*/
+		return &Bufferlist[block].recordHandle[recordOffset];		
+	}
 	
-	int Block_num = static_cast<int>(ceil(uuid / file->recordPerBlock));
-	int block = getBlock(file, Block_num);
-	long recordOffset = (int)uuid - (Block_num - 1) * file->recordPerBlock - 1;
-	/*
-	Record *recordHandle, *recnode;
-	recordHandle = new Record;
-	recnode = recordHandle;
-	recnode->next = NULL;
-	recordHandle = new Record[]
-	*/
-	return &Bufferlist[block].recordHandle[recordOffset];
 }
 
 /*
