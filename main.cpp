@@ -24,7 +24,7 @@ int main(int argc, const char * argv[])
     
     
     
-    
+    // Table structure definition
     Table InsT;
 	Attribute a;
 	BufferManager bufferM;
@@ -80,91 +80,67 @@ int main(int argc, const char * argv[])
     
     uint T = InsT.tableNum;
     
+    
+    
+    // insert record
+    // let's do a stress testing
+    for (int i=0; i<1000000; i++) {
+        recordManager.NewQuery();
+        recordManager.AppendValue(i);
+        recordManager.AppendValue(0xab);
+        recordManager.AppendValue("ooops");
+        //recordManager.ChooseTable(T); // NOTE: optional
+        recordManager.InsertRecord(T);
+        InsT.recordNum++;
+    }
+    
+    
 
-    recordManager.NewQuery();
-    recordManager.AppendValue(255);
-    recordManager.AppendValue(0xabcd);
-    recordManager.AppendValue("wxyz");
-    //recordManager.ChooseTable(T);
-    recordManager.InsertRecord(T);
-	InsT.recordNum++;
     
-    recordManager.NewQuery();
-    recordManager.AppendValue(2200);
-    recordManager.AppendValue(0xcd);
-    recordManager.AppendValue("ying");
-    //recordManager.ChooseTable(T);
-    recordManager.InsertRecord(T);
-	InsT.recordNum++;
-    
-    recordManager.NewQuery();
-    recordManager.AppendValue(25);
-    recordManager.AppendValue(0xab);
-    recordManager.AppendValue("wdff");
-    //recordManager.ChooseTable(T);
-    recordManager.InsertRecord(T);
-	InsT.recordNum++;
-    
-    
-    /*
-    Record *rec = new Record;
-	UUID  *uuid = new UUID(1);
-	int *aaa = new int(255);
-	int *bbb = new int(0xabcd);
-	string *str = new string("wxyz");
-    */
-    
-    
-    // TODO TODO if select choose table needed
-    recordManager.NewQuery();
-    recordManager.ChooseTable(T);
-    
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Equal, 10);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Greater, 11);
-    recordManager.PushLogicOp(")");
-    
-    recordManager.PushLogicOp("and");
-    
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Less, 11);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Equal, 11);
-    recordManager.PushLogicOp(")");
-    recordManager.SelectRecord();
+//
+//    recordManager.NewQuery();
+//    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
+//    
+//    recordManager.PushLogicOp("(");
+//    recordManager.PushCondition(T, 1, Equal, 10);
+//    recordManager.PushLogicOp("or");
+//    recordManager.PushCondition(T, 1, Greater, 11);
+//    recordManager.PushLogicOp(")");
+//    recordManager.PushLogicOp("and");
+//    recordManager.PushLogicOp("(");
+//    recordManager.PushCondition(T, 1, Less, 11);
+//    recordManager.PushLogicOp("or");
+//    recordManager.PushCondition(T, 1, Equal, 11);
+//    recordManager.PushLogicOp(")");
+//    recordManager.SelectRecord();
 
     
     
     recordManager.NewQuery();
-    recordManager.ChooseTable(T);
+    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
     
-    //recordManager.PushLogicOp("(");
     recordManager.PushCondition(T, 0, Equal, 25);
     recordManager.PushLogicOp("or");
     recordManager.PushCondition(T, 2, Equal, "ying");
-    //recordManager.PushLogicOp(")");
     
     recordManager.SelectRecord();
     
     
     
-    
-    
-    
+    // delete record
     recordManager.NewQuery();
     //recordManager.ChooseTable(T);
     recordManager.PushCondition(T, 0, Equal, 25);
     recordManager.DeleteRecord(T);
     
     
-    
+    // should be updated in the catalog
     InsT.recordNum--;
 
     
     
     
-    // select *
+    // select * from T
     recordManager.NewQuery();
     recordManager.ChooseTable(T);
     recordManager.SelectRecord();
@@ -175,17 +151,24 @@ int main(int argc, const char * argv[])
     recordManager.DropTable(&InsT);
     
     
-    
+    // must call when quit
     recordManager.OnQuit();
     
     return 0;
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // TODO merge select and add select from no where
-    
-    
-    
-    
     
     
     
