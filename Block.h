@@ -9,8 +9,8 @@
 #include <cstring>
 #include "typedefs.h"
 #define EMPTY 		0x00
-#define BLOCK_SIZE 	30
-#define _CRT_SECURE_NO_WARNINGS 1
+#define BLOCK_SIZE 	4096
+
 
 using namespace std;
 struct FileInf;
@@ -110,7 +110,7 @@ public:
 			}
 		}
 		recordPerBlock = BLOCK_SIZE / recordLen;
-		Block_Num = static_cast<int>(ceil(recordNum / recordPerBlock));
+		Block_Num = static_cast<int>(ceil((float)recordNum / recordPerBlock));
 
 		/* Pointer to Blocks remains unsolved */
 		delete [] fileName; 				

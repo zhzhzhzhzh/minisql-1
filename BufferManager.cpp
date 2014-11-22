@@ -79,14 +79,14 @@ FileInf* BufferManager::getFile(const Table *pTable){
 			}
 			flistTail->next = ret; 						// link node to the tail
 			flistTail = ret;
-			ret->next = NULL;
+			flistTail->next = NULL;
 		}
 		return ret;
 	}
 
 
 	/* In case active files exceed MAX_FILE_NUM */
-	if ( fileCount > MAX_FILE_NUM ){ 				
+	if ( fileCount >= MAX_FILE_NUM ){ 				
 		FileInf *pFi = flistHead;
 		flistHead = flistHead->next;
 		closeFile(pFi); 								// Close the Least Recently used
@@ -111,12 +111,17 @@ FileInf* BufferManager::getFile(const Table *pTable){
  	add the FileInf pointer to the file list
 	
  */
-void BufferManager::createTable(const Table *pTable){
+bool BufferManager::createTable(const Table *pTable){
 	/*
 	FileInf *file;
 	file = 
 	*/ 
-	getFile(pTable);					// Empty file init in openFile as well
+	if ( getFile(pTable) != NULL ){ 					// Empty file init in openFile as well
+		return true;
+	}			
+	else {
+		return false;
+	}
 	/* Blahblah */
 	/* file->firstBlock = -1;
 	file->lastBlock = -1; 	*/
@@ -165,50 +170,58 @@ int BufferManager::getFreeBlock(){
 int BufferManager::getBlock(FileInf *pFi, int offset){
 	if ( !pFi ) return -1;
 	int block_index = pFi->firstBlock;
-	if ( offset == 1 && pFi->firstBlock != -1 ){
-		return pFi->firstBlock;
+	if (offset > pFi->Block_Num){
+		return -1;
 	}
-	else if ( offset == pFi->Block_Num && pFi->lastBlock != -1 && Bufferlist[pFi->lastBlock].Block_Offset == offset ){
-		// lastBlock stays as is
-		return pFi->lastBlock;
-	}
-	else {
-		/* In case of the first block in a new file*/ 
-		if ( offset == 1 ){
-			block_index = getFreeBlock();
-			Bufferlist[block_index].Initialize(pFi, offset);
-			Bufferlist[block_index].lock();
-			Bufferlist[block_index].next = -1;
+	else{
+		if (offset == 1 && pFi->firstBlock != -1){
+			return pFi->firstBlock;
 		}
-		else{
-			int former_block = -1;
-			while ( block_index >= 0 && Bufferlist[block_index].Block_Offset != offset ){
-				former_block = block_index;
-				block_index = Bufferlist[block_index].next;
-			}
-			if ( block_index == -1 ){
+		else if (offset == pFi->Block_Num && pFi->lastBlock != -1 && Bufferlist[pFi->lastBlock].Block_Offset == offset){
+			// lastBlock stays as is
+			return pFi->lastBlock;
+		}
+		else {
+			/* In case of the first block in a new file*/
+			if (offset == 1){
 				block_index = getFreeBlock();
 				Bufferlist[block_index].Initialize(pFi, offset);
-
-				/*  
-					To link the node into the file-block queue, except for the case of 
-					the lastBlock when lastblock move forward
-				 */
-				if ( offset != pFi->Block_Num ){				
-					Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
-					Bufferlist[pFi->firstBlock].next = block_index;
+				Bufferlist[block_index].lock();
+				Bufferlist[block_index].next = -1;
+			}
+			else{
+				int former_block = -1;
+				while (block_index >= 0 && Bufferlist[block_index].Block_Offset != offset){
+					former_block = block_index;
+					block_index = Bufferlist[block_index].next;
 				}
-				else {
+				if (block_index == -1){
+					block_index = getFreeBlock();
+					Bufferlist[block_index].Initialize(pFi, offset);
 
+					/*
+					To link the node into the file-block queue, except for the case of
+					the lastBlock when lastblock move forward
+					*/
+					if (offset != pFi->Block_Num){
+						Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
+						Bufferlist[pFi->firstBlock].next = block_index;
+					}
+					else {
+
+					}
+				}
+				else if (offset == pFi->Block_Num){								// lastBlock not in the list, i.e. lastBlock withdraw
+					Bufferlist[former_block].next = Bufferlist[block_index].next;	// remove the node inside 
+					Bufferlist[block_index].next = -1;								// linked in later
 				}
 			}
-			else if ( offset == pFi->Block_Num ){								// lastBlock not in the list, i.e. lastBlock withdraw
-				Bufferlist[former_block].next = Bufferlist[block_index].next;	// remove the node inside 
-				Bufferlist[block_index].next = -1;								// linked in later
-			}					
+			return block_index;
 		}
-		return block_index;
 	}
+		
+
+	
 }
 
 /*
@@ -219,20 +232,27 @@ int BufferManager::getBlock(FileInf *pFi, int offset){
  */
 Record* BufferManager::getRecord(const Table *pTable, UUID uuid) 	// Exception to throw
 {	
-	FileInf *file;
-	file = getFile(pTable);
+	if ( uuid > pTable->recordNum ){
+		return NULL;
+	}
+	else {
+		FileInf *file;
+		file = getFile(pTable);
+		
+		int Block_num = static_cast<int>(ceil((float)uuid / file->recordPerBlock));
+		int block = getBlock(file, Block_num);
+		//if (block == -1) return NULL;
+		long recordOffset = (int)uuid - (Block_num - 1) * file->recordPerBlock - 1;
+		/*
+		Record *recordHandle, *recnode;
+		recordHandle = new Record;
+		recnode = recordHandle;
+		recnode->next = NULL;
+		recordHandle = new Record[]
+		*/
+		return &(Bufferlist[block].recordHandle[recordOffset]);
+	}
 	
-	int Block_num = static_cast<int>(ceil(uuid / file->recordPerBlock));
-	int block = getBlock(file, Block_num);
-	long recordOffset = (int)uuid - (Block_num - 1) * file->recordPerBlock - 1;
-	/*
-	Record *recordHandle, *recnode;
-	recordHandle = new Record;
-	recnode = recordHandle;
-	recnode->next = NULL;
-	recordHandle = new Record[]
-	*/
-	return &Bufferlist[block].recordHandle[recordOffset];
 }
 
 /*
@@ -288,7 +308,13 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 				break;
 			}
 			case String: {
-				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen((char *)rec->data.at(i)) + 1);
+				//memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen((char *)rec->data.at(i)) + 1);
+				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen(static_cast<string *>(rec->data.at(i))) + 1);
+				/* 
+				 Dear maintainer I donot understand why the upper line works well, but I comment it. 
+				 If you know anything about it. Please inform me ASAP. 
+				 Coder skar<dtsps.skar@gmail.com>
+				*/
 				byteOffset += strlen(static_cast<string *>(rec->data.at(i))->c_str());
 				delete static_cast<string *>(rec->data.at(i));
 				break;
@@ -323,7 +349,7 @@ int BufferManager::deleteRec(const Table *pTable, UUID delete_uuid){
 	if ( delete_uuid != file->recordNum ){							// The record to delete is not the last one
 
 		/* delete */
-		int del_blockNum = static_cast<int>(ceil(delete_uuid / file->recordPerBlock));		// 
+		int del_blockNum = static_cast<int>(ceil((float)delete_uuid / file->recordPerBlock));		// 
 		long del_recordOffset = delete_uuid - file->recordPerBlock * (del_blockNum - 1);
 		long del_byteOffset = file->recordLen * (del_recordOffset - 1);
 		int del_blkIndex = getBlock(file, del_blockNum);				// The block to delete 
@@ -392,25 +418,93 @@ UUID BufferManager::getMaxuuid(const Table *pTable){
 	}
 }	
 
+/*
+ return the number of blocks inside a table, for optimization.
+ @param: const Table *pTable
+ @return: int Block_Num
+ */
+int BufferManager::getBlockCount(const Table *pTable){
+	if ( pTable == NULL ){
+		return -1;
+	}
+	else {
+		FileInf *file;
+		file = getFile(pTable);
+		if ( file != NULL ) 
+			return file->Block_Num; 
+		else 
+			return -1;
+	}
+}
+
+
+bool BufferManager::deleteAll(const Table *pTable ){
+	return removeTable(pTable) && createTable(pTable);
+}
+
 /* 
  remove the table directly
  @param Table *pTable
  TODO: IF THE FILE IS CURRENTLY IN THE FILELIST, UPDATE THE LIST 
  */
-void BufferManager::removeTable(const Table *pTable){
+bool BufferManager::removeTable(const Table *pTable){
 	if ( pTable ){
-		FileInf *file = getFile(pTable);
-		// closeFile(file);
-		char s[20];
-		#ifdef WIN 
+		/* 
+		 After the operation of getFile the file 
+			is definitly to be at the end of the list 
+
+		 Whatever to avoid merge
+		 */
+
+		FileInf *file = getFile(pTable);	
+		//if ( file == NULL )	cout << "Table not found " << endl;
+		if ( flistHead == flistTail ){				// In case the file to delete is the only one file in the filelist
+			flistHead = flistTail = NULL;
+		}
+		else {
+			FileInf *fit = flistHead;				// To find the pre-node of flistTail
+			for (; fit != NULL && fit->next != flistTail; fit = fit->next);	
+			if ( fit != NULL ){
+				flistTail = fit;					// Move the tailnode forward
+				flistTail->next = NULL;	
+			}
+			else return false;
+		} 
+		
+		char *s = new char[40];						// Just in case for security
+		/*
+		#ifdef WIN
 		sprintf(s, "del -s -q %d.table", file->File_id);
-		#endif 
-		#else
-		#ifdef MACOS
-		sprintf(s, "rm -r %d.table", file->File_id);
 		#endif
-		system(s);	
+		*/
+		sprintf(s, "del  /Q %d.table", file->File_id);
+		closeFile(file);
+		system(s);
+		delete s;
+
+
+		/*
+		
+		if ( fit != NULL ){
+			
+			closeFile(file);
+			char s[20];
+			
+			#ifdef WIN 
+			sprintf(s, "del -s -q %d.table", file->File_id);
+			#endif 
+			
+			sprintf(s, "rm -r %d.table", file->File_id);
+			system(s);
+            
+            return true;
+		}
+		else return false;
+		*/
+		
 	}
+    
+    return false;
 }
 
 void BufferManager::quitDB(){

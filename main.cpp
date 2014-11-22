@@ -9,12 +9,15 @@
 
 #include <iostream>
 #include <string>
+#include <set>
 
 #include "RecordManager.h"
 
 
+
 int main(int argc, const char * argv[])
 {
+    
     RecordManager recordManager;
     
     // must initialize
@@ -22,10 +25,9 @@ int main(int argc, const char * argv[])
     
     
     
-    
+    // Table structure definition
     Table InsT;
 	Attribute a;
-	BufferManager bufferM;
 	InsT.attrNumber = 4;
     
 	a.attrName = "uuid";
@@ -35,18 +37,21 @@ int main(int argc, const char * argv[])
     
 	a.attrName = "att1";
 	a.dataType = Int;
+    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
 	a.attrName = "att2";
 	a.dataType = Int;
+    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
 	a.attrName = "att3";
 	a.dataType = String;
 	a.dataLength = 5;
+    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
-	InsT.tableName = "table1";
+	InsT.tableName = "table_test";
 	InsT.recordNum = 0;
 	InsT.tableNum  = 1;
     
@@ -64,55 +69,134 @@ int main(int argc, const char * argv[])
 
     
     
+    // create a table
     recordManager.CreateTable(&InsT);
+    
+    
+    
+    // must load tables
     recordManager.LoadTable(&InsT);
+    
+    
+
 
     
     uint T = InsT.tableNum;
     
+#define N 4
+    int t;
+    
+    // insert record
+    // let's do a stress testing
+    for (int i=0; i<N; i++) {
+        recordManager.NewQuery();
+        recordManager.AppendValue(i);
+        recordManager.AppendValue(0xab);
+        recordManager.AppendValue("ops");
+        //recordManager.ChooseTable(T); // NOTE: optional
+        recordManager.InsertRecord(T);
+        InsT.recordNum++;
+    }
+    
+    cout<<"insert done "<<endl;
+    cin>>t;
+    
 
-    recordManager.NewQuery();
-    recordManager.AppendValue(255);
-    recordManager.AppendValue(0xabcd);
-    recordManager.AppendValue("wxyz");
-    //recordManager.ChooseTable(T);
-    recordManager.InsertRecord(T);
-	InsT.recordNum++;
-    
-    recordManager.NewQuery();
-    recordManager.AppendValue(255);
-    recordManager.AppendValue(0xabcd);
-    recordManager.AppendValue("wxyz");
-    //recordManager.ChooseTable(T);
-    recordManager.InsertRecord(T);
-	InsT.recordNum++;
-    
-    recordManager.NewQuery();
-    recordManager.AppendValue(255);
-    recordManager.AppendValue(0xabcd);
-    recordManager.AppendValue("wxyz");
-    //recordManager.ChooseTable(T);
-    recordManager.InsertRecord(T);
-	InsT.recordNum++;
+
+//    recordManager.NewQuery();
+//    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
+//    
+//    recordManager.PushLogicOp("(");
+//    recordManager.PushCondition(T, 1, Equal, 10);
+//    recordManager.PushLogicOp("or");
+//    recordManager.PushCondition(T, 1, Greater, 11);
+//    recordManager.PushLogicOp(")");
+//    recordManager.PushLogicOp("and");
+//    recordManager.PushLogicOp("(");
+//    recordManager.PushCondition(T, 1, Less, 11);
+//    recordManager.PushLogicOp("or");
+//    recordManager.PushCondition(T, 1, Equal, 11);
+//    recordManager.PushLogicOp(")");
+//    recordManager.SelectRecord();
 
     
+    
+    recordManager.NewQuery();
+    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
+    
+    recordManager.PushCondition(T, 1, Equal, 2);
+    recordManager.PushLogicOp("or");
+    recordManager.PushCondition(T, 3, Equal, "ying");
+    
+    vector<vector<Record*>> results;
+    results = recordManager.SelectRecord();
+    
+    
+    cout<<"select done, results:"<<endl;
+    for (int i=0; i<results.at(0).size(); i++) {
+        cout<<*((UUID*)results.at(0).at(i)->data.at(0))<<"\t";
+    }
+    cin>>t;
+    
+    
+    for (int i=10000; i<10002; i++) {
+        // delete record
+        recordManager.NewQuery();
+        //recordManager.ChooseTable(T);
+        recordManager.PushCondition(T, 0, Equal, i);
+        recordManager.DeleteRecord(T);
+        
+        
+        // should be updated in the catalog
+        InsT.recordNum--;
+    }
+    
+    
+    cout<<"delete done "<<endl;
+    cin>>t;
+    
+    // select * from T
+    recordManager.NewQuery();
+    recordManager.ChooseTable(T);
+    results = recordManager.SelectRecord();
+    
+//    cout<<"select * done, results:"<<endl;
+//    for (int i=0; i<results.at(0).size(); i++) {
+//        cout<<*((UUID*)results.at(0).at(i)->data.at(0))<<"\t";
+//    }
+//    cin>>t;
+    
+    
+    // drop a table
+    //recordManager.DropTable(&InsT);
+    
+    
+    // must call when quit
     recordManager.OnQuit();
     
     return 0;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     // TODO merge select and add select from no where
     
     
     
-    
-    
-    
-    
-    
+#if TEST
     recordManager.root = new Record;
     recordManager.root->next = NULL;
     recordManager.lastRecord = recordManager.root;
+#endif
     
     
     
@@ -149,17 +233,6 @@ int main(int argc, const char * argv[])
         tableStruct.attributes = attributes;
     }
 
-
-    // create a table
-    recordManager.CreateTable(&tableStruct);
-    
- 
-    
-    // must load tables
-    recordManager.LoadTable(&tableStruct);
-
-    // drop a table
-    //recordManager.DropTable(&tableStruct);
 
 
     
@@ -198,28 +271,18 @@ int main(int argc, const char * argv[])
     
     
     
-    
+#if TEST
     recordManager.PrintRecord(T);
+#endif
     //recordManager.PrintSingle(recordManager.GetRecord(0, 0));
     
     
     
-    recordManager.NewQuery();
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Equal, 10);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Greater, 11);
-    recordManager.PushLogicOp(")");
+
+
     
-    recordManager.PushLogicOp("and");
-
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Less, 11);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Equal, 11);
-    recordManager.PushLogicOp(")");
-    recordManager.SelectRecord(T);
-
+    
+    
     
     recordManager.OnQuit();
 

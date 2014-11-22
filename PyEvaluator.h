@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <string>
+#include <set>
 #include <Python/Python.h>
 
 #include "typedefs.h"
@@ -30,7 +31,8 @@ public:
     void PushLogicalOperation(string op);
     
     bool Evaluate(vector<uint>tables, vector<Record*> records, vector<DataType>* tableRecordDataTypes[]);
-    vector<vector<UUID>> GetResult(int currentTablesCount);
+    vector<set<UUID>> GetResult(int currentTablesCount);
+
 
 private:
     const char *pBuffer = nullptr;

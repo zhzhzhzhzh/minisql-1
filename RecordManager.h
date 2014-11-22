@@ -24,38 +24,38 @@ using namespace std;
 
 
 
-struct FetchedValue{
-    uint table;
-    uint attribute;
-};
+//struct FetchedValue{
+//    uint table;
+//    uint attribute;
+//};
+//
+//
+//
+//enum ValueType{
+//    FetchValue = 0,
+//    IntValue = 1,
+//    FloatValue = 2,
+//    StringValue = 3
+//};
 
 
-
-enum ValueType{
-    FetchValue = 0,
-    IntValue = 1,
-    FloatValue = 2,
-    StringValue = 3
-};
-
-
-
-union Operand{
-    int intv;
-    float floatv;
-    //string stringv;
-    FetchedValue fetchv;
-};
-
-struct ConditionExpr{
-    //ValueType value1Type;
-    Operand v1;
-    //void* value1;
-    Operator condition;
-    ValueType value2Type;
-    void* value2;
-    
-};
+//
+//union Operand{
+//    int intv;
+//    float floatv;
+//    //string stringv;
+//    FetchedValue fetchv;
+//};
+//
+//struct ConditionExpr{
+//    //ValueType value1Type;
+//    Operand v1;
+//    //void* value1;
+//    Operator condition;
+//    ValueType value2Type;
+//    void* value2;
+//    
+//};
 
 
     
@@ -66,45 +66,42 @@ public:
     
     void Initialize();
     
-    void NewQuery(void);
+    void NewQuery(void);    // reentrant
     
     bool BuildIndex(uint table, uint attribute);
     bool DropIndex(uint table, uint attribute);
     
-    void LoadTable(struct Table* tableStruct);
+    void LoadTable(const struct Table* tableStruct);  // reentrant
 
     
-	void CreateTable(struct Table* tableStruct){
+	void CreateTable(const struct Table* tableStruct){
         LoadTable(tableStruct);
         bufferManager.createTable(tableStruct);
     }
     
-    void DropTable(struct Table* tableStruct){
+    void DropTable(const struct Table* tableStruct){
         bufferManager.removeTable(tableStruct);
+        UnsetTableDescriptions(tableStruct->tableNum);
     }
     
-    // TODO: add isIndexBuilt
-    void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);
-    void UnsetTableDescriptions(uint table);
     void ChooseTable(uint table);   // reentrant
     
-    void PushCondition(uint table, uint attribute, Operator condition, int value);
-    void PushCondition(uint table, uint attribute, Operator condition, float value);
-    void PushCondition(uint table, uint attribute, Operator condition, string value);
-    void PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2);
+    void PushCondition(uint table, uint attribute, Operator condition, int value);  // reentrant
+    void PushCondition(uint table, uint attribute, Operator condition, float value);    // reentrant
+    void PushCondition(uint table, uint attribute, Operator condition, string value);   // reentrant
+    void PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2); // reentrant
     
     void PushLogicOp(string op){
         pyEvaluator.PushLogicalOperation(op);
-    }
+    }   // reentrant
 
-    bool AppendValue(int recordData);
-    bool AppendValue(float recordData);
-    bool AppendValue(string recordData);
+    bool AppendValue(int recordData);   // reentrant
+    bool AppendValue(float recordData); // reentrant
+    bool AppendValue(string recordData);    // reentrant
     
     
     void InsertRecord(uint table);
-    // TODO tables not in where clause
-    vector<vector<UUID>> SelectRecord(uint table, uint *attributes = NULL); // attributes is not needed, return all and selected by interpreter
+    vector<vector<Record*>> SelectRecord();
     void DeleteRecord(uint table);
     
     void OnQuit(){
@@ -153,7 +150,7 @@ public:
 
     }
     
-    void PrintSingle(Table*t, Record* r)
+    void PrintSingle(const Table*t, Record* r)
     {
         for(int i=0;i<r->data.size();i++){
             DataType type = tableRecordDataTypes[t->tableNum]->at(i);
@@ -187,10 +184,7 @@ public:
         return r;
     }
     
-    int GetRecordCount(uint table)
-    {
-        return 3;
-    }
+    
     
     int getBlockCount(uint table)
     {
@@ -227,6 +221,7 @@ public:
 private:
     uint currentTables[MAX_CONCURRENT_TABLE];
     int currentTablesCount;
+    bool isWhereUsed;
     PyEvaluator pyEvaluator;
 
     
@@ -235,11 +230,15 @@ private:
     bool isTableChosen;
 
     // table description
-    struct Table* tableStructs[MAX_TABLE_NUMBER] = {nullptr};
-    vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
-    vector<bool>* isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
+    const struct Table *tableStructs[MAX_TABLE_NUMBER] = {nullptr};
+    vector<DataType> *tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
+    vector<bool> *isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
     
-    UUID currentLastUUID = 0;
+    void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);    // reentrant
+    void UnsetTableDescriptions(uint table);
+
+    
+    //UUID currentLastUUID = 0; 
     //uint currentTables[MAX_CONCURRENT_TABLE];
     //int currentTableCount;
     
@@ -251,14 +250,16 @@ private:
     
     // function
     void AddCurrentTable(uint table);
+    UUID NextUUID(const struct Table* tableStruct);
+    vector<set<UUID>> SelectUUID();
     
-    UUID NextUUID(Table* tableStruct);
+    
+    int GetRecordCount(const struct Table *table){
+        return table->recordNum;
+    }
 
-    bool Evaluate();
-    
-    // index
-    IndexManager in;
-    
+    //bool Evaluate();
+
     // buffer
 public:
     

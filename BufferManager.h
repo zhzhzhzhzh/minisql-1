@@ -6,7 +6,7 @@
 #ifndef _BUFFERMANAGER_H_
 #define _BUFFERMANAGER_H_
 #include "Block.h"
-#define MAX_BLOCK_NUM 	4
+#define MAX_BLOCK_NUM 	256
 #define MAX_FILE_NUM 	MAX_CONCURRENT_TABLE
 //#include "Exceptions.h"
 using namespace std;
@@ -41,12 +41,15 @@ public:
 
 	/* function */
 	Record* 	getRecord(const Table*, UUID );
-	void 		createTable(const Table* );
+	bool 		createTable(const Table* );
 	bool 		insertRec(const Table* , Record* );
+	bool 		deleteAll(const Table* );
 	int   		deleteRec(const Table* , UUID );
 	UUID 		getMaxuuid(const Table* );
-	void 		removeTable(const Table *);
+	int 		getBlockCount(const Table* );
+	bool 		removeTable(const Table *);
 	void 		quitDB();
+
 private:
 	/* data */
 	Block* 		Bufferlist;

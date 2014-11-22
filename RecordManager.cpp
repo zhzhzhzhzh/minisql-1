@@ -12,15 +12,19 @@ void RecordManager::Initialize()
 {
     for(int i=0; i<MAX_TABLE_NUMBER; i++){
         UnsetTableDescriptions(i);
+//        tableStructs[i] = nullptr;
+//        tableRecordDataTypes[i] = nullptr;
+//        isTableAttributeIndexBuilt[i] = nullptr;
     }
     
     // is table chosen
     //isTableChosen = false;
     // clear chosen table
     currentTablesCount = 0;
+    isWhereUsed = false;
     
     // clear UUID count
-    currentLastUUID = 0;
+    //currentLastUUID = 0;
     
     // clear new record
     newRecord.clear();
@@ -32,9 +36,12 @@ void RecordManager::NewQuery(void)
 {
     //isTableChosen = false;
     currentTablesCount = 0;
+    isWhereUsed = false;
 
     conditions.clear();
-    
+    isWhereUsed = false;
+    pyEvaluator.NewEvaluation();
+
     
     newRecord.clear();
     
@@ -42,7 +49,7 @@ void RecordManager::NewQuery(void)
     return;
 }
 
-void RecordManager::LoadTable(struct Table* tableStruct){
+void RecordManager::LoadTable(const struct Table* tableStruct){
     if(tableStructs[tableStruct->tableNum] == tableStruct)
         return;
     
@@ -52,6 +59,7 @@ void RecordManager::LoadTable(struct Table* tableStruct){
     vector<bool> isIndexBuilt;
     for (int i=0; i<tableStruct->attributes.size(); i++) {
         dataType.push_back(tableStruct->attributes.at(i).dataType);
+        // TODO agree on there is no index how to denote
         isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "null");
     }
     
@@ -105,7 +113,7 @@ void RecordManager::UnsetTableDescriptions(uint table)
 
 void RecordManager::ChooseTable(uint table)
 {
-    Debug("this function is deprecated");
+    //Debug("this function is deprecated");
     AddCurrentTable(table);
 }
 
@@ -127,10 +135,14 @@ void RecordManager::AddCurrentTable(uint table)
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, int value)
 {
-
-    AddCurrentTable(table);
+    if (attribute==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
+    //AddCurrentTable(table);
+    isWhereUsed = true;
     
-    pyEvaluator.PushCondition(table, attribute, condition, value,
+    pyEvaluator.PushCondition(table, attribute-1, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
 
     return;
@@ -138,9 +150,14 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, float value)
 {
-    AddCurrentTable(table);
+    if (attribute==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
+    //AddCurrentTable(table);
+    isWhereUsed = true;
     
-    pyEvaluator.PushCondition(table, attribute, condition, value,
+    pyEvaluator.PushCondition(table, attribute-1, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
 
     return;
@@ -148,9 +165,14 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, string value)
 {
-    AddCurrentTable(table);
+    if (attribute==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
+    //AddCurrentTable(table);
+    isWhereUsed = true;
 
-    pyEvaluator.PushCondition(table, attribute, condition, value,
+    pyEvaluator.PushCondition(table, attribute-1, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
 
     return;
@@ -158,10 +180,20 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2)
 {
-    AddCurrentTable(table_1);
-    AddCurrentTable(table_2);
+    if (attribute_1==0 || attribute_2==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
+    //AddCurrentTable(table_1);
+    //AddCurrentTable(table_2);
+    isWhereUsed = true;
     
+    // TODO getBlockCount
+    pyEvaluator.PushCondition(table_1, attribute_1-1, condition, table_2, attribute_2-1,
+                              isTableAttributeIndexBuilt[table_1]->at(attribute_1));
     
+    // TODO here optimization can be done
+    /*
     if(getBlockCount(table_1)<getBlockCount(table_2)){
         pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
                                   isTableAttributeIndexBuilt[table_2]->at(attribute_2));
@@ -170,6 +202,7 @@ void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condi
         pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
                                   isTableAttributeIndexBuilt[table_1]->at(attribute_1));
     }
+     */
     
     return;
 }
@@ -177,16 +210,15 @@ void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condi
 
 #define FIRSTUUID 1
 
-vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
+
+vector<set<UUID>> RecordManager::SelectUUID()
 {
     vector<Record*> records;
     vector<uint> tables;
     
-    // TODO no where, return all
     
-    pyEvaluator.NewEvaluation();
+    UUID underEvaluateUUID[MAX_TABLE_NUMBER];
     
-    UUID underEvaluateUUID[currentTablesCount];
     
     // TODO
     // optimization can be done here, to reorder the table order in currentTables
@@ -202,13 +234,17 @@ vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
         records.clear();
         tables.clear();
         
+        Record *r = nullptr;
         for (int i=0; i<currentTablesCount; i++) {
-            records.push_back(GetRecord(currentTables[i], underEvaluateUUID[i]));
-            tables.push_back(currentTables[i]);
-            Debug("record of table "<<currentTables[i]<<" uuid "<<underEvaluateUUID[i]-1<<" transfered");
-            
+            r = bufferManager.getRecord(tableStructs[currentTables[i]], underEvaluateUUID[i]);
+            if(r!=nullptr){
+                records.push_back(r);
+                tables.push_back(currentTables[i]);
+                Debug("record of table "<<currentTables[i]<<" uuid "<<underEvaluateUUID[i]-1<<" transfered");
+            }
+ 
             // no carry
-            if((++underEvaluateUUID[i] - FIRSTUUID) < GetRecordCount(currentTables[i])){
+            if((++underEvaluateUUID[i] - FIRSTUUID) < GetRecordCount(tableStructs[currentTables[i]])){
                 break;
             }
             // carry
@@ -216,9 +252,9 @@ vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
                 if(i == currentTablesCount-1) isDone = true; // highest carry
                 underEvaluateUUID[i] = FIRSTUUID;
             }
-            
         }
         
+
         if(pyEvaluator.Evaluate(tables, records, tableRecordDataTypes)) {
             Debug("evaluation finished early");
             break;
@@ -229,32 +265,103 @@ vector<vector<UUID>> RecordManager::SelectRecord(uint table, uint *attributes)
             break;
         }
     }
-    
-    
+
     return pyEvaluator.GetResult(currentTablesCount);
+}
+
+
+vector<vector<Record*>> RecordManager::SelectRecord()
+{
+    vector<vector<Record*>> results;
+    vector<Record*> oneTableResults;
+    
+    // no where, return all
+    if(isWhereUsed == false){        
+        for (int i=0; i<currentTablesCount; i++) {
+            const struct Table * tableStr = tableStructs[currentTables[i]];
+            oneTableResults.clear();
+            for (UUID uuid=FIRSTUUID; uuid<=tableStr->recordNum; uuid++) {
+                Record * r=bufferManager.getRecord(tableStr, uuid);
+                if (r!=nullptr) {
+                    oneTableResults.push_back(r);
+                    Debug("uuid: "<<uuid<<" selected");
+                }
+            }
+            results.push_back(oneTableResults);
+        }
+        Debug("All selected");
+        return results;
+    }
+    
+    
+    // save original table order
+    uint currentTablesOrigin[MAX_TABLE_NUMBER];
+    for (int i=0; i<currentTablesCount; i++) {
+        currentTablesOrigin[i] = currentTables[i];
+    }
+    
+    vector<set<UUID>> resultsUUID = SelectUUID();
+    
+    
+#if TEST
+    if(resultsUUID.at(0).size() == 0)
+        Debug("This evaluation got nothing");
+#endif
+    
+    
+    // NOTE need to restore to original order
+    // can be reduced if a Table struct is included in each set of UUID
+    for (int i=0; i<currentTablesCount; i++) {
+        const Table * tableStr = tableStructs[currentTablesOrigin[i]];
+        oneTableResults.clear();
+        
+        int positionNow = 0;
+        for (positionNow=0; positionNow<currentTablesCount; positionNow++) {
+            if(currentTables[positionNow] == currentTablesOrigin[i])
+                break;
+        }
+
+        for (set<UUID>::iterator it=resultsUUID.at(positionNow).begin(); it!=resultsUUID.at(positionNow).end(); it++) {
+            oneTableResults.push_back(bufferManager.getRecord(tableStr, *it));
+        }
+        results.push_back(oneTableResults);
+    }
+    return results;
 }
 
 
 void RecordManager::DeleteRecord(uint table)
 {
-//    vector<UUID> toDelete = SelectRecord(table);
-//    
-//    for (int i=0; i<toDelete.size(); i++) {
-//        // TODO
-//        //bufferManager.deleteRec(Table *t, toDelete.at(i));
-//    }
+    if(currentTablesCount == 0)
+        ChooseTable(table);
+    
+    // call delete all
+    if(isWhereUsed == false){
+        bufferManager.deleteAll(tableStructs[table]);
+    }
+    
+    
+    vector<set<UUID>> toDelete = SelectUUID();
+    
+    int i = 0;
+    for (i = 0; i<currentTablesCount; i++) {
+        if(currentTables[i] == table)
+            break;
+    }
+    for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); it++) {
+        Debug("try to delete uuid: "<<*it);
+        bufferManager.deleteRec(tableStructs[table], *it);
+        Debug("uuid: "<<*it<<" deleted");
+    }
     
     return;
 }
 
 
 
-UUID RecordManager::NextUUID(Table* tableStruct)
+UUID RecordManager::NextUUID(const Table* tableStruct)
 {
-    // TODO
-    // read record number from table description structure
     return UUID(tableStruct->recordNum + 1);
-    return currentLastUUID+=1;
 }
 
 bool RecordManager::AppendValue(int recordData)
@@ -280,7 +387,7 @@ bool RecordManager::AppendValue(string recordData)
     Debug("value append string: "<<recordData);
     string *value = new string(recordData);
     newRecord.push_back(static_cast<void*>(value));
-    
+   
     return true;
 }
 
@@ -315,7 +422,7 @@ void RecordManager::InsertRecord(uint table)
  	bufferManager.insertRec(tableStructs[table], record);
 
     
-    #if TEST
+    #if 0
     lastRecord->next = record;
     lastRecord = record;
     #endif

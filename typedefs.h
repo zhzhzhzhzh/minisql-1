@@ -14,18 +14,25 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include "environment.h"
 
 
 #define MAX_CONCURRENT_TABLE 1
 #define MAX_TABLE_NUMBER 32
 
 
-#define DEBUG 1
-#define Debug(MESSAGE) {if(DEBUG){cout<<MESSAGE<<endl;}}
-#define DebugS(MESSAGE) {if(DEBUG){cout<<MESSAGE;}}
+#define DEBUGG 1
+#define Debug(MESSAGE) {if(DEBUGG){cout<<MESSAGE<<endl;}}
+#define DebugS(MESSAGE) {if(DEBUGG){cout<<MESSAGE;}}
 
 
 #define TEST 1
+
+
+#if MACOS
+#define SETPYTHONPATH "import sys\nsys.path.append('/Users/ying/Documents/DEV/record-index-manager/record-index-manager')"
+#endif
+
 
 
 using namespace std;
