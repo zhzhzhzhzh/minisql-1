@@ -272,7 +272,7 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
 int catalogmanager::quit()
 {
     int flag = 0;
-    string FileName = ".\\" + dataBaseName + "\\" dataBaseNameNow + "Info.txt";
+    string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info.txt";
     fstream fout;
     fout.open(FileName.c_str(), fstream::out);
     if(fout.fail() != true)
