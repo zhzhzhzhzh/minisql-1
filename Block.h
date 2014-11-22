@@ -76,13 +76,18 @@ public:
 		
 		/* Create or/and Open the file *.table */
 		char *fileName;
-		fileName = new char[10];
-		sprintf(fileName, "%d.table", File_id);
+		fileName = new char[50];
+		#if WIN
+		sprintf(fileName, ".\\%s\\%d.table", pTable->dbName, File_id);
+		#endif
+		#if MACOS
+		sprintf(fileName, "./%s/%d.table", pTable->dbName, File_id);
+		#endif
 		fd.open(fileName, ios::in | ios::out | ios::binary);	
 		if ( !fd ){
 			fd.open(fileName, ios::in | ios::out | ios::binary | ios::trunc);
 			fd.close();
-			fd.write("aaaa", 10);
+			// fd.write("aaaa", 10);
 			fd.open(fileName, ios::in | ios::out | ios::binary);
 		}
 
