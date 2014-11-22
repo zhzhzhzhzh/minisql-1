@@ -164,7 +164,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
         else
         {
             //load the information of the old database
-            string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info" + ".txt";
+            string FileName = ".\\"  + dataBaseNameNow + "Info" + ".txt";
             fstream fout;
             fout.open(FileName.c_str(), fstream::out);
             if(fout.fail() != true)
@@ -191,6 +191,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
             {
                 flag = 1;
             }
+            string pathOld = "cd ..";
+            system(pathOld.c_str());
         }
         //read the information of the new database
 
@@ -229,6 +231,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
             flag = 1;
         }
     }
+    string  pathNew = "cd " + dataBaseNameNow;
+    system(pathNew.c_str());
     cout << "use some dataBase successfully" << endl;
 return flag;
 }
@@ -256,7 +260,7 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
 int catalogmanager::quit()
 {
     int flag = 0;
-    string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info.txt";
+    string FileName = ".\\" + dataBaseNameNow + "Info.txt";
     fstream fout;
     fout.open(FileName.c_str(), fstream::out);
     if(fout.fail() != true)
@@ -283,6 +287,8 @@ int catalogmanager::quit()
     {
         flag = 1;
     }
+    string path = "cd ..";
+    system(path.c_str());
     cout << "quit the database successfully!!" << endl;
     return flag;
 }
