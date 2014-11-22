@@ -308,14 +308,20 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 				break;
 			}
 			case String: {
+				//int strLen = strlen(static_cast<string *>(rec->data.at(i))->c_str()) + 1;
+				memset(&Bufferlist[file->lastBlock].token[byteOffset], EMPTY, pTable->attributes.at(i).dataLength);
 				//memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen((char *)rec->data.at(i)) + 1);
-				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), pTable->attributes.at(i).dataLength);
+				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen(static_cast<string *>(rec->data.at(i))->c_str()) + 1);
 				/* 
 				 Dear maintainer I donot understand why the upper line works well, but I comment it. 
 				 If you know anything about it. Please inform me ASAP. 
 				 Coder skar<dtsps.skar@gmail.com>
 				*/
-
+				 /*
+				if ( strLen < pTable->attributes.at(i).dataLength ){
+					memset(&Bufferlist[file->lastBlock].token[byteOffset + strLen], EMPTY, pTable->attributes.at(i).dataLength - strLen);
+				}
+				*/
 				//byteOffset += strlen(static_cast<string *>(rec->data.at(i))->c_str()) + 1;
 				byteOffset += pTable->attributes.at(i).dataLength;
 				delete static_cast<string *>(rec->data.at(i));
