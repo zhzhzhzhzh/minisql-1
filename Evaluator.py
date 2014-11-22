@@ -294,6 +294,10 @@ def GetEvaluationResults(isFirstTime):
 
     
     
+
+def PrintTree(table, attribute):
+    indices[(table, attribute)].PrintTree()
+    
     
 def LoadIndex(table, attribute):
     indices[(table, attribute)] = ReadFromFile(table, attribute)
@@ -301,6 +305,8 @@ def LoadIndex(table, attribute):
 def CreateIndex(table, attribute):
     if (table, attribute) not in indices.keys():
         indices[(table, attribute)] = BPT.BPlusTree(table, attribute)
+        if DEBUG:
+            print 'from eva.py, index newly created for',indices[(table, attribute)].table,indices[(table, attribute)].attribute
 
 def DropIndex(table, attribute):
     #indices[(table, attribute)].DeleteAll()
@@ -309,7 +315,13 @@ def DropIndex(table, attribute):
         
 
 def InsertIndexNode(table, attribute, key, uuid):
+    print 'from eva.py, index insert for',key,uuid
     indices[(table, attribute)].Insert(key, uuid)
+    ''''
+    if DEBUG:
+        print 'asdfsafsaasdfasfsadfsaf'
+        PrintTree(table, attribute)
+    '''
 
 
 # need to modify the last uuid
@@ -321,10 +333,6 @@ def Search(table, attribute, condition, value):
     return indices[(table, attribute)].Search(condition, value)
 
 
-def PrintTree(table, attribute):
-    indices[(table, attribute)].PrintTree()
-
-
 # serves as quit for this module
 def OnQuit():
     for k in indicies.keys:
@@ -333,13 +341,22 @@ def OnQuit():
 
     
     
-''''    
+
 if __name__ == '__main__': 
-    index = Index()
     
     table = 0
     attribute = 1
-    index.BuildIndex(table,attribute)
+    CreateIndex(table,attribute)
+    InsertIndexNode(table, attribute, 1, 2)
+    InsertIndexNode(table, attribute, 2, 3)
+    InsertIndexNode(table, attribute, 3, 4)
+    
+    
+    
+    sys.exit(0)
+    
+    
+    
     for i in range(10):
         ii = random.randint(0,100)
         index.InsertIndexNode(table, attribute, ii, ii)
@@ -391,8 +408,7 @@ if __name__ == '__main__':
     res = index.Search(table, attribute, Greater, 35)
     print res
     
-
-'''    
+ 
     
     
     

@@ -37,7 +37,6 @@ int main(int argc, const char * argv[])
     
 	a.attrName = "att1";
 	a.dataType = Int;
-    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
 	a.attrName = "att2";
@@ -83,7 +82,7 @@ int main(int argc, const char * argv[])
     
     uint T = InsT.tableNum;
     
-#define N 4
+#define N 7
     int t;
     
     // insert record
@@ -101,6 +100,15 @@ int main(int argc, const char * argv[])
     cout<<"insert done "<<endl;
     cin>>t;
     
+    
+    
+    // create index
+    recordManager.CreateIndex(T, 1);
+    InsT.attributes.at(1).indexName = "attr1";
+    
+    
+    cout<<"create index done "<<endl;
+    cin>>t;
 
 
 //    recordManager.NewQuery();

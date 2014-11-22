@@ -97,6 +97,9 @@ class BPlusTree(object):
         
     # pointer points to records
     def Insert(self, key, pointer):
+        if self.DEBUG:
+            pass
+            #print 'from b+tree.py, insert',key,pointer
         if self.isEmpty:
             self.root = Node(0)
             self.idCount = self.idCount + 1
@@ -105,7 +108,7 @@ class BPlusTree(object):
             self.root.pointers.append(pointer)
         else:
             n = self.FindElement(key)
-            
+                        
             print 'insert Node: %d'%n.nodeID,
            
             for index in range(len(n.keys)):
@@ -305,18 +308,18 @@ class BPlusTree(object):
         
             
     def PrintTree(self):
-        tmp = Node(-1)
         first = self.root
     
         level = 0
-        while type(first) == type(tmp):
+        while type(first) == type(self.root):
             print '\nlevel',level,'================'
             level = level + 1
             node = 0
             nex = first
-            while type(nex) == type(tmp):
+            print 'asdfsafsafsafsafsaff'
+            while type(nex) == type(self.root):
                 parent = -1
-                if type(nex.parent) == type(tmp):
+                if type(nex.parent) == type(self.root):
                     parent=nex.parent.nodeID
 
                 print '\tnode[%d]{%d}'%(nex.nodeID,parent),
@@ -349,8 +352,8 @@ if __name__ == '__main__':
     r = Record(0)
     
     for i in range(50):
-        ii = random.randint(0,100)
-        bp.Insert(i,i)
+        ii = random.randint(ord('A'),ord('z'))
+        bp.Insert(chr(ii),chr(ii))
         bp.PrintTree()
         print '\n'
         

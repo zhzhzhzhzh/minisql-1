@@ -335,7 +335,7 @@ vector<vector<Record*>> RecordManager::SelectRecord()
 }
 
 
-void RecordManager::DeleteRecord(uint table)
+unsigned long RecordManager::DeleteRecord(uint table)
 {
     if(currentTablesCount == 0)
         ChooseTable(table);
@@ -350,6 +350,7 @@ void RecordManager::DeleteRecord(uint table)
                 CreateIndex(table, i);
             }
         }
+        return 0;
     }
     
     
@@ -378,7 +379,7 @@ void RecordManager::DeleteRecord(uint table)
         Debug("uuid: "<<*it<<" deleted");
     }
     
-    return;
+    return toDelete.at(i).size();
 }
 
 
