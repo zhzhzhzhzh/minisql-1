@@ -71,15 +71,15 @@ public:
     bool BuildIndex(uint table, uint attribute);
     bool DropIndex(uint table, uint attribute);
     
-    void LoadTable(struct Table* tableStruct);  // reentrant
+    void LoadTable(const struct Table* tableStruct);  // reentrant
 
     
-	void CreateTable(struct Table* tableStruct){
+	void CreateTable(const struct Table* tableStruct){
         LoadTable(tableStruct);
         bufferManager.createTable(tableStruct);
     }
     
-    void DropTable(struct Table* tableStruct){
+    void DropTable(const struct Table* tableStruct){
         bufferManager.removeTable(tableStruct);
         UnsetTableDescriptions(tableStruct->tableNum);
     }
@@ -230,9 +230,9 @@ private:
     bool isTableChosen;
 
     // table description
-    struct Table* tableStructs[MAX_TABLE_NUMBER] = {nullptr};
-    vector<DataType>* tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
-    vector<bool>* isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
+    const struct Table *tableStructs[MAX_TABLE_NUMBER] = {nullptr};
+    vector<DataType> *tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
+    vector<bool> *isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
     
     void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);    // reentrant
     void UnsetTableDescriptions(uint table);
@@ -250,11 +250,11 @@ private:
     
     // function
     void AddCurrentTable(uint table);
-    UUID NextUUID(Table* tableStruct);
+    UUID NextUUID(const struct Table* tableStruct);
     vector<set<UUID>> SelectUUID();
     
     
-    int GetRecordCount(struct Table *table){
+    int GetRecordCount(const struct Table *table){
         return table->recordNum;
     }
 

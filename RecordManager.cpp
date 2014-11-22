@@ -12,6 +12,9 @@ void RecordManager::Initialize()
 {
     for(int i=0; i<MAX_TABLE_NUMBER; i++){
         UnsetTableDescriptions(i);
+//        tableStructs[i] = nullptr;
+//        tableRecordDataTypes[i] = nullptr;
+//        isTableAttributeIndexBuilt[i] = nullptr;
     }
     
     // is table chosen
@@ -46,7 +49,7 @@ void RecordManager::NewQuery(void)
     return;
 }
 
-void RecordManager::LoadTable(struct Table* tableStruct){
+void RecordManager::LoadTable(const struct Table* tableStruct){
     if(tableStructs[tableStruct->tableNum] == tableStruct)
         return;
     
@@ -197,7 +200,7 @@ vector<set<UUID>> RecordManager::SelectUUID()
     vector<uint> tables;
     
     
-    UUID underEvaluateUUID[currentTablesCount];
+    UUID underEvaluateUUID[MAX_TABLE_NUMBER];
     
     
     // TODO
@@ -258,7 +261,7 @@ vector<vector<Record*>> RecordManager::SelectRecord()
     // no where, return all
     if(isWhereUsed == false){        
         for (int i=0; i<currentTablesCount; i++) {
-            struct Table * tableStr = tableStructs[currentTables[i]];
+            const struct Table * tableStr = tableStructs[currentTables[i]];
             oneTableResults.clear();
             for (UUID uuid=FIRSTUUID; uuid<=tableStr->recordNum; uuid++) {
                 Record * r=bufferManager.getRecord(tableStr, uuid);
@@ -275,7 +278,7 @@ vector<vector<Record*>> RecordManager::SelectRecord()
     
     
     // save original table order
-    uint currentTablesOrigin[currentTablesCount];
+    uint currentTablesOrigin[MAX_TABLE_NUMBER];
     for (int i=0; i<currentTablesCount; i++) {
         currentTablesOrigin[i] = currentTables[i];
     }
@@ -292,7 +295,7 @@ vector<vector<Record*>> RecordManager::SelectRecord()
     // NOTE need to restore to original order
     // can be reduced if a Table struct is included in each set of UUID
     for (int i=0; i<currentTablesCount; i++) {
-        Table * tableStr = tableStructs[currentTablesOrigin[i]];
+        const Table * tableStr = tableStructs[currentTablesOrigin[i]];
         oneTableResults.clear();
         
         int positionNow = 0;
@@ -339,7 +342,7 @@ void RecordManager::DeleteRecord(uint table)
 
 
 
-UUID RecordManager::NextUUID(Table* tableStruct)
+UUID RecordManager::NextUUID(const Table* tableStruct)
 {
     return UUID(tableStruct->recordNum + 1);
 }
