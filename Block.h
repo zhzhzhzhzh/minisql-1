@@ -78,10 +78,10 @@ public:
 		char *fileName;
 		fileName = new char[50];
 		#if WIN
-		sprintf(fileName, "./%s/%d.table", pTable->dbName, File_id);
+		sprintf(fileName, "./%s/%d.table", pTable->dbName.c_str(), File_id);
 		#endif
 		#if MACOS
-		sprintf(fileName, "./%s/%d.table", pTable->dbName, File_id);
+		sprintf(fileName, "./%s/%d.table", pTable->dbName.c_str(), File_id);
 		#endif
 		fd.open(fileName, ios::in | ios::out | ios::binary);	
 		if ( !fd ){
