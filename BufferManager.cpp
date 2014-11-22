@@ -475,7 +475,7 @@ bool BufferManager::removeTable(const Table *pTable){
 		#endif
 		*/
 		#if WIN
-		sprintf(s, "del /Q .\\%s\\%d.table", pTable->dbName, file->File_id);
+		sprintf(s, "del /Q ./%s/%d.table", pTable->dbName, file->File_id);
 		#endif
 		#if MACOS
 		sprintf(s, "rm -r ./%s/%d.table", pTable->dbName, file->File_id);

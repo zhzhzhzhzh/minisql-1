@@ -78,7 +78,7 @@ public:
 		char *fileName;
 		fileName = new char[50];
 		#if WIN
-		sprintf(fileName, ".\\%s\\%d.table", pTable->dbName, File_id);
+		sprintf(fileName, "./%s/%d.table", pTable->dbName, File_id);
 		#endif
 		#if MACOS
 		sprintf(fileName, "./%s/%d.table", pTable->dbName, File_id);
