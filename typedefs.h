@@ -32,8 +32,13 @@
 #if MACOS
 #define SETPYTHONPATH "import sys\nsys.path.append('/Users/ying/Documents/DEV/record-index-manager/record-index-manager')"
 #endif
+#if WIN
+#define SETPYTHONPATH "import sys\nsys.path.append('D:\\db3.0\\minisql-1')"
+#endif
 
-
+#if WIN
+typedef unsigned int uint;
+#endif
 
 using namespace std;
 

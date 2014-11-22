@@ -230,9 +230,16 @@ private:
     bool isTableChosen;
 
     // table description
+#if MACOS
     const struct Table *tableStructs[MAX_TABLE_NUMBER] = {nullptr};
     vector<DataType> *tableRecordDataTypes[MAX_TABLE_NUMBER] = {nullptr};  // pointers to data type chain, excluding the first UUID at 0
     vector<bool> *isTableAttributeIndexBuilt[MAX_TABLE_NUMBER] = {nullptr};
+#endif
+#if WIN
+    const struct Table *tableStructs[MAX_TABLE_NUMBER];
+    vector<DataType> *tableRecordDataTypes[MAX_TABLE_NUMBER];  // pointers to data type chain, excluding the first UUID at 0
+    vector<bool> *isTableAttributeIndexBuilt[MAX_TABLE_NUMBER];
+#endif
     
     void SetTableDescriptions(uint table, vector<DataType> dataType, vector<bool> isIndexBuilt);    // reentrant
     void UnsetTableDescriptions(uint table);
