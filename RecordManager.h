@@ -16,7 +16,6 @@
 #include "BufferManager.h"
 #include "PyEvaluator.h"
 #include "typedefs.h"
-#include "IndexManager.h"
 
 
 using std::string;
