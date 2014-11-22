@@ -89,8 +89,7 @@ int catalogmanager::dropDatabase(string dataBaseName)
         system(c.c_str());
         #endif
 
-        #if  
-
+        #if  MACOS
         string a = "rm ";
         string b = "-rf";
         string c = a + b + dataBaseName;
@@ -268,7 +267,7 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
         return 0;
     else if(dataTypeIn == Float)
         return 1;
-    else if(dataTypeIn == String)
+    else if(dataTypeIn == String)quit
         return 2;
     else
         return 3;
