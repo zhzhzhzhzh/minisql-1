@@ -1,3 +1,3 @@
 
-#define WIN 0
-#define MACOS 1
+#define WIN 1
+#define MACOS 0 

@@ -43,16 +43,14 @@ int catalogmanager::createDatabase(string dataBaseName)
     if(flag == 0)
     {
         #if WIN
-        string a = "mkdir /Q";
-        string b = ".\\";
-        string cmd = a + b + dataBaseName;
+        string a = "mkdir ";
+        string cmd = a  + dataBaseName;
         system(cmd.c_str());
         #endif
 
         #if MACOS
         string a = "mkdir ";
-        string b = "./";
-        string cmd = a + b + dataBaseName;
+        string cmd = a  + dataBaseName;
         system(cmd.c_str());
         #endif
 
@@ -272,6 +270,7 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
 int catalogmanager::quit()
 {
     int flag = 0;
+	Debug("database now " << dataBaseNameNow);
     string FileName = ".\\" + dataBaseNameNow + "Info.txt";
     fstream fout;
     fout.open(FileName.c_str(), fstream::out);

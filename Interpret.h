@@ -42,7 +42,7 @@ public:
 	vector<Condition> condition;		   //要比较的where字句的链表
 	Row row;		                       //要插入的值链表
 	Table NewTableInfo;                    //存入要新建的表的信息
-	Table* TableInfo;                      //接收来自catalogmanager传递的表头的信息
+	const Table* TableInfo;                      //接收来自catalogmanager传递的表头的信息
 	Index getIndexInfo;
 
 	//friend void execute();

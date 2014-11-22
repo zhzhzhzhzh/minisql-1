@@ -20,7 +20,7 @@ BufferManager buf;
 
 /*API*/
 
-void insert(Table* T, Row row){
+void insert(const Table* T, Row row){
 	int tableIndex = Mcatalog.getTableIndex(T->tableName);
 	Mrecord.NewQuery();
 
@@ -121,7 +121,7 @@ void execute(void)
 					   cout << "create database successfully" << endl;
 				  else
 				       cout << "something wrong happened in the database" << endl;
-				  break;
+				  break; 
 	    }
 	    case DRPTAB:
 		{
