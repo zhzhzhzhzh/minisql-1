@@ -167,7 +167,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
     }
     else
     {
-        if(dataBaseNameNow == "null")//when start the program
+        if(dataBaseNameNow == "")//when start the program
         {
 
         }
