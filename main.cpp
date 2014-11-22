@@ -91,7 +91,8 @@ void execute(void)
 	    case CRETAB:
 	    {
 				   if (!Mcatalog.createTable(query.NewTableInfo)){
-					   Mrecord.CreateTable(&query.NewTableInfo);
+					   query.TableInfo = Mcatalog.getTableInformation(query.NewTableInfo.tableName);
+					   Mrecord.CreateTable(query.TableInfo);
 					   cout << "Table " << query.NewTableInfo.tableName << " has been created successfully" << endl;
 				   }
 				   else
