@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include "environment.h"
 
 
 #define MAX_CONCURRENT_TABLE 1
@@ -28,12 +29,10 @@
 #define TEST 1
 
 
-
-#define WIN 1
-#define MACOS 0
-
-
+#if MACOS
 #define SETPYTHONPATH "import sys\nsys.path.append('/Users/ying/Documents/DEV/record-index-manager/record-index-manager')"
+#endif
+
 
 
 using namespace std;
