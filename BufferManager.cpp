@@ -407,7 +407,7 @@ int BufferManager::deleteRec(const Table *pTable, UUID delete_uuid){
 	 	pTable is maintained by the CatalogManager 
 	 */ 
 	file->recordNum--;
-	return pTable->recordNum;
+	return file->recordNum + 1;
 }
 
 /*
