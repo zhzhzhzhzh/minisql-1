@@ -30,6 +30,10 @@ public:
     PyEvaluator();
     ~PyEvaluator(){Py_Finalize();}
     
+    void OnQuit(){
+        PyEval_CallObject(pFuncOnQuit,NULL);
+    }
+    
     void NewEvaluation();
     void PushCondition(uint table, uint attribute, Operator condition, int value, bool withIndex=false);
     void PushCondition(uint table, uint attribute, Operator condition, float value, bool withIndex=false);
@@ -39,7 +43,22 @@ public:
     
     bool Evaluate(vector<uint>tables, vector<Record*> records, vector<DataType>* tableRecordDataTypes[]);
     vector<set<UUID>> GetResult(int currentTablesCount);
-
+    
+    
+    // index manager
+    void LoadIndex(uint table, uint attribute);
+    void CreateIndex(uint table, uint attribute);
+    void DropIndex(uint table, uint attribute);
+    
+    void InsertIndexNode(uint table, uint attribute, int key, UUID uuid);
+    void InsertIndexNode(uint table, uint attribute, float key, UUID uuid);
+    void InsertIndexNode(uint table, uint attribute, string key, UUID uuid);
+    
+    void DeleteIndexNode(uint table, uint attribute, int key, UUID uuid);
+    void DeleteIndexNode(uint table, uint attribute, float key, UUID uuid);
+    void DeleteIndexNode(uint table, uint attribute, string key, UUID uuid);
+    
+    
 
 private:
     const char *pBuffer = nullptr;
@@ -48,25 +67,21 @@ private:
     PyObject *pModule = nullptr;
     PyObject *pRetValue = nullptr;
 
+    PyObject *pFuncOnQuit = nullptr;
+    
     PyObject *pFuncPushCondition = nullptr;
     PyObject *pFuncPushLogicalOperation = nullptr;
     PyObject *pFuncNewEvaluation = nullptr;
     PyObject *pFuncEvaluate = nullptr;
     PyObject *pFuncGetEvaluationResults = nullptr;
-
     
     
-//    PyObject* pArgs = Py_BuildValue("ii", 12, 14);
-//    
-//    PyObject* pRet = PyEval_CallObject(pFunc,pArgs);
-//    
-//    PyArg_ParseTuple(pRet,"ii", &a,&b);
-//
-//    pRetValue = PyEval_CallObject(pFunc, NULL);
-//    
-//    PyArg_Parse(pValue, "s", &pBuffer);
-//    cout<<pBuffer<<endl;
-    
+    // index manager
+    PyObject *pFuncLoadIndex = nullptr;
+    PyObject *pFuncCreateIndex = nullptr;
+    PyObject *pFuncDropIndex = nullptr;
+    PyObject *pFuncInsertIndexNode = nullptr;
+    PyObject *pFuncDeleteIndexNode = nullptr;
     
     
 };
@@ -76,4 +91,4 @@ private:
     
     
     
-#endif /* defined(__record_index_manager__PyEvaluator__) */
+#endif /* voidined(__record_index_manager__PyEvaluator__) */

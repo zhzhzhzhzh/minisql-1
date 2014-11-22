@@ -15,7 +15,7 @@
 
 #include "BufferManager.h"
 #include "PyEvaluator.h"
-#include "typedefs.h" 
+#include "typedefs.h"
 
 
 using std::string;
@@ -67,8 +67,19 @@ public:
     
     void NewQuery(void);    // reentrant
     
-    bool BuildIndex(uint table, uint attribute);
-    bool DropIndex(uint table, uint attribute);
+    bool CreateIndex(uint table, uint attribute)
+    {
+        pyEvaluator.CreateIndex(table, attribute);
+        BuildUpIndex(table, attribute);
+        return true;
+    }
+    bool DropIndex(uint table, uint attribute){
+        if (isTableAttributeIndexBuilt[table]->at(attribute) == false) {
+            return true;
+        }
+        pyEvaluator.DropIndex(table, attribute);
+        return true;
+    }
     
     void LoadTable(const struct Table* tableStruct);  // reentrant
 
@@ -105,6 +116,7 @@ public:
     
     void OnQuit(){
         bufferManager.quitDB();
+        pyEvaluator.OnQuit();
     }
 
     
@@ -264,8 +276,15 @@ private:
         return table->recordNum;
     }
 
-    //bool Evaluate();
 
+    // index
+    void BuildUpIndex(uint table, uint attribute);
+    void LoadIndex(uint table, uint attribute){
+        pyEvaluator.LoadIndex(table, attribute);
+    }
+    void InsertIndexNode(uint table, uint attribute, Record *record);
+    void DeleteIndexNode(uint table, uint attribute, Record *record);
+    
     // buffer
 public:
     

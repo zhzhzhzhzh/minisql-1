@@ -89,7 +89,8 @@ int catalogmanager::dropDatabase(string dataBaseName)
         system(c.c_str());
         #endif
 
-        #if MACOS
+        #if  
+
         string a = "rm ";
         string b = "-rf";
         string c = a + b + dataBaseName;
@@ -255,8 +256,10 @@ DataType catalogmanager::switchIntToEnum(int enumIn)
         return Int;
     else if(enumIn == 1)
         return Float;
-    else //if(enumIn == 2)
+    else if(enumIn == 2)
         return String;
+    else
+        return Uuid;
 }
 
 int catalogmanager::switchEnumToInt(DataType dataTypeIn)
@@ -265,8 +268,10 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
         return 0;
     else if(dataTypeIn == Float)
         return 1;
-    else //if(dataTypeIn == String)
+    else if(dataTypeIn == String)
         return 2;
+    else
+        return 3;
 }
 
 int catalogmanager::quit()

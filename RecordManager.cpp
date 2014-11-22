@@ -59,8 +59,11 @@ void RecordManager::LoadTable(const struct Table* tableStruct){
     vector<bool> isIndexBuilt;
     for (int i=0; i<tableStruct->attributes.size(); i++) {
         dataType.push_back(tableStruct->attributes.at(i).dataType);
-        // TODO agree on there is no index how to denote
         isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "null");
+        
+        if (i!=0 && isIndexBuilt.at(i) == true) {
+            pyEvaluator.LoadIndex(tableStruct->tableNum, i);
+        }
     }
     
     SetTableDescriptions(tableStruct->tableNum, dataType, isIndexBuilt);
@@ -276,12 +279,14 @@ vector<vector<Record*>> RecordManager::SelectRecord()
     vector<Record*> oneTableResults;
     
     // no where, return all
-    if(isWhereUsed == false){        
+    if(isWhereUsed == false){
+        const struct Table * tableStr = nullptr;
         for (int i=0; i<currentTablesCount; i++) {
-            const struct Table * tableStr = tableStructs[currentTables[i]];
+            tableStr = tableStructs[currentTables[i]];
             oneTableResults.clear();
+            Record * r=nullptr;
             for (UUID uuid=FIRSTUUID; uuid<=tableStr->recordNum; uuid++) {
-                Record * r=bufferManager.getRecord(tableStr, uuid);
+                r=bufferManager.getRecord(tableStr, uuid);
                 if (r!=nullptr) {
                     oneTableResults.push_back(r);
                     Debug("uuid: "<<uuid<<" selected");
@@ -338,6 +343,13 @@ void RecordManager::DeleteRecord(uint table)
     // call delete all
     if(isWhereUsed == false){
         bufferManager.deleteAll(tableStructs[table]);
+        
+        for (int i=1; i<tableStructs[table]->attributes.size(); i++){
+            if (isTableAttributeIndexBuilt[table]->at(i)) {
+                DropIndex(table, i);
+                CreateIndex(table, i);
+            }
+        }
     }
     
     
@@ -348,9 +360,21 @@ void RecordManager::DeleteRecord(uint table)
         if(currentTables[i] == table)
             break;
     }
+    
+    Record *tmp;
     for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); it++) {
         Debug("try to delete uuid: "<<*it);
+        
+        tmp = bufferManager.getRecord(tableStructs[table], *it);
+        for (int i=1; i<tableStructs[table]->attributes.size(); i++) {
+            if (isTableAttributeIndexBuilt[table]->at(i) == true) {
+                InsertIndexNode(table, i, tmp);
+            }
+        }
+        
+        // TODO check if delete successfully and delete the new record here
         bufferManager.deleteRec(tableStructs[table], *it);
+        
         Debug("uuid: "<<*it<<" deleted");
     }
     
@@ -419,16 +443,113 @@ void RecordManager::InsertRecord(uint table)
     PrintSingle(tableStructs[table],record);
 #endif
     
+    
+    for (int i=1; i<tableStructs[table]->attributes.size(); i++) {
+        if (isTableAttributeIndexBuilt[table]->at(i)) {
+            InsertIndexNode(table, i, record);
+        }
+    }
+    
+    // TODO check if insert successfully and delete the new record here
  	bufferManager.insertRec(tableStructs[table], record);
 
-    
-    #if 0
-    lastRecord->next = record;
-    lastRecord = record;
-    #endif
-    
-    
     newRecord.clear(); 
     
     return;
 }
+
+
+
+
+void RecordManager::BuildUpIndex(uint table, uint attribute)
+{
+    const struct Table * tableStr = tableStructs[table];
+    
+    Record * r=nullptr;
+    for (UUID uuid=FIRSTUUID; uuid<=tableStr->recordNum; uuid++) {
+        r=bufferManager.getRecord(tableStr, uuid);
+        if (r!=nullptr) {
+            InsertIndexNode(table, attribute, r);
+        }
+    }
+    Debug("Built index on table "<<table<<" attribute "<<attribute);
+    
+    return;
+}
+
+// TODO update index when insert delete
+
+
+void RecordManager::InsertIndexNode(uint table, uint attribute, Record *record)
+{
+    DataType type = tableRecordDataTypes[table]->at(attribute);
+    UUID uuid = *(static_cast<UUID*>(record->data.at(0)));
+    
+    switch (type) {
+        case Int:
+            pyEvaluator.InsertIndexNode(table, attribute,
+                                        *(static_cast<int*>(record->data.at(attribute))),
+                                        uuid);
+            break;
+            
+        case Float:
+            pyEvaluator.InsertIndexNode(table, attribute,
+                                        *(static_cast<float*>(record->data.at(attribute))),
+                                        uuid);
+            break;
+            
+        case String:
+            pyEvaluator.InsertIndexNode(table, attribute,
+                                        *(static_cast<string*>(record->data.at(attribute))),
+                                        uuid);
+            break;
+            
+        default:
+            Debug("Index: insert index, unknown datatype at table "<<table<<" attribute "<<attribute<<" uuid "<<uuid);
+            break;
+    }
+    
+    Debug("Index: insert index node for table "<<table<<" attribute "<<attribute<<" uuid "<<uuid);
+
+    return;
+}
+
+
+void RecordManager::DeleteIndexNode(uint table, uint attribute, Record *record)
+{
+    DataType type = tableRecordDataTypes[table]->at(attribute);
+    UUID uuid = *(static_cast<UUID*>(record->data.at(0)));
+    
+    switch (type) {
+        case Int:
+            pyEvaluator.DeleteIndexNode(table, attribute,
+                                        *(static_cast<int*>(record->data.at(attribute))),
+                                        uuid);
+            break;
+            
+        case Float:
+            pyEvaluator.DeleteIndexNode(table, attribute,
+                                        *(static_cast<float*>(record->data.at(attribute))),
+                                        uuid);
+            break;
+            
+        case String:
+            pyEvaluator.DeleteIndexNode(table, attribute,
+                                        *(static_cast<string*>(record->data.at(attribute))),
+                                        uuid);
+            break;
+            
+        default:
+            Debug("Index: delete index, unknown datatype at table "<<table<<" attribute "<<attribute<<" uuid "<<uuid);
+            break;
+    }
+    
+    Debug("Index: delete index node for table "<<table<<" attribute "<<attribute<<" uuid "<<uuid);
+    
+    return;
+}
+
+
+
+
+

@@ -7,12 +7,12 @@ import math
   
 class Node(object):
     def __init__(self, nodeID, parent=None, sibling=None):
-            self.nodeID = nodeID
-            self.parent = parent
-            self.sibling = sibling
-            # large data here
-            self.pointers = []
-            self.keys = []
+        self.nodeID = nodeID
+        self.parent = parent
+        self.sibling = sibling
+        # large data here
+        self.pointers = []
+        self.keys = []
         
     def isLeaf(self):
         res = (len(self.pointers) == 0 or type(self.pointers[0]) != type(self))
@@ -28,13 +28,14 @@ class Node(object):
 # id and uuid are treated as 64 bits long
 class BPlusTree(object):
     def __init__(self, table, attribute, dataType=types.IntType, keySize=8, blockSize=4000):
+        self.DEBUG = True
         # table info
         self.table = table
         self.attribute = attribute
         self.dataType = dataType
         # (blocksize - id)/(uuid/id+key)
         #self.N = (blockSize - 8)/(8+keySize)
-        self.N = 3
+        self.N = 4
         self.root = None
         self.idCount = 0
         self.isEmpty = True
@@ -154,11 +155,9 @@ class BPlusTree(object):
                    
         # underfull
         if len(n.keys) < int(math.ceil(1.0*(self.N-1)/2)):
-            
-
-
-
-            
+ 
+ 
+ 
             print 'split left:',
             for i in n.keys:
                 print i,
@@ -211,45 +210,67 @@ class BPlusTree(object):
         result = []
         if condition == Equal:
             n = self.FindElement(value)
+            print n.nodeID
             for index in range(len(n.keys)):
-                if key == n.keys[index]:
+                if n.keys[index] == value:
                     break
-            while key == n.keys[index]:
+            while n.keys[index] == value:
+                result.append(n.pointers[index]) # add uuid
+                index = index + 1
                 if index >= len(n.keys):
-                    if type(n.sibling)!=type(n):
+                    if n.sibling == None:
                         break
                     n = n.sibling
                     index = 0
                     continue
-                result.append(n.pointers[index]) # add uuid
-                index = index + 1
             return result       
                  
         elif condition == Less:
             n = self.FindLeftEnd()
-            for index in range(len(n.keys)):
-                if key == n.keys[index]:
-                    break
-            while key == n.keys[index]:
+            print n.nodeID
+            index = 0
+            while n.keys[index] < value:
+                result.append(n.pointers[index]) # add uuid
+                index = index + 1
                 if index >= len(n.keys):
-                    if type(n.sibling)!=type(n):
+                    if n.sibling == None:
                         break
                     n = n.sibling
                     index = 0
                     continue
+            return result
+            
+
+        elif condition == Greater:
+            n = self.FindElement(value)
+            print n.nodeID
+            index = 0
+            while n.keys[index] <= value:
+                index = index + 1
+                if index >= len(n.keys):
+                    if n.sibling == None:
+                        return result
+                    n = n.sibling
+                    index = 0
+                    continue
+                     
+            while True:
                 result.append(n.pointers[index]) # add uuid
                 index = index + 1
+                if index >= len(n.keys):
+                    if n.sibling == None:
+                        break
+                    n = n.sibling
+                    index = 0
+                    continue
             return result
             
             
-            
-            
-        elif condition == Greater:
-            pass
 
         else: # not equal
             n = FindLeftEnd()
-            while type(n) == type(n.parent):
+            print n.nodeID
+            while n != None:
                 for index in range(len(n.keys)):
                     if n.keys[index] != value:
                         result.append(n.pointers[index])
@@ -260,12 +281,15 @@ class BPlusTree(object):
     
         
     
-    def ReadFromFile(self):
+    def ReadFromFile(self, table, attribute):
+        if self.DEBUG:
+            print 'Index: load for table',table,'attribute',attribute
+        # return a b tree object
         pass
         
     
     # need to instantiate a buffer manager
-    def WriteToFile(self):
+    def WriteToFile(self, table, attribute):
         pass
         '''
         f = open(str(table)+'.'+str(attribute)+'.index', 'w')
@@ -279,52 +303,71 @@ class BPlusTree(object):
         # remove file
         pass
         
-        
-def PrintTree(tree):
-    tmp = Node(-1)
-    first = tree.root
+            
+    def PrintTree(self):
+        tmp = Node(-1)
+        first = self.root
     
-    level = 0
-    while type(first) == type(tmp):
-        print '\nlevel',level,'================'
-        level = level + 1
-        node = 0
-        nex = first
-        while type(nex) == type(tmp):
-            parent = -1
-            if type(nex.parent) == type(tmp):
-                parent=nex.parent.nodeID
+        level = 0
+        while type(first) == type(tmp):
+            print '\nlevel',level,'================'
+            level = level + 1
+            node = 0
+            nex = first
+            while type(nex) == type(tmp):
+                parent = -1
+                if type(nex.parent) == type(tmp):
+                    parent=nex.parent.nodeID
 
-            print '\tnode[%d]{%d}'%(nex.nodeID,parent),
-            node = node + 1
+                print '\tnode[%d]{%d}'%(nex.nodeID,parent),
+                node = node + 1
             
             
-            if not nex.isLeaf():
-                i = 0
-                for i in range(len(nex.keys)):
+                if not nex.isLeaf():
+                    i = 0
+                    for i in range(len(nex.keys)):
+                        print '(%d)'%nex.pointers[i].nodeID,
+                        print nex.keys[i],
+                    i = i + 1
                     print '(%d)'%nex.pointers[i].nodeID,
-                    print nex.keys[i],
-                i = i + 1
-                print '(%d)'%nex.pointers[i].nodeID,
-            else:
-                for k in nex.keys:
-                    print k,
-            nex = nex.sibling
-        first = first.pointers[0]
+                else:
+                    for k in nex.keys:
+                        print k,
+                nex = nex.sibling
+            first = first.pointers[0]
+    
+    
+    
+    
     
 class Record(object):
     def __init__(self, uuid):
         self.uuid = uuid
         
 if __name__ == '__main__':
-    bp = BPlusTree('0', type(Record))
+    bp = BPlusTree(0,0)
     r = Record(0)
     
-    for i in range(20):
+    for i in range(50):
         ii = random.randint(0,100)
-        bp.Insert(ii,r)
-        PrintTree(bp)
+        bp.Insert(i,i)
+        bp.PrintTree()
         print '\n'
+        
+    #def Search(self, condition, value):
+    Equal = 0
+    Less = 1
+    Greater = 2
+    #LessEqual = 3
+    #GreaterEqual = 4
+    NotEqual = 5
+        
+    res = bp.Search(Less, 12)
+    print res
+    res = bp.Search(Equal, 20)
+    print res
+    res = bp.Search(Greater, 35)
+    print res
 
     
     
