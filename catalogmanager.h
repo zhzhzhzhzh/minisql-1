@@ -20,7 +20,7 @@ class catalogmanager
     public:
         int isDBExisted(string db_name);
         int createDatabase(string dataBaseName);
-        int dropDatabase(string dataBaseName);//TODO test again
+        int dropDatabase(string dataBaseName);
         int useDataBase(string dataBaseName);
         int quit();
         int createTable(Table& tableName);
@@ -49,7 +49,7 @@ class catalogmanager
             }
             return v;
         }
-        Table getTableInformation(string tableName);//TODO
+        const Table* getTableInformation(string tableName);//TODO
 };
 
 #endif // CATALOGMANAGER_H
