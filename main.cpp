@@ -382,37 +382,50 @@ int main()
 	char word[WORDLEN] = "";
 	short int ComEnd = 0;
 	char temp[256];
+	fstream in;
 
-	while (1)
+	if ((query.state == EXECFILE) && (query.fileName != ""))
 	{
-		strcpy_s(command, "");//command清零
-		ComEnd = 0;
-		cout << "miniSQL>>";
-		if ((query.state == EXECFILE) && (query.fileName != ""))
+		in.open(query.fileName.c_str(), ios::in);
+		while (!in.eof())
 		{
-			fstream in;
-			in.open(query.fileName.c_str(), ios::in);
-			while (!in.eof())
-			{
-				in.getline(temp, 256, '\n');
-				strcat(input, " ");
-				strcat(input, temp);
-			}
-			in.close();
-		}
-		while (!ComEnd)
-		{
-
-			gets_s(input);
+			in.getline(temp, 256, '\n');
 			if (IsComEnd(input))
-				ComEnd = 1;
-			strcat(command, input);//保存分号结束之前的命令，不含分号
-			AddSeperator(command); //在command命令的字符串加一个空格在字符串结尾，并在空格后补上'\0'
+			{
+				strcat(input, temp);
+				AddSeperator(command);
+				query.Parse(command);
+				execute();
+				strcpy_s(command, "");
+				strcpy_s(temp, "");
+			}
+			strcat(input, temp);
+			AddSeperator(command);
 		}
-cout << command << endl;
-		query.Parse(command);
-		execute();
+		in.close();
 	}
+	else
+	{
+		while (1)
+		{
+			strcpy_s(command, "");//command清零
+			ComEnd = 0;
+			cout << "miniSQL>>";
+
+			while (!ComEnd)
+			{
+				gets_s(input);
+				if (IsComEnd(input))
+					ComEnd = 1;
+				strcat(command, input);//保存分号结束之前的命令，不含分号
+				AddSeperator(command); //在command命令的字符串加一个空格在字符串结尾，并在空格后补上'\0'
+			}
+			query.Parse(command);
+			execute();
+
+		}
+	}
+	
 	getchar();
 	return 0;
 }

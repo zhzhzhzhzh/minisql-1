@@ -273,7 +273,8 @@ int catalogmanager::quit()
 {
     int flag = 0;
 	Debug("database now " << dataBaseNameNow);
-    string FileName = ".\\" + dataBaseNameNow + "Info.txt";
+	string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info.txt";
+cout << FileName << endl;
     fstream fout;
     fout.open(FileName.c_str(), fstream::out);
     if(fout.fail() != true)
