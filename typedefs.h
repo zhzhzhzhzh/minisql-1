@@ -36,7 +36,9 @@
 #define SETPYTHONPATH "import sys\nsys.path.append('D:\\db3.0\\minisql-1')"
 #endif
 
-
+#if WIN
+typedef unsigned int uint;
+#endif
 
 using namespace std;
 
