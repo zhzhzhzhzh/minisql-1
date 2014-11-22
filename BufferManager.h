@@ -6,6 +6,7 @@
 #ifndef _BUFFERMANAGER_H_
 #define _BUFFERMANAGER_H_
 #include "Block.h"
+#include <string.h>
 #define MAX_BLOCK_NUM 	256
 #define MAX_FILE_NUM 	MAX_CONCURRENT_TABLE
 //#include "Exceptions.h"
