@@ -43,7 +43,7 @@ int catalogmanager::createDatabase(string dataBaseName)
     if(flag == 0)
     {
         #if WIN
-        string a = "mkdir /Q";
+        string a = "mkdir ";
         string cmd = a + dataBaseName;
         system(cmd.c_str());
         #endif
