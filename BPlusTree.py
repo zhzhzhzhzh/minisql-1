@@ -226,7 +226,24 @@ class BPlusTree(object):
             return result       
                  
         elif condition == Less:
-            pass
+            n = self.FindLeftEnd()
+            for index in range(len(n.keys)):
+                if key == n.keys[index]:
+                    break
+            while key == n.keys[index]:
+                if index >= len(n.keys):
+                    if type(n.sibling)!=type(n):
+                        break
+                    n = n.sibling
+                    index = 0
+                    continue
+                result.append(n.pointers[index]) # add uuid
+                index = index + 1
+            return result
+            
+            
+            
+            
         elif condition == Greater:
             pass
 

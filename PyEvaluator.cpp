@@ -13,7 +13,7 @@ PyEvaluator::PyEvaluator()
 {
     Py_Initialize();
     
-    PyRun_SimpleString("import sys\nsys.path.append('/Users/ying/Documents/DEV/record-index-manager/record-index-manager')");
+    PyRun_SimpleString(SETPYTHONPATH);
 
     pModule = PyImport_ImportModule("Evaluator");
     
@@ -104,7 +104,7 @@ bool PyEvaluator::Evaluate(vector<uint>tables, vector<Record*> records, vector<D
         uint table = tables.at(i);
         vector<void *> recordData = records.at(i)->data;
         unsigned long paramCount = recordData.size() - 1; //minus the first UUID, plus the first leading isDone, table
-        string paramsPattern = "";
+        //string paramsPattern = "";
         DataType type;
         
         Debug("PyEvaluator::Evaluate:recordData.size() "<<paramCount);
