@@ -452,10 +452,7 @@ bool BufferManager::removeTable(const Table *pTable){
 		/* 
 		 After the operation of getFile the file 
 			is definitly to be at the end of the list 
-
-		 Whatever to avoid merge
 		 */
-
 		FileInf *file = getFile(pTable);	
 		//if ( file == NULL )	cout << "Table not found " << endl;
 		if ( flistHead == flistTail ){				// In case the file to delete is the only one file in the filelist
@@ -477,33 +474,17 @@ bool BufferManager::removeTable(const Table *pTable){
 		sprintf(s, "del -s -q %d.table", file->File_id);
 		#endif
 		*/
+		#if WIN
 		sprintf(s, "del  /Q %d.table", file->File_id);
+		#endif
+		#if MACOS
+		sprintf(s, "rm -r %d.table", file->File_id);
+		#endif 
 		closeFile(file);
 		system(s);
 		delete s;
-
-
-		/*
-		
-		if ( fit != NULL ){
-			
-			closeFile(file);
-			char s[20];
-			
-			#ifdef WIN 
-			sprintf(s, "del -s -q %d.table", file->File_id);
-			#endif 
-			
-			sprintf(s, "rm -r %d.table", file->File_id);
-			system(s);
-            
-            return true;
-		}
-		else return false;
-		*/
-		
+		return true;
 	}
-    
     return false;
 }
 
