@@ -12,6 +12,7 @@ catalogmanager::~catalogmanager()
 //flag=1,database already exist;flag=0,create a database successfully
 int catalogmanager::isDBExisted(string db_name)//return 1,find
 {
+    openDbFile();
     int flag = 0;
     int i;
     for(i = 0; i < dataBaseNum; i++)
@@ -22,6 +23,7 @@ int catalogmanager::isDBExisted(string db_name)//return 1,find
             i = dataBaseNum;
         }
     }
+    closeDbFile();
     return flag;
 }
 int catalogmanager::createDatabase(string dataBaseName)
@@ -41,7 +43,7 @@ int catalogmanager::createDatabase(string dataBaseName)
     if(flag == 0)
     {
         #if WIN
-        string a = "mkdir ";
+        string a = "mkdir /Q";
         string b = ".\\";
         string cmd = a + b + dataBaseName;
         system(cmd.c_str());
@@ -243,7 +245,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
     }
     string  pathNew = "cd " + dataBaseNameNow;
     system(pathNew.c_str());
-    cout << "use some dataBase successfully" << endl;
+    Debug("use some dataBase successfully");
 return flag;
 }
 
@@ -299,7 +301,7 @@ int catalogmanager::quit()
     }
     string path = "cd ..";
     system(path.c_str());
-    cout << "quit the database successfully!!" << endl;
+    Debug("quit the database successfully!!");
     return flag;
 }
 int catalogmanager::createTable(Table& tableNameIn)//TODO datalength increment
@@ -347,7 +349,7 @@ int catalogmanager::createTable(Table& tableNameIn)//TODO datalength increment
     }
     totalTableNum++;
     tableV.push_back(T_temp);
-    cout << "create a table successfully!!" << endl;
+    Debug("create a table successfully!!");
     return 0;
 
 
@@ -368,7 +370,7 @@ int catalogmanager::deleteTable(int tableIndex)
     //system(cmd.c_str());
     tableV.erase(tableV.begin() + tableIndex);
     totalTableNum--;
-    cout << "delete finished" << endl;
+    Debug("delete finished");
     return 0;
 }
 
