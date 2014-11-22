@@ -40,10 +40,20 @@ int catalogmanager::createDatabase(string dataBaseName)
         flag = 0;
     if(flag == 0)
     {
+        #if WIN
         string a = "mkdir ";
         string b = ".\\";
         string cmd = a + b + dataBaseName;
         system(cmd.c_str());
+        #endif
+
+        #if MACOS
+        string a = "mkdir ";
+        string b = "./";
+        string cmd = a + b + dataBaseName;
+        system(cmd.c_str());
+        #endif
+
         string newFileName = ".\\" + dataBaseName + "\\" + dataBaseName + "Info" + ".txt";
         fstream newfile;
         newfile.open(newFileName.c_str(), fstream::out);
@@ -80,7 +90,10 @@ int catalogmanager::dropDatabase(string dataBaseName)
         #endif
 
         #if MACOS
-        system("rm -rf ")
+        string a = "rm ";
+        string b = "-rf";
+        string c = a + b + dataBaseName;
+        system(c.c_str());
         #endif
         /*for(int j = 0; j < totalTableNum; j++)
         {
@@ -476,7 +489,7 @@ int catalogmanager::getAttrNumber(int tableIndex)
 {
     return tableV[tableIndex].attrNumber;
 }
-Table catalogmanager::getTableInformation(string tableName)
+const Table* catalogmanager::getTableInformation(string tableName)
 {
     int i = 0;
     for(i = 0; i < totalTableNum; i++)
@@ -484,9 +497,9 @@ Table catalogmanager::getTableInformation(string tableName)
         if(tableV[i].tableName == tableName)
             break;
     }
-    Table temp_table;
+    //Table temp_table;
     //temp_table.tableName = tableV[i].tableName;
     //temp_table.attrNumber = tableV[i].attrNumber;
-    temp_table = tableV[i];
-    return temp_table;
+    //temp_table = tableV[i];
+    return &tableV[i];
 }
