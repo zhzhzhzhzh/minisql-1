@@ -46,8 +46,10 @@ public:
 	bool 		deleteAll(const Table* );
 	int   		deleteRec(const Table* , UUID );
 	UUID 		getMaxuuid(const Table* );
+	int 		getBlockCount(const Table* );
 	bool 		removeTable(const Table *);
 	void 		quitDB();
+
 private:
 	/* data */
 	Block* 		Bufferlist;

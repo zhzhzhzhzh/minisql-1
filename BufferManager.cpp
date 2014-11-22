@@ -412,6 +412,25 @@ UUID BufferManager::getMaxuuid(const Table *pTable){
 	}
 }	
 
+/*
+ return the number of blocks inside a table, for optimization.
+ @param: const Table *pTable
+ @return: int Block_Num
+ */
+int BufferManager::getBlockCount(const Table *pTable){
+	if ( pTable == NULL ){
+		return -1;
+	}
+	else {
+		FileInf *file;
+		file = getFile(pTable);
+		if ( file != NULL ) 
+			return file->Block_Num; 
+		else 
+			return -1;
+	}
+}
+
 
 bool BufferManager::deleteAll(const Table *pTable ){
 	return removeTable(pTable) && createTable(pTable);
