@@ -155,7 +155,7 @@ int main(int argc, const char * argv[])
     // select * from T
     recordManager.NewQuery();
     recordManager.ChooseTable(T);
-    recordManager.SelectRecord();
+    results = recordManager.SelectRecord();
     
     cout<<"select * done, results:"<<endl;
     for (int i=0; i<results.at(0).size(); i++) {
