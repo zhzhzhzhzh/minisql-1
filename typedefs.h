@@ -97,6 +97,7 @@ struct Attribute
 
 struct Table
 {
+    string dbName;
     string tableName;
     int attrNumber;
     int recordNum;
