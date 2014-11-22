@@ -12,9 +12,16 @@
 #include <iostream>
 #include <string>
 #include <set>
-#include <Python/Python.h>
 
 #include "typedefs.h"
+
+#if MACOS
+#include <Python/Python.h>
+#endif
+#if WIN
+#include <Python.h>
+#endif
+
 
 
 class PyEvaluator{
