@@ -267,7 +267,7 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
         return 0;
     else if(dataTypeIn == Float)
         return 1;
-    else if(dataTypeIn == String)quit
+    else if(dataTypeIn == String)
         return 2;
     else
         return 3;
