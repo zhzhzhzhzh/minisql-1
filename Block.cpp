@@ -68,7 +68,7 @@ void Block::Initialize(FileInf *pFi, int offset ){
 	recordHandle = new Record[pFi->recordPerBlock];
 	unsigned int byteOffset = 0;
 	unsigned int rec_num = 0;
-	for (; (byteOffset + pFi->recordLen) < BLOCK_SIZE; byteOffset += pFi->recordLen){
+	for (; (byteOffset + pFi->recordLen) < BLOCK_SIZE; /* byteOffset += pFi->recordLen */){				// The code 'byteOffset += pFi->recordLen' will cause record lost because of double jump
 		for (unsigned int i = 0; i < pFi->dataVector->size(); i++){
 			recordHandle[rec_num].data.push_back(reinterpret_cast<void *>(&token[byteOffset]));
 			switch ( pFi->dataVector->at(i).dataType ) {

@@ -89,11 +89,40 @@ int main(){
 	*/
 	Record *rec = NULL;
 	rec = bufferM.getRecord(&InsT, 1);
-	printf("%u, %d, %x, %s",	*static_cast<UUID *>(rec->data.at(0)), 
+	printf("%u, %x, %x, %s\n",	*static_cast<UUID *>(rec->data.at(0)), 
 								*static_cast<int *>(rec->data.at(1)),
 								*static_cast<int *>(rec->data.at(2)),
 								static_cast<char *>(rec->data.at(3)));
-	
+	rec = bufferM.getRecord(&InsT, 2);
+	printf("%u, %x, %x, %s\n",	*static_cast<UUID *>(rec->data.at(0)),
+								*static_cast<int *>(rec->data.at(1)),
+								*static_cast<int *>(rec->data.at(2)),
+								static_cast<char *>(rec->data.at(3)));
+	rec = bufferM.getRecord(&InsT, 3);
+	printf("%u, %x, %x, %s\n",	*static_cast<UUID *>(rec->data.at(0)),
+								*static_cast<int *>(rec->data.at(1)),
+								*static_cast<int *>(rec->data.at(2)),
+								static_cast<char *>(rec->data.at(3)));
+	rec = bufferM.getRecord(&InsT, 4);
+	printf("%u, %x, %x, %s\n",	*static_cast<UUID *>(rec->data.at(0)),
+								*static_cast<int *>(rec->data.at(1)),
+								*static_cast<int *>(rec->data.at(2)),
+								static_cast<char *>(rec->data.at(3)));
+	rec = bufferM.getRecord(&InsT, 5);
+	printf("%u, %x, %x, %s\n",	*static_cast<UUID *>(rec->data.at(0)),
+								*static_cast<int *>(rec->data.at(1)),
+								*static_cast<int *>(rec->data.at(2)),
+								static_cast<char *>(rec->data.at(3)));
+	rec = bufferM.getRecord(&InsT, 6);
+	printf("%u, %x, %x, %s\n",	*static_cast<UUID *>(rec->data.at(0)),
+								*static_cast<int *>(rec->data.at(1)),
+								*static_cast<int *>(rec->data.at(2)),
+								static_cast<char *>(rec->data.at(3)));
+	rec = bufferM.getRecord(&InsT, 7);
+	printf("%u, %x, %x, %s\n",	*static_cast<UUID *>(rec->data.at(0)),
+								*static_cast<int *>(rec->data.at(1)),
+								*static_cast<int *>(rec->data.at(2)),
+								static_cast<char *>(rec->data.at(3)));
 	/*
 	rec = new Record;
 	uuid = new UUID(5);
