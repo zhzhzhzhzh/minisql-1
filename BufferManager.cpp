@@ -170,50 +170,58 @@ int BufferManager::getFreeBlock(){
 int BufferManager::getBlock(FileInf *pFi, int offset){
 	if ( !pFi ) return -1;
 	int block_index = pFi->firstBlock;
-	if ( offset == 1 && pFi->firstBlock != -1 ){
-		return pFi->firstBlock;
+	if (offset > pFi->Block_Num){
+		return -1;
 	}
-	else if ( offset == pFi->Block_Num && pFi->lastBlock != -1 && Bufferlist[pFi->lastBlock].Block_Offset == offset ){
-		// lastBlock stays as is
-		return pFi->lastBlock;
-	}
-	else {
-		/* In case of the first block in a new file*/ 
-		if ( offset == 1 ){
-			block_index = getFreeBlock();
-			Bufferlist[block_index].Initialize(pFi, offset);
-			Bufferlist[block_index].lock();
-			Bufferlist[block_index].next = -1;
+	else{
+		if (offset == 1 && pFi->firstBlock != -1){
+			return pFi->firstBlock;
 		}
-		else{
-			int former_block = -1;
-			while ( block_index >= 0 && Bufferlist[block_index].Block_Offset != offset ){
-				former_block = block_index;
-				block_index = Bufferlist[block_index].next;
-			}
-			if ( block_index == -1 ){
+		else if (offset == pFi->Block_Num && pFi->lastBlock != -1 && Bufferlist[pFi->lastBlock].Block_Offset == offset){
+			// lastBlock stays as is
+			return pFi->lastBlock;
+		}
+		else {
+			/* In case of the first block in a new file*/
+			if (offset == 1){
 				block_index = getFreeBlock();
 				Bufferlist[block_index].Initialize(pFi, offset);
-
-				/*  
-					To link the node into the file-block queue, except for the case of 
-					the lastBlock when lastblock move forward
-				 */
-				if ( offset != pFi->Block_Num ){				
-					Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
-					Bufferlist[pFi->firstBlock].next = block_index;
+				Bufferlist[block_index].lock();
+				Bufferlist[block_index].next = -1;
+			}
+			else{
+				int former_block = -1;
+				while (block_index >= 0 && Bufferlist[block_index].Block_Offset != offset){
+					former_block = block_index;
+					block_index = Bufferlist[block_index].next;
 				}
-				else {
+				if (block_index == -1){
+					block_index = getFreeBlock();
+					Bufferlist[block_index].Initialize(pFi, offset);
 
+					/*
+					To link the node into the file-block queue, except for the case of
+					the lastBlock when lastblock move forward
+					*/
+					if (offset != pFi->Block_Num){
+						Bufferlist[block_index].next = Bufferlist[pFi->firstBlock].next;
+						Bufferlist[pFi->firstBlock].next = block_index;
+					}
+					else {
+
+					}
+				}
+				else if (offset == pFi->Block_Num){								// lastBlock not in the list, i.e. lastBlock withdraw
+					Bufferlist[former_block].next = Bufferlist[block_index].next;	// remove the node inside 
+					Bufferlist[block_index].next = -1;								// linked in later
 				}
 			}
-			else if ( offset == pFi->Block_Num ){								// lastBlock not in the list, i.e. lastBlock withdraw
-				Bufferlist[former_block].next = Bufferlist[block_index].next;	// remove the node inside 
-				Bufferlist[block_index].next = -1;								// linked in later
-			}					
+			return block_index;
 		}
-		return block_index;
 	}
+		
+
+	
 }
 
 /*
@@ -231,8 +239,9 @@ Record* BufferManager::getRecord(const Table *pTable, UUID uuid) 	// Exception t
 		FileInf *file;
 		file = getFile(pTable);
 		
-		int Block_num = static_cast<int>(ceil(uuid / file->recordPerBlock));
+		int Block_num = static_cast<int>(ceil((float)uuid / file->recordPerBlock));
 		int block = getBlock(file, Block_num);
+		//if (block == -1) return NULL;
 		long recordOffset = (int)uuid - (Block_num - 1) * file->recordPerBlock - 1;
 		/*
 		Record *recordHandle, *recnode;
@@ -241,7 +250,7 @@ Record* BufferManager::getRecord(const Table *pTable, UUID uuid) 	// Exception t
 		recnode->next = NULL;
 		recordHandle = new Record[]
 		*/
-		return &Bufferlist[block].recordHandle[recordOffset];		
+		return &(Bufferlist[block].recordHandle[recordOffset]);
 	}
 	
 }
@@ -334,7 +343,7 @@ int BufferManager::deleteRec(const Table *pTable, UUID delete_uuid){
 	if ( delete_uuid != file->recordNum ){							// The record to delete is not the last one
 
 		/* delete */
-		int del_blockNum = static_cast<int>(ceil(delete_uuid / file->recordPerBlock));		// 
+		int del_blockNum = static_cast<int>(ceil((float)delete_uuid / file->recordPerBlock));		// 
 		long del_recordOffset = delete_uuid - file->recordPerBlock * (del_blockNum - 1);
 		long del_byteOffset = file->recordLen * (del_recordOffset - 1);
 		int del_blkIndex = getBlock(file, del_blockNum);				// The block to delete 

@@ -110,7 +110,7 @@ public:
 			}
 		}
 		recordPerBlock = BLOCK_SIZE / recordLen;
-		Block_Num = static_cast<int>(ceil(recordNum / recordPerBlock));
+		Block_Num = static_cast<int>(ceil((float)recordNum / recordPerBlock));
 
 		/* Pointer to Blocks remains unsolved */
 		delete [] fileName; 				
