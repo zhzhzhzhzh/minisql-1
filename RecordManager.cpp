@@ -488,20 +488,17 @@ void RecordManager::InsertIndexNode(uint table, uint attribute, Record *record)
     switch (type) {
         case Int:
             pyEvaluator.InsertIndexNode(table, attribute,
-                                        *(static_cast<int*>(record->data.at(attribute))),
-                                        uuid);
+                                        *(static_cast<int*>(record->data.at(attribute))),uuid);
             break;
             
         case Float:
             pyEvaluator.InsertIndexNode(table, attribute,
-                                        *(static_cast<float*>(record->data.at(attribute))),
-                                        uuid);
+                                        *(static_cast<float*>(record->data.at(attribute))),uuid);
             break;
             
         case String:
             pyEvaluator.InsertIndexNode(table, attribute,
-                                        *(static_cast<string*>(record->data.at(attribute))),
-                                        uuid);
+                                        *(static_cast<string*>(record->data.at(attribute))),uuid);
             break;
             
         default:
@@ -523,20 +520,17 @@ void RecordManager::DeleteIndexNode(uint table, uint attribute, Record *record)
     switch (type) {
         case Int:
             pyEvaluator.DeleteIndexNode(table, attribute,
-                                        *(static_cast<int*>(record->data.at(attribute))),
-                                        uuid);
+                                        *(static_cast<int*>(record->data.at(attribute))),uuid);
             break;
             
         case Float:
             pyEvaluator.DeleteIndexNode(table, attribute,
-                                        *(static_cast<float*>(record->data.at(attribute))),
-                                        uuid);
+                                        *(static_cast<float*>(record->data.at(attribute))),uuid);
             break;
             
         case String:
             pyEvaluator.DeleteIndexNode(table, attribute,
-                                        *(static_cast<string*>(record->data.at(attribute))),
-                                        uuid);
+                                        *(static_cast<string*>(record->data.at(attribute))),uuid);
             break;
             
         default:
