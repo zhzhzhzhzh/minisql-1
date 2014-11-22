@@ -470,15 +470,17 @@ bool BufferManager::removeTable(const Table *pTable){
 			}
 			else return false;
 		} 
-		closeFile(file);
-		char s[20];
+		
+		char *s = new char[40];						// Just in case for security
 		/*
-		#ifdef WIN 
+		#ifdef WIN
 		sprintf(s, "del -s -q %d.table", file->File_id);
-		#endif 
+		#endif
 		*/
-		sprintf(s, "rm -r %d.table", file->File_id);
+		sprintf(s, "del  /Q %d.table", file->File_id);
+		closeFile(file);
 		system(s);
+		delete s;
 
 
 		/*
