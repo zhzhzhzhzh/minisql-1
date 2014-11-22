@@ -326,6 +326,7 @@ int catalogmanager::createTable(Table& tableNameIn)//TODO datalength increment
     }
     return flag;*/
     Table T_temp;
+    T_temp.dbName = dataBaseNameNow;
     T_temp.tableName = tableNameIn.tableName;
     T_temp.attrNumber = tableNameIn.attrNumber;
     T_temp.attributes = tableNameIn.attributes;
