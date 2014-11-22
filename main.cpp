@@ -17,8 +17,7 @@
 
 int main(int argc, const char * argv[])
 {
-
-
+    
     RecordManager recordManager;
     
     // must initialize
@@ -81,7 +80,8 @@ int main(int argc, const char * argv[])
     
     uint T = InsT.tableNum;
     
-#define N 4
+#define N 2000000
+    int t;
     
     // insert record
     // let's do a stress testing
@@ -95,25 +95,26 @@ int main(int argc, const char * argv[])
         InsT.recordNum++;
     }
     
+    cout<<"insert done "<<endl;
+    cin>>t;
     
 
-    
 
-    recordManager.NewQuery();
-    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
-    
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Equal, 10);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Greater, 11);
-    recordManager.PushLogicOp(")");
-    recordManager.PushLogicOp("and");
-    recordManager.PushLogicOp("(");
-    recordManager.PushCondition(T, 1, Less, 11);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 1, Equal, 11);
-    recordManager.PushLogicOp(")");
-    recordManager.SelectRecord();
+//    recordManager.NewQuery();
+//    recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
+//    
+//    recordManager.PushLogicOp("(");
+//    recordManager.PushCondition(T, 1, Equal, 10);
+//    recordManager.PushLogicOp("or");
+//    recordManager.PushCondition(T, 1, Greater, 11);
+//    recordManager.PushLogicOp(")");
+//    recordManager.PushLogicOp("and");
+//    recordManager.PushLogicOp("(");
+//    recordManager.PushCondition(T, 1, Less, 11);
+//    recordManager.PushLogicOp("or");
+//    recordManager.PushCondition(T, 1, Equal, 11);
+//    recordManager.PushLogicOp(")");
+//    recordManager.SelectRecord();
 
     
     
@@ -124,12 +125,18 @@ int main(int argc, const char * argv[])
     recordManager.PushLogicOp("or");
     recordManager.PushCondition(T, 2, Equal, "ying");
     
-    recordManager.SelectRecord();
+    vector<vector<Record*>> results;
+    results = recordManager.SelectRecord();
     
     
+    cout<<"select done, results:"<<endl;
+    for (int i=0; i<results.at(0).size(); i++) {
+        cout<<*((UUID*)results.at(0).at(i)->data.at(0))<<"\t";
+    }
+    cin>>t;
     
     
-    for (int i=0; i<N-3; i++) {
+    for (int i=10000; i<10002; i++) {
         // delete record
         recordManager.NewQuery();
         //recordManager.ChooseTable(T);
@@ -142,15 +149,23 @@ int main(int argc, const char * argv[])
     }
     
     
+    cout<<"delete done "<<endl;
+    cin>>t;
+    
     // select * from T
     recordManager.NewQuery();
     recordManager.ChooseTable(T);
     recordManager.SelectRecord();
     
+    cout<<"select * done, results:"<<endl;
+    for (int i=0; i<results.at(0).size(); i++) {
+        cout<<*((UUID*)results.at(0).at(i)->data.at(0))<<"\t";
+    }
+    cin>>t;
     
     
     // drop a table
-    recordManager.DropTable(&InsT);
+    //recordManager.DropTable(&InsT);
     
     
     // must call when quit
@@ -174,10 +189,11 @@ int main(int argc, const char * argv[])
     
     
     
-    
+#if TEST
     recordManager.root = new Record;
     recordManager.root->next = NULL;
     recordManager.lastRecord = recordManager.root;
+#endif
     
     
     
@@ -252,8 +268,9 @@ int main(int argc, const char * argv[])
     
     
     
-    
+#if TEST
     recordManager.PrintRecord(T);
+#endif
     //recordManager.PrintSingle(recordManager.GetRecord(0, 0));
     
     

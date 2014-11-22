@@ -34,7 +34,7 @@ def OnQuit():
     
 '''
 
-    
+DEBUG = False
 conditionsDirectWithIndex = []
 conditionsDirectWithoutIndex = []
 conditionsIndirectWithIndex = []
@@ -48,7 +48,8 @@ currentTables = []
 
 
 def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table2=-1, attribute2=-1):
-    print 'from eva.py',table1, attribute1, condition, value, withIndex, table2, attribute2
+    if DEBUG:
+        print 'from eva.py',table1, attribute1, condition, value, withIndex, table2, attribute2
     
     if table2<0 and attribute2<0:
         # second operand direct value
@@ -67,25 +68,28 @@ def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table
             conditionsIndirectWithoutIndex.append((table1, attribute1, condition, table2, attribute2))
             conditionsAll.append((table1, attribute1, condition, table2, attribute2))
 
-    
-    print 'from eva.py:PushCondition',conditionsDirectWithIndex
-    print 'from eva.py:PushCondition',conditionsDirectWithoutIndex
-    print 'from eva.py:PushCondition',conditionsIndirectWithIndex
-    print 'from eva.py:PushCondition',conditionsIndirectWithoutIndex
+    if DEBUG:
+        print 'from eva.py:PushCondition',conditionsDirectWithIndex
+        print 'from eva.py:PushCondition',conditionsDirectWithoutIndex
+        print 'from eva.py:PushCondition',conditionsIndirectWithIndex
+        print 'from eva.py:PushCondition',conditionsIndirectWithoutIndex
     return
     
     
 def PushLogicalOperation(operator):
     operator = operator.lower()
-    if operator not in ['(',')','and','or']:
-        print 'from eva.py:PushLogicalOperation',operator,'is not right operator'
+    if DEBUG:
+        if operator not in ['(',')','and','or']:
+            print 'from eva.py:PushLogicalOperation',operator,'is not right operator'
         
     conditionsAll.append(operator.strip())
-    print 'from eva.py:PushLogicalOperation',operator,'pushed'
+    if DEBUG:
+        print 'from eva.py:PushLogicalOperation',operator,'pushed'
         
     
 
 def NewEvaluation():
+    global DEBUG
     global conditionsDirectWithIndex
     global conditionsDirectWithoutIndex
     global conditionsIndirectWithIndex
@@ -98,15 +102,18 @@ def NewEvaluation():
     global currentTables
 
     
+    DEBUG = False
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []
     conditionsIndirectWithIndex = []
     conditionsIndirectWithoutIndex = []
     conditionsAll = []
-    print 'from eva.py','conditions cleared'
+    if DEBUG:
+        print 'from eva.py','conditions cleared'
     currentRecordData = {}
     isDataNew = {}
-    print 'from eva.py','currentRecordData cleared'
+    if DEBUG:
+        print 'from eva.py','currentRecordData cleared'
     results = {}
     finalResults = []
     currentTables = []
@@ -124,6 +131,11 @@ def GetCurrentUUIDTuple():
 
 # for conditionsDirectWithIndex
 def Evaluate(isDone, table, uuid, record): 
+    if DEBUG:
+        print 'from eva.py:Evaluate', 'isDone',isDone
+        print 'from eva.py:Evaluate', 'table',table
+        print 'from eva.py:Evaluate', 'record',record
+
     if table not in currentTables:
         currentTables.append(table)
     
@@ -132,9 +144,7 @@ def Evaluate(isDone, table, uuid, record):
     currentRecordData[table].append(uuid)
     
     
-    print 'from eva.py:Evaluate', 'isDone',isDone
-    print 'from eva.py:Evaluate', 'table',table
-    print 'from eva.py:Evaluate', 'record',record
+
     
     if isDone:
         Equal = 0
@@ -152,8 +162,9 @@ def Evaluate(isDone, table, uuid, record):
                 
             table,attribute,condition,value = expr
             
-            print 'from eva.py:Evaluate table,attribute,condition,value', table,attribute,condition,value
-            print 'from eva.py:Evaluate',currentRecordData[table][attribute], 'compares to', value
+            if DEBUG:
+                print 'from eva.py:Evaluate table,attribute,condition,value', table,attribute,condition,value
+                print 'from eva.py:Evaluate',currentRecordData[table][attribute], 'compares to', value
             
             # TODO decide from where to fetch data
             if condition == Equal:
@@ -175,8 +186,8 @@ def Evaluate(isDone, table, uuid, record):
                 if currentRecordData[table][attribute] != value:
                     results[expr].append(GetCurrentUUIDTuple())
       
-        
-        print 'from eva.py:Evaluate', 'results', results
+        if DEBUG:
+            print 'from eva.py:Evaluate', 'results', results
         return True
         
     
@@ -224,12 +235,11 @@ def LogicalEvaluation():
     
     
     
-
-    print 'from eva.py:LogicalEvaluation: expr ',expr
+    if DEBUG:
+        print 'from eva.py:LogicalEvaluation: expr ',expr
     stack = []
     priorityHighestNow = 0
     for op in expr:
-        print 'op',op
         
         if op == ')':
             res = EvaluateExpr([stack.pop() for i in range(3)])
@@ -265,16 +275,19 @@ def LogicalEvaluation():
                     
                     # if more priority levels, need to loop
                     stack.append(op)
-        print 'stack now',stack
+        if DEBUG:
+            print 'stack now',stack
         
     if len(stack)>1:
         res = EvaluateExpr([stack.pop() for i in range(3)])
         stack.append(res)
     
-    print 'stack final ',stack    
+    if DEBUG:
+        print 'stack final ',stack    
     finalResults = list(stack[0])
     
-    print 'from eva.py:LogicalEvaluation', 'finalResults', finalResults
+    if DEBUG:
+        print 'from eva.py:LogicalEvaluation', 'finalResults', finalResults
 
 
 def GetEvaluationResults(isFirstTime):
@@ -290,7 +303,8 @@ def GetEvaluationResults(isFirstTime):
             res.append(-1)
         res = tuple(res)
     
-    print 'from eva.py:GetEvaluationResults return', res
+    if DEBUG:
+        print 'from eva.py:GetEvaluationResults return', res
     return res
 
     

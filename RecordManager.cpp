@@ -36,6 +36,7 @@ void RecordManager::NewQuery(void)
     isWhereUsed = false;
 
     conditions.clear();
+    isWhereUsed = false;
     pyEvaluator.NewEvaluation();
 
     
@@ -55,7 +56,7 @@ void RecordManager::LoadTable(struct Table* tableStruct){
     vector<bool> isIndexBuilt;
     for (int i=0; i<tableStruct->attributes.size(); i++) {
         dataType.push_back(tableStruct->attributes.at(i).dataType);
-        // TODO agree on there is no index
+        // TODO agree on there is no index how to denote
         isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "");
     }
     
@@ -170,14 +171,18 @@ void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condi
     isWhereUsed = true;
     
     // TODO getBlockCount
-    if(getBlockCount(table_1)<getBlockCount(table_2)){
-        pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
-                                  isTableAttributeIndexBuilt[table_2]->at(attribute_2));
-    }
-    else{
-        pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
-                                  isTableAttributeIndexBuilt[table_1]->at(attribute_1));
-    }
+    pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
+                              isTableAttributeIndexBuilt[table_1]->at(attribute_1));
+    
+    
+//    if(getBlockCount(table_1)<getBlockCount(table_2)){
+//        pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
+//                                  isTableAttributeIndexBuilt[table_2]->at(attribute_2));
+//    }
+//    else{
+//        pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
+//                                  isTableAttributeIndexBuilt[table_1]->at(attribute_1));
+//    }
     
     return;
 }

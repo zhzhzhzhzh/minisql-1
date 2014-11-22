@@ -20,12 +20,13 @@
 #define MAX_TABLE_NUMBER 32
 
 
-#define DEBUG 1
-#define Debug(MESSAGE) {if(DEBUG){cout<<MESSAGE<<endl;}}
-#define DebugS(MESSAGE) {if(DEBUG){cout<<MESSAGE;}}
+#define DEBUGG 0
+#define Debug(MESSAGE) {if(DEBUGG){cout<<MESSAGE<<endl;}}
+#define DebugS(MESSAGE) {if(DEBUGG){cout<<MESSAGE;}}
 
 
-#define TEST 1
+#define TEST 0
+
 
 
 #define WIN 1
