@@ -994,6 +994,16 @@ cout << tempint << endl;
 			}
 		}
 	}
+	else if (strcmp(word.c_str(), "execfile") == 0)
+	{
+
+		flag = GetWord(temp, word);
+		if (!flag)
+			return;
+		fileName = word;
+		state = EXECFILE;
+cout << fileName << endl;
+	}
 }
 
 

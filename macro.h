@@ -54,6 +54,7 @@
 #define DELETE_WHERE_CAULSE  39
 #define DROPDBERR 40
 #define INSERT_VALUES_TYPERR 41
+#define EXECFILE 42
 
 #define SELECT		0
 #define CRETAB		1

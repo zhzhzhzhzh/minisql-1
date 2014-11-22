@@ -337,8 +337,9 @@ void execute(void)
 									  cout << "Some of the values are not correct" << endl;
 									  break;
 		}
-
-		}
+		default: break;
+	}
+		
 }
 
 void AddSeperator(char *command)
@@ -380,12 +381,25 @@ int main()
 	char input[INPUTLEN] = "";
 	char word[WORDLEN] = "";
 	short int ComEnd = 0;
+	char temp[256];
 
 	while (1)
 	{
 		strcpy_s(command, "");//command清零
 		ComEnd = 0;
 		cout << "miniSQL>>";
+		if ((query.state == EXECFILE) && (query.fileName != ""))
+		{
+			fstream in;
+			in.open(query.fileName.c_str(), ios::in);
+			while (!in.eof())
+			{
+				in.getline(temp, 256, '\n');
+				strcat(input, " ");
+				strcat(input, temp);
+			}
+			in.close();
+		}
 		while (!ComEnd)
 		{
 
@@ -393,8 +407,9 @@ int main()
 			if (IsComEnd(input))
 				ComEnd = 1;
 			strcat(command, input);//保存分号结束之前的命令，不含分号
-			AddSeperator(command);//在command命令的字符串加一个空格在字符串结尾，并在空格后补上'\0'
+			AddSeperator(command); //在command命令的字符串加一个空格在字符串结尾，并在空格后补上'\0'
 		}
+cout << command << endl;
 		query.Parse(command);
 		execute();
 	}

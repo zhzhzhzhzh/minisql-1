@@ -43,14 +43,14 @@ int catalogmanager::createDatabase(string dataBaseName)
     if(flag == 0)
     {
         #if WIN
-        string a = "mkdir ";
-        string cmd = a  + dataBaseName;
+        string a = "mkdir /Q";
+        string cmd = a + dataBaseName;
         system(cmd.c_str());
         #endif
 
         #if MACOS
         string a = "mkdir ";
-        string cmd = a  + dataBaseName;
+        string cmd = a + dataBaseName;
         system(cmd.c_str());
         #endif
 
@@ -182,6 +182,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
                 fout << totalTableNum << endl;
                 for(int i = 0; i < totalTableNum; i++)
                 {
+                    fout << tableV[i].dbName << endl;
                     fout << tableV[i].tableName << endl;
                     fout << tableV[i].attrNumber << endl;
                     fout << tableV[i].recordNum << endl;
@@ -201,8 +202,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
             {
                 flag = 1;
             }
-            string pathOld = "cd ..";
-            system(pathOld.c_str());
+            //string pathOld = "cd ..";
+            //system(pathOld.c_str());
         }
         //read the information of the new database
 
@@ -215,6 +216,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
             for(int i = 0; i < totalTableNum; i++)
             {
                 Table tmp_table;
+                fin >> tmp_table.dbName;
                 fin >> tmp_table.tableName;
                 fin >> tmp_table.attrNumber;
                 fin >> tmp_table.recordNum;
@@ -241,8 +243,8 @@ int catalogmanager::useDataBase(string newDataBaseName)
             flag = 1;
         }
     }
-    string  pathNew = "cd " + dataBaseNameNow;
-    system(pathNew.c_str());
+    //string  pathNew = "cd " + dataBaseNameNow;
+    //system(pathNew.c_str());
     Debug("use some dataBase successfully");
 return flag;
 }
@@ -279,6 +281,7 @@ int catalogmanager::quit()
         fout << totalTableNum << endl;
         for(int i = 0; i < totalTableNum; i++)
         {
+            fout << tableV[i].dbName << endl;
             fout << tableV[i].tableName << endl;
             fout << tableV[i].attrNumber << endl;
             fout << tableV[i].recordNum << endl;
@@ -298,8 +301,8 @@ int catalogmanager::quit()
     {
         flag = 1;
     }
-    string path = "cd ..";
-    system(path.c_str());
+    //string path = "cd ..";
+    //system(path.c_str());
     Debug("quit the database successfully!!");
     return flag;
 }

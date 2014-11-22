@@ -38,6 +38,7 @@ public:
 	string IndexName;		               //要操作的索引名
 	string ColName;                        //存储要搜索的列名
 	string db_name;                        //要操作的数据库名
+	string fileName;                       //要执行的文件名
 	vector<Attribute> column;
 	vector<Condition> condition;		   //要比较的where字句的链表
 	Row row;		                       //要插入的值链表
@@ -53,6 +54,7 @@ public:
 		IndexName = "";
 		ColName = "";
 		db_name = "";
+		fileName = "";
 	}
 	~Interpret(){}
 
