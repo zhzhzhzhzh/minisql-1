@@ -174,7 +174,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
         else
         {
             //load the information of the old database
-            string FileName = ".\\"  + dataBaseNameNow + "Info" + ".txt";
+            string FileName = ".\\"  + dataBaseNameNow + "\\" + dataBaseNameNow + "Info" + ".txt";
             fstream fout;
             fout.open(FileName.c_str(), fstream::out);
             if(fout.fail() != true)
