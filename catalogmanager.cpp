@@ -43,7 +43,7 @@ int catalogmanager::createDatabase(string dataBaseName)
     if(flag == 0)
     {
         #if WIN
-        string a = "mkdir /Q";
+        string a = "mkdir ";
         string cmd = a + dataBaseName;
         system(cmd.c_str());
         #endif
@@ -174,7 +174,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
         else
         {
             //load the information of the old database
-            string FileName = ".\\"  + dataBaseNameNow + "Info" + ".txt";
+            string FileName = ".\\"  + dataBaseNameNow + "\\" + dataBaseNameNow + "Info" + ".txt";
             fstream fout;
             fout.open(FileName.c_str(), fstream::out);
             if(fout.fail() != true)
@@ -272,7 +272,7 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
 int catalogmanager::quit()
 {
     int flag = 0;
-    string FileName = ".\\" + dataBaseNameNow + "Info.txt";
+    string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info.txt";
     fstream fout;
     fout.open(FileName.c_str(), fstream::out);
     if(fout.fail() != true)
@@ -323,6 +323,7 @@ int catalogmanager::createTable(Table& tableNameIn)//TODO datalength increment
     }
     return flag;*/
     Table T_temp;
+    T_temp.dbName = dataBaseNameNow;
     T_temp.tableName = tableNameIn.tableName;
     T_temp.attrNumber = tableNameIn.attrNumber;
     T_temp.attributes = tableNameIn.attributes;
