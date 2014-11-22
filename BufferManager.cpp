@@ -308,6 +308,8 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 				break;
 			}
 			case String: {
+				//int strLen = strlen(static_cast<string *>(rec->data.at(i))->c_str()) + 1;
+				memset(&Bufferlist[file->lastBlock].token[byteOffset], EMPTY, pTable->attributes.at(i).dataLength);
 				//memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen((char *)rec->data.at(i)) + 1);
 				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen(static_cast<string *>(rec->data.at(i))->c_str()) + 1);
 				/* 
@@ -315,7 +317,13 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 				 If you know anything about it. Please inform me ASAP. 
 				 Coder skar<dtsps.skar@gmail.com>
 				*/
-				byteOffset += strlen(static_cast<string *>(rec->data.at(i))->c_str()) + 1;
+				 /*
+				if ( strLen < pTable->attributes.at(i).dataLength ){
+					memset(&Bufferlist[file->lastBlock].token[byteOffset + strLen], EMPTY, pTable->attributes.at(i).dataLength - strLen);
+				}
+				*/
+				//byteOffset += strlen(static_cast<string *>(rec->data.at(i))->c_str()) + 1;
+				byteOffset += pTable->attributes.at(i).dataLength;
 				delete static_cast<string *>(rec->data.at(i));
 				break;
 			}
@@ -399,7 +407,7 @@ int BufferManager::deleteRec(const Table *pTable, UUID delete_uuid){
 	 	pTable is maintained by the CatalogManager 
 	 */ 
 	file->recordNum--;
-	return pTable->recordNum;
+	return file->recordNum + 1;
 }
 
 /*
@@ -475,7 +483,7 @@ bool BufferManager::removeTable(const Table *pTable){
 		#endif
 		*/
 		#if WIN
-		sprintf(s, "del /Q ./%s/%d.table", pTable->dbName.c_str(), file->File_id);
+		sprintf(s, "del  .\\%s\\%d.table", pTable->dbName.c_str(), file->File_id);
 		#endif
 		#if MACOS
 		sprintf(s, "rm -r ./%s/%d.table", pTable->dbName.c_str(), file->File_id);

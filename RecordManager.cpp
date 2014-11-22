@@ -61,9 +61,9 @@ void RecordManager::LoadTable(const struct Table* tableStruct){
         dataType.push_back(tableStruct->attributes.at(i).dataType);
         isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "null");
         
-        if (i!=0 && isIndexBuilt.at(i) == true) {
-            pyEvaluator.LoadIndex(tableStruct->tableNum, i);
-        }
+//        if (i!=0 && isIndexBuilt.at(i) == true) {
+//            pyEvaluator.LoadIndex(tableStruct->tableNum, i);
+//        }
     }
     
     SetTableDescriptions(tableStruct->tableNum, dataType, isIndexBuilt);
@@ -335,7 +335,7 @@ vector<vector<Record*>> RecordManager::SelectRecord()
 }
 
 
-unsigned long RecordManager::DeleteRecord(uint table)
+int RecordManager::DeleteRecord(uint table)
 {
     if(currentTablesCount == 0)
         ChooseTable(table);
@@ -350,7 +350,7 @@ unsigned long RecordManager::DeleteRecord(uint table)
                 CreateIndex(table, i);
             }
         }
-        return 0;
+        return -1;
     }
     
     
@@ -366,12 +366,12 @@ unsigned long RecordManager::DeleteRecord(uint table)
     for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); it++) {
         Debug("try to delete uuid: "<<*it);
         
-        tmp = bufferManager.getRecord(tableStructs[table], *it);
-        for (int i=1; i<tableStructs[table]->attributes.size(); i++) {
-            if (isTableAttributeIndexBuilt[table]->at(i) == true) {
-                InsertIndexNode(table, i, tmp);
-            }
-        }
+//        tmp = bufferManager.getRecord(tableStructs[table], *it);
+//        for (int i=1; i<tableStructs[table]->attributes.size(); i++) {
+//            if (isTableAttributeIndexBuilt[table]->at(i) == true) {
+//                InsertIndexNode(table, i, tmp);
+//            }
+//        }
         
         // TODO check if delete successfully and delete the new record here
         bufferManager.deleteRec(tableStructs[table], *it);
@@ -379,7 +379,7 @@ unsigned long RecordManager::DeleteRecord(uint table)
         Debug("uuid: "<<*it<<" deleted");
     }
     
-    return toDelete.at(i).size();
+    return (int)toDelete.at(i).size();
 }
 
 

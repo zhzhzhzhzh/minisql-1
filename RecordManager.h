@@ -112,7 +112,7 @@ public:
     
     void InsertRecord(uint table);
     vector<vector<Record*>> SelectRecord();
-    unsigned long DeleteRecord(uint table);
+    int DeleteRecord(uint table);
     
     void OnQuit(){
         bufferManager.quitDB();
