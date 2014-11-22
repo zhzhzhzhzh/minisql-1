@@ -37,15 +37,18 @@ int main(int argc, const char * argv[])
     
 	a.attrName = "att1";
 	a.dataType = Int;
+    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
 	a.attrName = "att2";
 	a.dataType = Int;
+    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
 	a.attrName = "att3";
 	a.dataType = String;
 	a.dataLength = 5;
+    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
 	InsT.tableName = "table_test";
@@ -80,7 +83,7 @@ int main(int argc, const char * argv[])
     
     uint T = InsT.tableNum;
     
-#define N 2000000
+#define N 4
     int t;
     
     // insert record
@@ -121,9 +124,9 @@ int main(int argc, const char * argv[])
     recordManager.NewQuery();
     recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
     
-    recordManager.PushCondition(T, 0, Equal, 25);
+    recordManager.PushCondition(T, 1, Equal, 2);
     recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 2, Equal, "ying");
+    recordManager.PushCondition(T, 3, Equal, "ying");
     
     vector<vector<Record*>> results;
     results = recordManager.SelectRecord();
@@ -157,11 +160,11 @@ int main(int argc, const char * argv[])
     recordManager.ChooseTable(T);
     results = recordManager.SelectRecord();
     
-    cout<<"select * done, results:"<<endl;
-    for (int i=0; i<results.at(0).size(); i++) {
-        cout<<*((UUID*)results.at(0).at(i)->data.at(0))<<"\t";
-    }
-    cin>>t;
+//    cout<<"select * done, results:"<<endl;
+//    for (int i=0; i<results.at(0).size(); i++) {
+//        cout<<*((UUID*)results.at(0).at(i)->data.at(0))<<"\t";
+//    }
+//    cin>>t;
     
     
     // drop a table

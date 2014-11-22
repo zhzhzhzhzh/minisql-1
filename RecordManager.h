@@ -24,38 +24,38 @@ using namespace std;
 
 
 
-struct FetchedValue{
-    uint table;
-    uint attribute;
-};
+//struct FetchedValue{
+//    uint table;
+//    uint attribute;
+//};
+//
+//
+//
+//enum ValueType{
+//    FetchValue = 0,
+//    IntValue = 1,
+//    FloatValue = 2,
+//    StringValue = 3
+//};
 
 
-
-enum ValueType{
-    FetchValue = 0,
-    IntValue = 1,
-    FloatValue = 2,
-    StringValue = 3
-};
-
-
-
-union Operand{
-    int intv;
-    float floatv;
-    //string stringv;
-    FetchedValue fetchv;
-};
-
-struct ConditionExpr{
-    //ValueType value1Type;
-    Operand v1;
-    //void* value1;
-    Operator condition;
-    ValueType value2Type;
-    void* value2;
-    
-};
+//
+//union Operand{
+//    int intv;
+//    float floatv;
+//    //string stringv;
+//    FetchedValue fetchv;
+//};
+//
+//struct ConditionExpr{
+//    //ValueType value1Type;
+//    Operand v1;
+//    //void* value1;
+//    Operator condition;
+//    ValueType value2Type;
+//    void* value2;
+//    
+//};
 
 
     
@@ -150,7 +150,7 @@ public:
 
     }
     
-    void PrintSingle(Table*t, Record* r)
+    void PrintSingle(const Table*t, Record* r)
     {
         for(int i=0;i<r->data.size();i++){
             DataType type = tableRecordDataTypes[t->tableNum]->at(i);

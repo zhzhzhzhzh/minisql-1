@@ -60,7 +60,7 @@ void RecordManager::LoadTable(const struct Table* tableStruct){
     for (int i=0; i<tableStruct->attributes.size(); i++) {
         dataType.push_back(tableStruct->attributes.at(i).dataType);
         // TODO agree on there is no index how to denote
-        isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "");
+        isIndexBuilt.push_back(tableStruct->attributes.at(i).indexName != "null");
     }
     
     SetTableDescriptions(tableStruct->tableNum, dataType, isIndexBuilt);
@@ -135,11 +135,14 @@ void RecordManager::AddCurrentTable(uint table)
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, int value)
 {
-
+    if (attribute==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
     //AddCurrentTable(table);
     isWhereUsed = true;
     
-    pyEvaluator.PushCondition(table, attribute, condition, value,
+    pyEvaluator.PushCondition(table, attribute-1, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
 
     return;
@@ -147,10 +150,14 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, float value)
 {
+    if (attribute==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
     //AddCurrentTable(table);
     isWhereUsed = true;
     
-    pyEvaluator.PushCondition(table, attribute, condition, value,
+    pyEvaluator.PushCondition(table, attribute-1, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
 
     return;
@@ -158,10 +165,14 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table, uint attribute, Operator condition, string value)
 {
+    if (attribute==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
     //AddCurrentTable(table);
     isWhereUsed = true;
 
-    pyEvaluator.PushCondition(table, attribute, condition, value,
+    pyEvaluator.PushCondition(table, attribute-1, condition, value,
                               isTableAttributeIndexBuilt[table]->at(attribute));
 
     return;
@@ -169,23 +180,29 @@ void RecordManager::PushCondition(uint table, uint attribute, Operator condition
 
 void RecordManager::PushCondition(uint table_1, uint attribute_1, Operator condition, uint table_2, uint attribute_2)
 {
+    if (attribute_1==0 || attribute_2==0) {
+        Debug("UUID is used to evaluate");
+        return;
+    }
     //AddCurrentTable(table_1);
     //AddCurrentTable(table_2);
     isWhereUsed = true;
     
     // TODO getBlockCount
-    pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
+    pyEvaluator.PushCondition(table_1, attribute_1-1, condition, table_2, attribute_2-1,
                               isTableAttributeIndexBuilt[table_1]->at(attribute_1));
     
-    
-//    if(getBlockCount(table_1)<getBlockCount(table_2)){
-//        pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
-//                                  isTableAttributeIndexBuilt[table_2]->at(attribute_2));
-//    }
-//    else{
-//        pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
-//                                  isTableAttributeIndexBuilt[table_1]->at(attribute_1));
-//    }
+    // TODO here optimization can be done
+    /*
+    if(getBlockCount(table_1)<getBlockCount(table_2)){
+        pyEvaluator.PushCondition(table_2, attribute_2, condition, table_1, attribute_1,
+                                  isTableAttributeIndexBuilt[table_2]->at(attribute_2));
+    }
+    else{
+        pyEvaluator.PushCondition(table_1, attribute_1, condition, table_2, attribute_2,
+                                  isTableAttributeIndexBuilt[table_1]->at(attribute_1));
+    }
+     */
     
     return;
 }

@@ -34,7 +34,7 @@ def OnQuit():
     
 '''
 
-DEBUG = False
+DEBUG = True
 conditionsDirectWithIndex = []
 conditionsDirectWithoutIndex = []
 conditionsIndirectWithIndex = []
@@ -102,7 +102,7 @@ def NewEvaluation():
     global currentTables
 
     
-    DEBUG = False
+    DEBUG = True
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []
     conditionsIndirectWithIndex = []
@@ -131,6 +131,8 @@ def GetCurrentUUIDTuple():
 
 # for conditionsDirectWithIndex
 def Evaluate(isDone, table, uuid, record): 
+    global DEBUG
+    
     if DEBUG:
         print 'from eva.py:Evaluate', 'isDone',isDone
         print 'from eva.py:Evaluate', 'table',table

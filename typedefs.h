@@ -20,17 +20,20 @@
 #define MAX_TABLE_NUMBER 32
 
 
-#define DEBUGG 0
+#define DEBUGG 1
 #define Debug(MESSAGE) {if(DEBUGG){cout<<MESSAGE<<endl;}}
 #define DebugS(MESSAGE) {if(DEBUGG){cout<<MESSAGE;}}
 
 
-#define TEST 0
+#define TEST 1
 
 
 
 #define WIN 1
 #define MACOS 0
+
+
+#define SETPYTHONPATH "import sys\nsys.path.append('/Users/ying/Documents/DEV/record-index-manager/record-index-manager')"
 
 
 using namespace std;
