@@ -308,7 +308,13 @@ bool BufferManager::insertRec(const Table *pTable, Record* rec){
 				break;
 			}
 			case String: {
-				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen((char *)rec->data.at(i)) + 1);
+				//memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen((char *)rec->data.at(i)) + 1);
+				memcpy(&Bufferlist[file->lastBlock].token[byteOffset], static_cast<string *>(rec->data.at(i))->c_str(), strlen(static_cast<string *>(rec->data.at(i))) + 1);
+				/* 
+				 Dear maintainer I donot understand why the upper line works well, but I comment it. 
+				 If you know anything about it. Please inform me ASAP. 
+				 Coder skar<dtsps.skar@gmail.com>
+				*/
 				byteOffset += strlen(static_cast<string *>(rec->data.at(i))->c_str());
 				delete static_cast<string *>(rec->data.at(i));
 				break;
