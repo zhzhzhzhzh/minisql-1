@@ -2,39 +2,20 @@
 
 import sys
 import os
+import BPlusTree as BPT
+import random
 
-indicies = {} # (T,A):root
 
-'''
-def BuildIndex(table, attribute):
-    pass
-    indices[(table, attribute)] = BPlusTree(table, attribute)
-    
-    IndexManager.IndexInsertNode(table, attribute)
+class Index():
+    def __init__(self):
+        self.indices = {} # (T,A):root
+        
+  
     
 
-    
-def DeleteIndex(table, attribute):
-    indices[(table, attribute)].DeleteAll()
-    indices.pop((table, attribute))
-    pass
-    
-# need to modify the last uuid
-def DeleteIndexNode(table, attribute, uuid, key):
-    pass
-    
-def InsertIndexNode(table, attribute, uuid, key):
-    pass
-    
-    
-def OnQuit():
-    indices[(table, attribute)].WriteToFile()
-    pass
-    
-    
-'''
 
 DEBUG = True
+indices = {} # (T,A):root
 conditionsDirectWithIndex = []
 conditionsDirectWithoutIndex = []
 conditionsIndirectWithIndex = []
@@ -90,6 +71,7 @@ def PushLogicalOperation(operator):
 
 def NewEvaluation():
     global DEBUG
+    global indices
     global conditionsDirectWithIndex
     global conditionsDirectWithoutIndex
     global conditionsIndirectWithIndex
@@ -103,6 +85,7 @@ def NewEvaluation():
 
     
     DEBUG = True
+    indices = {}
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []
     conditionsIndirectWithIndex = []
@@ -312,15 +295,104 @@ def GetEvaluationResults(isFirstTime):
     
     
     
+def LoadIndex(table, attribute):
+    indices[(table, attribute)] = ReadFromFile(table, attribute)
 
-    
-    
-    
-if __name__ == '__main__': 
+def CreateIndex(table, attribute):
+    if (table, attribute) not in indices.keys():
+        indices[(table, attribute)] = BPT.BPlusTree(table, attribute)
+
+def DropIndex(table, attribute):
+    #indices[(table, attribute)].DeleteAll()
+    #indices.pop((table, attribute))
+    pass
         
 
-    pass  
+def InsertIndexNode(table, attribute, key, uuid):
+    indices[(table, attribute)].Insert(key, uuid)
+
+
+# need to modify the last uuid
+def DeleteIndexNode(table, attribute, key, uuid):
+    pass
+
+
+def Search(table, attribute, condition, value):
+    return indices[(table, attribute)].Search(condition, value)
+
+
+def PrintTree(table, attribute):
+    indices[(table, attribute)].PrintTree()
+
+
+# serves as quit for this module
+def OnQuit():
+    for k in indicies.keys:
+        table, attribute = k
+        indices[k].WriteToFile()
+
     
+    
+''''    
+if __name__ == '__main__': 
+    index = Index()
+    
+    table = 0
+    attribute = 1
+    index.BuildIndex(table,attribute)
+    for i in range(10):
+        ii = random.randint(0,100)
+        index.InsertIndexNode(table, attribute, ii, ii)
+        index.PrintTree(table, attribute)
+        print '\n'
+        
+        
+    raw_input()
+        
+    table = 1
+    attribute = 1
+    index.BuildIndex(table,attribute)
+    for i in range(10):
+        ii = random.randint(0,100)
+        index.InsertIndexNode(table, attribute, ii, ii)
+        index.PrintTree(table, attribute)
+        print '\n'
+        
+        
+        
+    #def Search(self, condition, value):
+    Equal = 0
+    Less = 1
+    Greater = 2
+    #LessEqual = 3
+    #GreaterEqual = 4
+    NotEqual = 5
+             
+    
+    raw_input()
+    
+    table = 0
+    attribute = 1
+    res = index.Search(table, attribute, Less, 12)
+    print res
+    res = index.Search(table, attribute, Equal, 20)
+    print res
+    res = index.Search(table, attribute, Greater, 35)
+    print res
+    
+    raw_input()
+    
+    table = 1
+    attribute = 1
+    res = index.Search(table, attribute, Less, 12)
+    print res
+    res = index.Search(table, attribute, Equal, 20)
+    print res
+    res = index.Search(table, attribute, Greater, 35)
+    print res
+    
+
+'''    
     
     
     

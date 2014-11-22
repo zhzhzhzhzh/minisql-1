@@ -17,13 +17,22 @@ PyEvaluator::PyEvaluator()
 
     pModule = PyImport_ImportModule("Evaluator");
     
+    pFuncOnQuit = PyObject_GetAttrString(pModule, "OnQuit");
+
     pFuncPushCondition = PyObject_GetAttrString(pModule, "PushCondition");
     pFuncPushLogicalOperation = PyObject_GetAttrString(pModule, "PushLogicalOperation");
     pFuncNewEvaluation = PyObject_GetAttrString(pModule, "NewEvaluation");
     pFuncEvaluate = PyObject_GetAttrString(pModule, "Evaluate");
     pFuncGetEvaluationResults = PyObject_GetAttrString(pModule, "GetEvaluationResults");
-
+    
+    pFuncLoadIndex = PyObject_GetAttrString(pModule, "LoadIndex");
+    pFuncCreateIndex = PyObject_GetAttrString(pModule, "CreateIndex");
+    pFuncDropIndex = PyObject_GetAttrString(pModule, "DropIndex");
+    pFuncInsertIndexNode = PyObject_GetAttrString(pModule, "InsertIndexNode");
+    pFuncDeleteIndexNode = PyObject_GetAttrString(pModule, "DeleteIndexNode");
+    
 }
+
 
 
 void PyEvaluator::NewEvaluation()
@@ -204,4 +213,89 @@ vector<set<UUID>> PyEvaluator::GetResult(int currentTablesCount)
 
     return results;
 }
+
+
+
+
+
+// def LoadIndex(table, attribute):
+void PyEvaluator::LoadIndex(uint table, uint attribute)
+{
+    PyObject* pArgs = Py_BuildValue("ii", table, attribute);
+    PyEval_CallObject(pFuncLoadIndex,pArgs);
+    
+    return;
+}
+
+// def CreateIndex(table, attribute):
+void PyEvaluator::CreateIndex(uint table, uint attribute)
+{
+    PyObject* pArgs = Py_BuildValue("ii", table, attribute);
+    PyEval_CallObject(pFuncCreateIndex,pArgs);
+    
+    return;
+}
+
+// def DropIndex(table, attribute):
+void PyEvaluator::DropIndex(uint table, uint attribute)
+{
+    PyObject* pArgs = Py_BuildValue("ii", table, attribute);
+    PyEval_CallObject(pFuncDropIndex,pArgs);
+    
+    return;
+}
+
+// def InsertIndexNode(table, attribute, key, uuid):
+void PyEvaluator::InsertIndexNode(uint table, uint attribute, int key, UUID uuid)
+{
+    PyObject* pArgs = Py_BuildValue("iiii", table, attribute, key, uuid);
+    PyEval_CallObject(pFuncInsertIndexNode,pArgs);
+    
+    return;
+}
+
+void PyEvaluator::InsertIndexNode(uint table, uint attribute, float key, UUID uuid)
+{
+    PyObject* pArgs = Py_BuildValue("iifi", table, attribute, key, uuid);
+    PyEval_CallObject(pFuncInsertIndexNode,pArgs);
+    
+    return;
+}
+
+void PyEvaluator::InsertIndexNode(uint table, uint attribute, string key, UUID uuid)
+{
+    PyObject* pArgs = Py_BuildValue("iisi", table, attribute, key.c_str(), uuid);
+    PyEval_CallObject(pFuncInsertIndexNode,pArgs);
+    
+    return;
+}
+
+
+// def DeleteIndexNode(table, attribute, uuid, key):
+void PyEvaluator::DeleteIndexNode(uint table, uint attribute, int key, UUID uuid)
+{
+    PyObject* pArgs = Py_BuildValue("iiii", table, attribute, key, uuid);
+    PyEval_CallObject(pFuncDeleteIndexNode,pArgs);
+    
+    return;
+}
+
+void PyEvaluator::DeleteIndexNode(uint table, uint attribute, float key, UUID uuid)
+{
+    PyObject* pArgs = Py_BuildValue("iifi", table, attribute, key, uuid);
+    PyEval_CallObject(pFuncDeleteIndexNode,pArgs);
+    
+    return;
+}
+
+void PyEvaluator::DeleteIndexNode(uint table, uint attribute, string key, UUID uuid)
+{
+    PyObject* pArgs = Py_BuildValue("iisi", table, attribute, key.c_str(), uuid);
+    PyEval_CallObject(pFuncDeleteIndexNode,pArgs);
+    
+    return;
+}
+
+
+
 
