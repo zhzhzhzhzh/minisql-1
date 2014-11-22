@@ -344,12 +344,12 @@ int RecordManager::DeleteRecord(uint table)
     if(isWhereUsed == false){
         bufferManager.deleteAll(tableStructs[table]);
         
-        for (int i=1; i<tableStructs[table]->attributes.size(); i++){
-            if (isTableAttributeIndexBuilt[table]->at(i)) {
-                DropIndex(table, i);
-                CreateIndex(table, i);
-            }
-        }
+//        for (int i=1; i<tableStructs[table]->attributes.size(); i++){
+//            if (isTableAttributeIndexBuilt[table]->at(i)) {
+//                DropIndex(table, i);
+//                CreateIndex(table, i);
+//            }
+//        }
         return -1;
     }
     
