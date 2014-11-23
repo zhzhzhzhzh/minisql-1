@@ -294,6 +294,7 @@ void execute(void)
 
 					}
 					Mrecord.DeleteRecord(TableIndex);
+					Mcatalog.deleteRecord(TableIndex);
 					break;
 									
 		}
