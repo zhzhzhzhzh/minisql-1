@@ -4,14 +4,11 @@ import sys
 import os
 import BPlusTree as BPT
 import random
-
-
-class Index():
-    def __init__(self):
-        self.indices = {} # (T,A):root
-        
+import types
+import math
   
-    
+
+
 
 
 DEBUG = True
@@ -26,6 +23,48 @@ isDataNew = {}
 results = {}
 finalResults = []
 currentTables = []
+
+
+
+
+def LoadIndex(table, attribute):
+    indices[(table, attribute)] = ReadFromFile(table, attribute)
+
+def CreateIndex(table, attribute):
+    if (table, attribute) not in indices.keys():
+        indices[(table, attribute)] = BPT.BPlusTree(table, attribute)
+    if DEBUG:
+        print 'index created for',table,attribute, 'now keys',indices.keys()
+
+def DropIndex(table, attribute):
+    #indices[(table, attribute)].DeleteAll()
+    #indices.pop((table, attribute))
+    pass
+        
+
+def InsertIndexNode(table, attribute, key, uuid):
+    indices[(table, attribute)].Insert(key, uuid)
+    if DEBUG:
+        PrintTree(table, attribute)
+
+
+# need to modify the last uuid
+def DeleteIndexNode(table, attribute, key, uuid):
+    pass
+
+
+def Search(table, attribute, condition, value):
+    if DEBUG:
+        print 'search for', table, attribute
+        print 'in search, now keys', indices.keys()
+    return indices[(table, attribute)].Search(condition, value)
+
+
+def PrintTree(table, attribute):
+    indices[(table, attribute)].PrintTree()
+
+
+
 
 
 def PushCondition(table1, attribute1, condition, value=0, withIndex=False, table2=-1, attribute2=-1):
@@ -84,8 +123,9 @@ def NewEvaluation():
     global currentTables
 
     
-    DEBUG = True
-    indices = {}
+    DEBUG = False
+    if len(indices)<=0:
+        indices = {}
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []
     conditionsIndirectWithIndex = []
@@ -140,6 +180,30 @@ def Evaluate(isDone, table, uuid, record):
         NotEqual = 5
         
         
+        for expr in conditionsDirectWithIndex:
+            if expr not in results.keys():
+                results[expr] = []
+            
+            table,attribute,condition,value = expr
+            
+            
+            res = Search(table, attribute, condition,value)
+            for uuid in res:
+                results[expr].append((uuid,))
+
+            
+            if condition == LessEqual or condition == GreaterEqual:
+                res = Search(table,attribute, Equal,value)
+                for uuid in res:
+                    results[expr].append((uuid,))
+                 
+            conditionsDirectWithIndex.pop(conditionsDirectWithIndex.index(expr))  
+            
+            if DEBUG:
+                print 'from eva.py:Evaluate indexed search for',expr,'result:',results[expr]
+                    
+                    
+            
         # format: [table1, attribute1, condition, value]
         for expr in conditionsDirectWithoutIndex:
             if expr not in results.keys():
@@ -294,43 +358,7 @@ def GetEvaluationResults(isFirstTime):
 
     
     
-
-def PrintTree(table, attribute):
-    indices[(table, attribute)].PrintTree()
     
-    
-def LoadIndex(table, attribute):
-    indices[(table, attribute)] = ReadFromFile(table, attribute)
-
-def CreateIndex(table, attribute):
-    if (table, attribute) not in indices.keys():
-        indices[(table, attribute)] = BPT.BPlusTree(table, attribute)
-        if DEBUG:
-            print 'from eva.py, index newly created for',indices[(table, attribute)].table,indices[(table, attribute)].attribute
-
-def DropIndex(table, attribute):
-    #indices[(table, attribute)].DeleteAll()
-    #indices.pop((table, attribute))
-    pass
-        
-
-def InsertIndexNode(table, attribute, key, uuid):
-    print 'from eva.py, index insert for',key,uuid
-    indices[(table, attribute)].Insert(key, uuid)
-    ''''
-    if DEBUG:
-        print 'asdfsafsaasdfasfsadfsaf'
-        PrintTree(table, attribute)
-    '''
-
-
-# need to modify the last uuid
-def DeleteIndexNode(table, attribute, key, uuid):
-    pass
-
-
-def Search(table, attribute, condition, value):
-    return indices[(table, attribute)].Search(condition, value)
 
 
 # serves as quit for this module
@@ -347,25 +375,15 @@ if __name__ == '__main__':
     table = 0
     attribute = 1
     CreateIndex(table,attribute)
-    InsertIndexNode(table, attribute, 1, 2)
-    InsertIndexNode(table, attribute, 2, 3)
-    InsertIndexNode(table, attribute, 3, 4)
-    
-    
-    
-    sys.exit(0)
-    
-    
-    
     for i in range(10):
         ii = random.randint(0,100)
-        index.InsertIndexNode(table, attribute, ii, ii)
-        index.PrintTree(table, attribute)
+        InsertIndexNode(table, attribute, ii, ii)
+        PrintTree(table, attribute)
         print '\n'
         
+
         
-    raw_input()
-        
+    ''''
     table = 1
     attribute = 1
     index.BuildIndex(table,attribute)
@@ -374,6 +392,7 @@ if __name__ == '__main__':
         index.InsertIndexNode(table, attribute, ii, ii)
         index.PrintTree(table, attribute)
         print '\n'
+    '''
         
         
         
@@ -386,15 +405,14 @@ if __name__ == '__main__':
     NotEqual = 5
              
     
-    raw_input()
-    
+
     table = 0
     attribute = 1
-    res = index.Search(table, attribute, Less, 12)
+    res = Search(table, attribute, Less, 12)
     print res
-    res = index.Search(table, attribute, Equal, 20)
+    res = Search(table, attribute, Equal, 20)
     print res
-    res = index.Search(table, attribute, Greater, 35)
+    res = Search(table, attribute, Greater, 35)
     print res
     
     raw_input()
@@ -408,9 +426,8 @@ if __name__ == '__main__':
     res = index.Search(table, attribute, Greater, 35)
     print res
     
- 
-    
-    
+
+
     
     
     

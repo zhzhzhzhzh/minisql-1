@@ -69,8 +69,9 @@ public:
     
     bool CreateIndex(uint table, uint attribute)
     {
-        pyEvaluator.CreateIndex(table, attribute);
+        pyEvaluator.CreateIndex(table, attribute-1);
         BuildUpIndex(table, attribute);
+        isTableAttributeIndexBuilt[table]->at(attribute)=true;
         return true;
     }
     bool DropIndex(uint table, uint attribute){

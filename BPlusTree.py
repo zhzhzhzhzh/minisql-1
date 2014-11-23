@@ -39,6 +39,8 @@ class BPlusTree(object):
         self.root = None
         self.idCount = 0
         self.isEmpty = True
+        
+        print 'tree init: N',self.N
      
 
     def InsertInNonLeaf(self, node, key, pointer):
@@ -114,6 +116,7 @@ class BPlusTree(object):
             for index in range(len(n.keys)):
                 if n.keys[index] > key:
                     break
+            
             if key > n.keys[index]:
                 index = index + 1
             print 'insert index: %d'%index
@@ -267,8 +270,7 @@ class BPlusTree(object):
                     index = 0
                     continue
             return result
-            
-            
+            print 'BPlusTree.py: Search results', result
 
         else: # not equal
             n = FindLeftEnd()
@@ -316,7 +318,6 @@ class BPlusTree(object):
             level = level + 1
             node = 0
             nex = first
-            print 'asdfsafsafsafsafsaff'
             while type(nex) == type(self.root):
                 parent = -1
                 if type(nex.parent) == type(self.root):

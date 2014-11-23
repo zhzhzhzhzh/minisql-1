@@ -37,6 +37,7 @@ int main(int argc, const char * argv[])
     
 	a.attrName = "att1";
 	a.dataType = Int;
+    a.indexName = "null";
 	InsT.attributes.push_back(a);
     
 	a.attrName = "att2";
@@ -82,7 +83,7 @@ int main(int argc, const char * argv[])
     
     uint T = InsT.tableNum;
     
-#define N 7
+#define N 200000
     int t;
     
     // insert record
@@ -132,9 +133,9 @@ int main(int argc, const char * argv[])
     recordManager.NewQuery();
     recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
     
-    recordManager.PushCondition(T, 1, Equal, 2);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 3, Equal, "ying");
+    recordManager.PushCondition(T, 1, Equal, 1000);
+    //recordManager.PushLogicOp("or");
+    //recordManager.PushCondition(T, 3, Equal, "ops");
     
     vector<vector<Record*>> results;
     results = recordManager.SelectRecord();
