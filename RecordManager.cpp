@@ -362,7 +362,7 @@ int RecordManager::DeleteRecord(uint table)
             break;
     }
     
-    Record *tmp;
+    //Record *tmp;
     for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); it++) {
         Debug("try to delete uuid: "<<*it);
         

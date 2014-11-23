@@ -21,12 +21,12 @@
 #define MAX_TABLE_NUMBER 32
 
 
-#define DEBUGG 0
+#define DEBUGG 1
 #define Debug(MESSAGE) {if(DEBUGG){cout<<MESSAGE<<endl;}}
 #define DebugS(MESSAGE) {if(DEBUGG){cout<<MESSAGE;}}
 
 
-#define TEST 0
+#define TEST 1
 
 
 #if MACOS

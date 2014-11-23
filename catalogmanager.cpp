@@ -54,7 +54,12 @@ int catalogmanager::createDatabase(string dataBaseName)
         system(cmd.c_str());
 #endif
         
+#if WIN
         string newFileName = ".\\" + dataBaseName + "\\" + dataBaseName + "Info" + ".txt";
+#endif
+#if MACOS
+        string newFileName = "./" + dataBaseName + "/" + dataBaseName + "Info" + ".txt";
+#endif
         fstream newfile;
         newfile.open(newFileName.c_str(), fstream::out);
         newfile << 0;
@@ -174,7 +179,12 @@ int catalogmanager::useDataBase(string newDataBaseName)
         else
         {
             //load the information of the old database
+#if WIN
             string FileName = ".\\"  + dataBaseNameNow + "\\" + dataBaseNameNow + "Info" + ".txt";
+#endif
+#if MACOS
+            string FileName = "./"  + dataBaseNameNow + "/" + dataBaseNameNow + "Info" + ".txt";
+#endif
             fstream fout;
             fout.open(FileName.c_str(), fstream::out);
             if(fout.fail() != true)
@@ -207,7 +217,12 @@ int catalogmanager::useDataBase(string newDataBaseName)
         }
         //read the information of the new database
         
+#if WIN
         string FileName = ".\\" + newDataBaseName + "\\" + newDataBaseName + "Info" + ".txt";
+#endif
+#if MACOS
+        string FileName = "./" + newDataBaseName + "/" + newDataBaseName + "Info" + ".txt";
+#endif
         fstream fin;
         fin.open(FileName.c_str(), fstream::in);
         if(fin.fail() != true)
@@ -276,7 +291,13 @@ int catalogmanager::switchEnumToInt(DataType dataTypeIn)
 int catalogmanager::quit()
 {
     int flag = 0;
+#if WIN
     string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info.txt";
+#endif
+#if MACOS
+    string FileName = "./" + dataBaseNameNow + "/" + dataBaseNameNow + "Info.txt";
+#endif
+    
     fstream fout;
     fout.open(FileName.c_str(), fstream::out);
     if(fout.fail() != true)
