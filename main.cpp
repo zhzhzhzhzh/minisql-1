@@ -82,7 +82,7 @@ void printTable(vector<vector<Record*>> r, int tableIndex, vector <Attribute>att
 void execute(void)
 {
 	int i;
-	int attrIndex = -1;
+	//int attrIndex = -1;
 	int TableIndex = -1;
 	vector<vector<Record*>> selrecord;
 	vector <const Table* > tables;
@@ -211,6 +211,8 @@ void execute(void)
 									 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
 									 break;
 					  }
+                      default:
+                              break;
 					  }
 				  
 				  for (int j = 0; j < query.Lop.size(); j++)
@@ -231,6 +233,8 @@ void execute(void)
 										 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
 										 break;
 						  }
+                          default:
+                                  break;
 						  }
 
 					  }
@@ -260,6 +264,8 @@ void execute(void)
 							 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
 												   break;
 						}
+                        default:
+                          break;
 					}
 
 					for (int j = 0; j < query.Lop.size(); j++)
@@ -280,13 +286,14 @@ void execute(void)
 											Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
 											break;
 							}
+                            default:
+                                    break;
 							}
 
 						}
 
 					}
 					Mrecord.DeleteRecord(TableIndex);
-					Mcatalog.deleteRecord(TableIndex);
 					break;
 									
 		}
@@ -401,7 +408,7 @@ void AddSeperator(char *command)
 
 short int IsComEnd(char *input)
 {
-	unsigned int next = strlen(input) - 1;
+	int next = strlen(input) - 1;
 	char prev = ' ';
 	while (next >= 0 && (prev == '\t' || prev == ' '))
 	{
@@ -430,21 +437,21 @@ int main()
 	//Data datas;
 	char command[COMLEN] = "";
 	char input[INPUTLEN] = "";
-	char word[WORDLEN] = "";
+	//char word[WORDLEN] = "";
 	short int ComEnd = 0;
 	fstream in;
-	time_t   first, second;
+	time_t   first=0, second=0;
 
 	while (1)
 	{
 		
-		strcpy_s(command, "");//command清零
+		strcpy(command, "");//command清零
 		ComEnd = 0;
 		cout << "miniSQL>>";
 
 		while (!ComEnd)
 		{
-			gets_s(input);
+			gets(input);
 			if (IsComEnd(input)){
 				ComEnd = 1;
 				first = time(NULL);
@@ -459,7 +466,7 @@ int main()
 		cout << "The during time is: " << difftime(second, first) << " seconds\n" << endl;
 		if ((query.state == EXECFILE) && (query.fileName != ""))
 		{
-			strcpy_s(command, "");//command清零
+			strcpy(command, "");//command清零
 			in.open(query.fileName.c_str(), ios::in);
 			while (!in.eof())
 			{
@@ -473,8 +480,8 @@ int main()
 					insertnum++;
 					if (insertnum % 10000 == 0)
 						cout << insertnum <<"records has been inserted!" <<endl;
-					strcpy_s(input, "");
-					strcpy_s(command, "");
+					strcpy(input, "");
+					strcpy(command, "");
 				}
 				strcat(command, input);
 				AddSeperator(command);

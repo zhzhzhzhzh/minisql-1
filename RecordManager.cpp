@@ -335,7 +335,7 @@ vector<vector<Record*>> RecordManager::SelectRecord()
 }
 
 
-void RecordManager::DeleteRecord(uint table)
+int RecordManager::DeleteRecord(uint table)
 {
     if(currentTablesCount == 0)
         ChooseTable(table);
@@ -350,6 +350,7 @@ void RecordManager::DeleteRecord(uint table)
 //                CreateIndex(table, i);
 //            }
 //        }
+        return -1;
     }
     
     
@@ -361,7 +362,7 @@ void RecordManager::DeleteRecord(uint table)
             break;
     }
     
-    Record *tmp;
+    //Record *tmp;
     for (set<UUID>::iterator it = toDelete.at(i).begin(); it!=toDelete.at(i).end(); it++) {
         Debug("try to delete uuid: "<<*it);
         
@@ -378,7 +379,7 @@ void RecordManager::DeleteRecord(uint table)
         Debug("uuid: "<<*it<<" deleted");
     }
     
-    return;
+    return (int)toDelete.at(i).size();
 }
 
 
@@ -445,7 +446,8 @@ void RecordManager::InsertRecord(uint table)
     
     
     for (int i=1; i<tableStructs[table]->attributes.size(); i++) {
-        if (isTableAttributeIndexBuilt[table]->at(i)) {
+        if (isTableAttributeIndexBuilt[table]->at(i) == true) {
+            cout << "attribute "<<i<<" has index"<<endl;
             InsertIndexNode(table, i, record);
         }
     }
@@ -487,21 +489,18 @@ void RecordManager::InsertIndexNode(uint table, uint attribute, Record *record)
     
     switch (type) {
         case Int:
-            pyEvaluator.InsertIndexNode(table, attribute,
-                                        *(static_cast<int*>(record->data.at(attribute))),
-                                        uuid);
+            pyEvaluator.InsertIndexNode(table, attribute-1,
+                                        *(static_cast<int*>(record->data.at(attribute))),uuid);
             break;
             
         case Float:
-            pyEvaluator.InsertIndexNode(table, attribute,
-                                        *(static_cast<float*>(record->data.at(attribute))),
-                                        uuid);
+            pyEvaluator.InsertIndexNode(table, attribute-1,
+                                        *(static_cast<float*>(record->data.at(attribute))),uuid);
             break;
             
         case String:
-            pyEvaluator.InsertIndexNode(table, attribute,
-                                        *(static_cast<string*>(record->data.at(attribute))),
-                                        uuid);
+            pyEvaluator.InsertIndexNode(table, attribute-1,
+                                        *(static_cast<string*>(record->data.at(attribute))),uuid);
             break;
             
         default:
@@ -522,21 +521,18 @@ void RecordManager::DeleteIndexNode(uint table, uint attribute, Record *record)
     
     switch (type) {
         case Int:
-            pyEvaluator.DeleteIndexNode(table, attribute,
-                                        *(static_cast<int*>(record->data.at(attribute))),
-                                        uuid);
+            pyEvaluator.DeleteIndexNode(table, attribute-1,
+                                        *(static_cast<int*>(record->data.at(attribute))),uuid);
             break;
             
         case Float:
-            pyEvaluator.DeleteIndexNode(table, attribute,
-                                        *(static_cast<float*>(record->data.at(attribute))),
-                                        uuid);
+            pyEvaluator.DeleteIndexNode(table, attribute-1,
+                                        *(static_cast<float*>(record->data.at(attribute))),uuid);
             break;
             
         case String:
-            pyEvaluator.DeleteIndexNode(table, attribute,
-                                        *(static_cast<string*>(record->data.at(attribute))),
-                                        uuid);
+            pyEvaluator.DeleteIndexNode(table, attribute-1,
+                                        *(static_cast<string*>(record->data.at(attribute))),uuid);
             break;
             
         default:

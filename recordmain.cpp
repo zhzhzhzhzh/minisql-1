@@ -13,7 +13,7 @@
 
 #include "RecordManager.h"
 
-
+# if 0
 
 int main(int argc, const char * argv[])
 {
@@ -83,7 +83,7 @@ int main(int argc, const char * argv[])
     
     uint T = InsT.tableNum;
     
-#define N 4
+#define N 200000
     int t;
     
     // insert record
@@ -101,6 +101,15 @@ int main(int argc, const char * argv[])
     cout<<"insert done "<<endl;
     cin>>t;
     
+    
+    
+    // create index
+    recordManager.CreateIndex(T, 1);
+    InsT.attributes.at(1).indexName = "attr1";
+    
+    
+    cout<<"create index done "<<endl;
+    cin>>t;
 
 
 //    recordManager.NewQuery();
@@ -124,9 +133,9 @@ int main(int argc, const char * argv[])
     recordManager.NewQuery();
     recordManager.ChooseTable(T);       // NOTE: choose is mandatory for selection
     
-    recordManager.PushCondition(T, 1, Equal, 2);
-    recordManager.PushLogicOp("or");
-    recordManager.PushCondition(T, 3, Equal, "ying");
+    recordManager.PushCondition(T, 1, Equal, 1000);
+    //recordManager.PushLogicOp("or");
+    //recordManager.PushCondition(T, 3, Equal, "ops");
     
     vector<vector<Record*>> results;
     results = recordManager.SelectRecord();
@@ -366,3 +375,5 @@ int main(int argc, const char * argv[])
     return 0;
 }
 
+
+#endif

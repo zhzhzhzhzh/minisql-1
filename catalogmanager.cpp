@@ -42,19 +42,24 @@ int catalogmanager::createDatabase(string dataBaseName)
         flag = 0;
     if(flag == 0)
     {
-        #if WIN
+#if WIN
         string a = "mkdir ";
         string cmd = a + dataBaseName;
         system(cmd.c_str());
-        #endif
-
-        #if MACOS
+#endif
+        
+#if MACOS
         string a = "mkdir ";
         string cmd = a + dataBaseName;
         system(cmd.c_str());
-        #endif
-
+#endif
+        
+#if WIN
         string newFileName = ".\\" + dataBaseName + "\\" + dataBaseName + "Info" + ".txt";
+#endif
+#if MACOS
+        string newFileName = "./" + dataBaseName + "/" + dataBaseName + "Info" + ".txt";
+#endif
         fstream newfile;
         newfile.open(newFileName.c_str(), fstream::out);
         newfile << 0;
@@ -81,35 +86,35 @@ int catalogmanager::dropDatabase(string dataBaseName)
         flag = 1;//can not find the database
     if(flag == 0)
     {
-        #if WIN
+#if WIN
         quit();
         string a = "rmdir ";
         string b = "/S /Q ";
         string c = a + b + dataBaseName;
         system(c.c_str());
-        #endif
-
-        #if  MACOS
+#endif
+        
+#if  MACOS
         string a = "rm ";
         string b = "-rf";
         string c = a + b + dataBaseName;
         system(c.c_str());
-        #endif
+#endif
         /*for(int j = 0; j < totalTableNum; j++)
-        {
-            deleteTable(j);
-            cout << "delete table " << j << endl;
-        }
-        quit();
-        string a = "del ";
-        string b = ".\\";
-        string c = "\\";
-        string d = "Info.txt";
-        string Info = a + b + dataBaseName + c + dataBaseName + d;
-        system(Info.c_str());
-        string e = "rmdir ";
-        string cmd = e + b + dataBaseName;
-        system(cmd.c_str());*/
+         {
+         deleteTable(j);
+         cout << "delete table " << j << endl;
+         }
+         quit();
+         string a = "del ";
+         string b = ".\\";
+         string c = "\\";
+         string d = "Info.txt";
+         string Info = a + b + dataBaseName + c + dataBaseName + d;
+         system(Info.c_str());
+         string e = "rmdir ";
+         string cmd = e + b + dataBaseName;
+         system(cmd.c_str());*/
         dbV.erase(dbV.begin() + i);
         dataBaseNum--;
     }
@@ -163,18 +168,23 @@ int catalogmanager::useDataBase(string newDataBaseName)
     int flag = 0;
     if(newDataBaseName == dataBaseNameNow)
     {
-
+        
     }
     else
     {
         if(dataBaseNameNow == "")//when start the program
         {
-
+            
         }
         else
         {
             //load the information of the old database
+#if WIN
             string FileName = ".\\"  + dataBaseNameNow + "\\" + dataBaseNameNow + "Info" + ".txt";
+#endif
+#if MACOS
+            string FileName = "./"  + dataBaseNameNow + "/" + dataBaseNameNow + "Info" + ".txt";
+#endif
             fstream fout;
             fout.open(FileName.c_str(), fstream::out);
             if(fout.fail() != true)
@@ -206,8 +216,13 @@ int catalogmanager::useDataBase(string newDataBaseName)
             //system(pathOld.c_str());
         }
         //read the information of the new database
-
+        
+#if WIN
         string FileName = ".\\" + newDataBaseName + "\\" + newDataBaseName + "Info" + ".txt";
+#endif
+#if MACOS
+        string FileName = "./" + newDataBaseName + "/" + newDataBaseName + "Info" + ".txt";
+#endif
         fstream fin;
         fin.open(FileName.c_str(), fstream::in);
         if(fin.fail() != true)
@@ -246,7 +261,7 @@ int catalogmanager::useDataBase(string newDataBaseName)
     //string  pathNew = "cd " + dataBaseNameNow;
     //system(pathNew.c_str());
     Debug("use some dataBase successfully");
-return flag;
+    return flag;
 }
 
 DataType catalogmanager::switchIntToEnum(int enumIn)
@@ -277,9 +292,16 @@ int catalogmanager::quit()
 {
     int flag = 0;
 	Debug("database now " << dataBaseNameNow);
-	string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info.txt";
-	// cout << FileName << endl;
 
+
+
+    #if WIN
+        string FileName = ".\\" + dataBaseNameNow + "\\" + dataBaseNameNow + "Info.txt";
+    #endif
+    #if MACOS
+        string FileName = "./" + dataBaseNameNow + "/" + dataBaseNameNow + "Info.txt";
+    #endif
+        
     fstream fout;
     fout.open(FileName.c_str(), fstream::out);
     if(fout.fail() != true)
@@ -315,20 +337,20 @@ int catalogmanager::quit()
 int catalogmanager::createTable(Table& tableNameIn)//TODO datalength increment
 {
     /*int flag = 0;
-    string newfileName = ".\\" + dataBaseNameNow + "\\" + tableName.tableName + "Info" + ".txt";
-    fstream newFile;
-    newFile.open(newfileName.c_str(),fstream::out);
-    if(newFile.fail() != true)
-    {
-        newFile.close();
-        tableNum++;
-        tableV.push_back(tableName);
-    }
-    else
-    {
-        flag = 1;
-    }
-    return flag;*/
+     string newfileName = ".\\" + dataBaseNameNow + "\\" + tableName.tableName + "Info" + ".txt";
+     fstream newFile;
+     newFile.open(newfileName.c_str(),fstream::out);
+     if(newFile.fail() != true)
+     {
+     newFile.close();
+     tableNum++;
+     tableV.push_back(tableName);
+     }
+     else
+     {
+     flag = 1;
+     }
+     return flag;*/
     Table T_temp;
     T_temp.dbName = dataBaseNameNow;
     T_temp.tableName = tableNameIn.tableName;
@@ -354,25 +376,25 @@ int catalogmanager::createTable(Table& tableNameIn)//TODO datalength increment
             T_temp.tableNum = i;
             i = 32;
         }
-
+        
     }
     totalTableNum++;
     tableV.push_back(T_temp);
     Debug("create a table successfully!!");
     return 0;
-
-
+    
+    
 }
 int catalogmanager::deleteTable(int tableIndex)
 {
     //cout << tableIndex << endl;
-
+    
     /*cout << "totalTableNum is " << totalTableNum << endl;
-    string a = "del ";
-    string b = ".\\";
-    string c = "\\";
-    string d = "Info.txt";
-    cout << "everthing is OK" << endl;*/
+     string a = "del ";
+     string b = ".\\";
+     string c = "\\";
+     string d = "Info.txt";
+     cout << "everthing is OK" << endl;*/
     //string e = tableV[tableIndex].tableName;
     //cout << e << endl;
     //string cmd = a + b + dataBaseNameNow + c + e + d;
