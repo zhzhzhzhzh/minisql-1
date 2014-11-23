@@ -64,7 +64,6 @@
 #define DELETE		5
 #define INSERT		6
 #define QUIT		7
-#define EXEFILE		8 
 
 #define COMLEN		400 
 #define INPUTLEN	200 

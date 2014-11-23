@@ -693,16 +693,7 @@ cout << tempint << endl;
 		if (!flag)
 			return;
 		//initcol(column);
-		TableInfo = Mcatalog.getTableInformation(TableName);
-		if (word == "*")
-		{
-			for (i = 0; i < TableInfo->attributes.size(); i++)
-			{
-				tempcol.attrName = TableInfo->attributes[i].attrName;
-				column.push_back(tempcol);
-			}
-		}
-		else{
+
 			tempcol.attrName = word;
 			column.push_back(tempcol);
 			flag = GetWord(temp, word);
@@ -720,7 +711,6 @@ cout << tempint << endl;
 				if (!flag)
 					return;
 			}
-		}
 
 		if (strcmp(word.c_str(), "from") != 0)
 			return;
@@ -729,14 +719,22 @@ cout << tempint << endl;
 		if (!flag)
 			return;
 		TableName = word;
-
+		TableInfo = Mcatalog.getTableInformation(TableName);
 		int TableIndex = Mcatalog.getTableIndex(word);
 		if (TableIndex == -1){
 			state = TABLEERROR;
 			return;
 		}
 
-		//Èç¹ûÃ»ÓÐwhere×Ó¾ä£¬ÕýÈ··µ»Ø
+		if (column[0].attrName == "*")
+		{
+			column.clear();
+			for (i = 1; i < TableInfo->attributes.size(); i++)
+			{
+				tempcol.attrName = TableInfo->attributes[i].attrName;
+				column.push_back(tempcol);
+			}
+		}
 		flag = GetWord(temp, word);
 		if (!flag)
 		{
@@ -803,7 +801,7 @@ cout << tempint << endl;
 		}
 		while ((strcmp(word.c_str(), "and") == 0) || (strcmp(word.c_str(), "or") == 0))
 		{
-				tempcon.Lop = word;
+			Lop.push_back(word);
 			flag = GetWord(temp, word);
 			if (!flag)
 				return;
@@ -934,12 +932,12 @@ cout << tempint << endl;
 			flag = GetWord(temp, word);
 			if (!flag)
 			{
-				state = DELETE;
+				state = DELETE_WHERE_CAULSE;
 				return;
 			}
 			while ((strcmp(word.c_str(), "and") == 0) || (strcmp(word.c_str(), "or") == 0))
 			{
-					tempcon.Lop = word;
+				Lop.push_back(word);
 				flag = GetWord(temp, word);
 				if (!flag)
 					return;
@@ -1002,7 +1000,6 @@ cout << tempint << endl;
 			return;
 		fileName = word;
 		state = EXECFILE;
-cout << fileName << endl;
 	}
 }
 

@@ -14,7 +14,7 @@ class Index():
     
 
 
-DEBUG = True
+DEBUG = False
 indices = {} # (T,A):root
 conditionsDirectWithIndex = []
 conditionsDirectWithoutIndex = []
@@ -84,7 +84,7 @@ def NewEvaluation():
     global currentTables
 
     
-    DEBUG = True
+    DEBUG = False
     indices = {}
     conditionsDirectWithIndex = []
     conditionsDirectWithoutIndex = []

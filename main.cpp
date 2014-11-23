@@ -7,7 +7,7 @@
 #include "Interpret.h"
 #include "typedefs.h"
 #include "macro.h"
-
+#include <time.h> 
 using namespace std;
 
 
@@ -25,7 +25,6 @@ void insert(const Table* T, Row row){
 	Mrecord.NewQuery();
 
 	for (int i = 1; i<T->attrNumber; i++){
-cout << i << " " << T->attributes[i].attrName << endl;
 		switch (T->attributes[i].dataType){
 		case String:{Mrecord.AppendValue(row.columns.at(i-1).c_str()); break; }
 		case Int:{Mrecord.AppendValue(atoi(row.columns.at(i-1).c_str())); break; }
@@ -42,34 +41,39 @@ cout << i << " " << T->attributes[i].attrName << endl;
  
 void printTable(vector<vector<Record*>> r, int tableIndex, vector <Attribute>attributes)
 {
-	int i,j, attrIndex;
-	cout << "\n\t" << endl;
+	int i,j,k,attrIndex;
+	cout << "\n" ;
 	for (i=0; i < attributes.size(); i++)
-		cout << attributes[i].attrName << "\t" << endl;
+		cout << attributes[i].attrName << "\t" ;
 	
-	cout << "\n\t" << endl;
+	cout << "\n" ;
 	for (i = 0; i < r.size(); i++)
 	{
-		for (j = 0; j < attributes.size(); j++)
+		for (k = 0; k < r[i].size(); k++)
 		{
-			attrIndex = Mcatalog.getAttrIndex(tableIndex, attributes[i].attrName);
-			DataType type = Mcatalog.getDataType(tableIndex, attrIndex);
-			switch (type) {
-			case Int:
-				cout << *(int*)r[i][j]->data[attrIndex] << "\t" << endl;
-				break;
+			for (j = 0; j < attributes.size(); j++)
+			{
+				attrIndex = Mcatalog.getAttrIndex(tableIndex, attributes[j].attrName);
+				DataType type = Mcatalog.getDataType(tableIndex, attrIndex);
+				switch (type) {
+				case Int:
+					cout << *(int*)(r.at(i).at(k)->data[attrIndex]) << "\t" ;
+					break;
 
-			case Float:
-				cout << *(float*)r[i][j]->data[attrIndex] << "\t" << endl;
-				break;
+				case Float:
+					cout << *(float*)(r.at(i).at(k)->data[attrIndex]) << "\t";
+					break;
 
-			case String:
-				cout << *(char*)r[i][j]->data[attrIndex] << "\t" << endl;
-				break;
+				case String:
+					cout << (char*)(r.at(i).at(k)->data[attrIndex]) << "\t";
+					break;
 
-			default:
-				break;
+				default:
+					cout << "unknown type" << endl;
+					break;
+				}
 			}
+			cout << endl;
 		}
 	}
 }
@@ -168,7 +172,7 @@ void execute(void)
 				  insert(query.TableInfo, query.row);
 				  TableIndex = Mcatalog.getTableIndex(query.TableInfo->tableName);
 				  Mcatalog.addRecord(TableIndex);
-				  cout << "One record has been inserted successfully" << endl;
+				 // cout << "One record has been inserted successfully" << endl;
 				  break;
 	    }
 		case USEDB:
@@ -192,151 +196,196 @@ void execute(void)
 				  Mrecord.NewQuery();
 				  TableIndex = Mcatalog.getTableIndex(query.TableInfo->tableName);
 			      Mrecord.ChooseTable(TableIndex);
-				  for (i = 0; i<query.condition.size(); i++){
+				  int i = 0;
 					  switch (Mcatalog.getDataType(TableIndex, query.condition[i].columnNum))
 					  {
-					      case String:{
-									  Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, query.condition[i].value); 
+					  case String:{
+									  Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, query.condition[i].value);
 									  break;
-					      }
-					      case Int:{
-								   Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, atoi(query.condition[i].value.c_str()));  
-								   break;
-					      }
-					      case Float:{
-									 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));  
-									 break;
-					      }
 					  }
+					  case Int:{
+								   Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, atoi(query.condition[i].value.c_str()));
+								   break;
+					  }
+					  case Float:{
+									 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
+									 break;
+					  }
+					  }
+				  
+				  for (int j = 0; j < query.Lop.size(); j++)
+				  {
+					  Mrecord.PushLogicOp(query.Lop.at(j));
+					  for (i = 1; i<query.condition.size(); i++){
+						  switch (Mcatalog.getDataType(TableIndex, query.condition[i].columnNum))
+						  {
+						  case String:{
+										  Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, query.condition[i].value);
+										  break;
+						  }
+						  case Int:{
+									   Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, atoi(query.condition[i].value.c_str()));
+									   break;
+						  }
+						  case Float:{
+										 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
+										 break;
+						  }
+						  }
+
+					  }
+					  
 				  }
-										
-				  Mrecord.PushLogicOp(query.condition[i].Lop);
 				  selrecord = Mrecord.SelectRecord();
 				  printTable(selrecord, TableIndex, query.column);
 				  break;
 		}
 		case DELETE_WHERE_CAULSE:
 		{
-									Mrecord.NewQuery();
-									TableIndex = Mcatalog.getTableIndex(query.TableInfo->tableName);
-									Mrecord.ChooseTable(TableIndex);
-									for (i = 0; i < query.condition.size(); i++){
-										switch (Mcatalog.getDataType(TableIndex, query.condition[i].columnNum))
-										{
-										    case String:{
-														Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, query.condition[i].value);  //TODO  overload
-														break;
-										    }
-										    case Int:{
-													 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, atoi(query.condition[i].value.c_str()));  //TODO  overload
-													 break;
-										    }
-										    case Float:{
-													   Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));  //TODO  overload
-													   break;
-										    }
-										}
-										Mrecord.DeleteRecord(TableIndex);
-										break;
-									}
+				  Mrecord.NewQuery();
+				  TableIndex = Mcatalog.getTableIndex(query.TableInfo->tableName);
+				  Mrecord.ChooseTable(TableIndex);
+				  int i = 0;
+				  switch (Mcatalog.getDataType(TableIndex, query.condition[i].columnNum))
+				  {
+						case String:{
+							 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, query.condition[i].value);
+							 break;
+						}
+						case Int:{
+							 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, atoi(query.condition[i].value.c_str()));
+							 break;
+						}
+						case Float:{
+							 Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
+												   break;
+						}
+					}
+
+					for (int j = 0; j < query.Lop.size(); j++)
+					{
+						Mrecord.PushLogicOp(query.Lop.at(j));
+						for (i = 1; i<query.condition.size(); i++){
+							switch (Mcatalog.getDataType(TableIndex, query.condition[i].columnNum))
+							{
+							case String:{
+											Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, query.condition[i].value);
+											break;
+							}
+							case Int:{
+											Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, atoi(query.condition[i].value.c_str()));
+											break;
+							}
+							case Float:{
+											Mrecord.PushCondition(TableIndex, query.condition[i].columnNum, query.condition[i].op, (float)atof(query.condition[i].value.c_str()));
+											break;
+							}
+							}
+
+						}
+
+					}
+					Mrecord.DeleteRecord(TableIndex);
+					Mcatalog.deleteRecord(TableIndex);
+					break;
+									
 		}
 		case DELETE_NOWHERE_CAULSE:
 		{
-									  Mrecord.NewQuery();
-									  attrIndex;
-									  TableIndex = Mcatalog.getTableIndex(query.TableInfo->tableName);
-									  Mrecord.ChooseTable(TableIndex);
-									  Mrecord.DeleteRecord(TableIndex);
-									  break;
+					Mrecord.NewQuery();
+					TableIndex = Mcatalog.getTableIndex(query.TableInfo->tableName);
+					Mrecord.ChooseTable(TableIndex);
+					Mrecord.DeleteRecord(TableIndex);
+					break;
 		}
 			/*-----below is some error information------*/
 		case TABLEEXISTED:{
-							  cout << "The table has been created,please check the database" << endl;
-							  break;
+					cout << "The table has been created,please check the database" << endl;
+					break;
 		}
 		case INSERTERR:{
-						   cout << "Incorrect usage of \"insert\" query! Please check your input!" << endl;
-						   break;
+					cout << "Incorrect usage of \"insert\" query! Please check your input!" << endl;
+					break;
 		}
 		case INDEXERROR:{
-							cout << "The index on primary key of table has been existed" << endl;
-							break;
+					cout << "The index on primary key of table has been existed" << endl;
+					break;
 		}
 		case CREINDERR:{
-						   cout << "Incorrect usage of \"create index\" query! Please check your input!" << endl;
-						   break;
+					cout << "Incorrect usage of \"create index\" query! Please check your input!" << endl;
+					break;
 		}
 		case EMP:{
-					 cout << "EMP query! Please enter your command!" << endl;
-					 break;
+					cout << "EMP query! Please enter your command!" << endl;
+					break;
 		}
 		case UNKNOW:{
-						cout << "UNKNOW query! Please check your input!" << endl;
-						break;
+					cout << "UNKNOW query! Please check your input!" << endl;
+					break;
 		}
 		case SELERR:{
-						cout << "Incorrect usage of \"select\" query! Please check your input!" << endl;
-						break;
+					cout << "Incorrect usage of \"select\" query! Please check your input!" << endl;
+					break;
 		}
 		case CRETABERR:{
-						   cout << "Incorrect usage of \"create table\" query! Please check your input!" << endl;
-						   break;
+					cout << "Incorrect usage of \"create table\" query! Please check your input!" << endl;
+					break;
 		}
 		case DELETEERR:{
-						   cout << "Incorrect usage of \"delete from\" query! Please check your input!" << endl;
-						   break;
+					cout << "Incorrect usage of \"delete from\" query! Please check your input!" << endl;
+					break;
 		}
 		case DRPTABERR:{
-						   cout << "Incorrect usage of \"drop table\" query! Please check your input!" << endl;
-						   break;
+					cout << "Incorrect usage of \"drop table\" query! Please check your input!" << endl;
+					break;
 		}
 		case DRPINDERR:{
-						   cout << "Incorrect usage of \"drop index\" query! Please check your input!" << endl;
-						   break;
+					cout << "Incorrect usage of \"drop index\" query! Please check your input!" << endl;
+					break;
 		}
 		case VOIDPRI:{
-						 cout << "Error: invalid primary key! Please check your input!" << endl;
-						 break;
+					cout << "Error: invalid primary key! Please check your input!" << endl;
+					break;
 		}
 		case VOIDUNI:{
-						 cout << "Error: invalid unique key! Please check your input!" << endl;
-						 break;
+					cout << "Error: invalid unique key! Please check your input!" << endl;
+					break;
 		}
 		case CHARBOUD:{
-						  cout << "Error: only 1~255 charactors is allowed! Please check your input!" << endl;
-						  break;
+					cout << "Error: only 1~255 charactors is allowed! Please check your input!" << endl;
+					break;
 		}
 		case NOPRIKEY:{
-						  cout << "No primary key is defined! Please check your input!" << endl;
-						  break;
+					cout << "No primary key is defined! Please check your input!" << endl;
+					break;
 		}
 		case TABLEERROR:{
-							cout << "Table is not existed,please check the database" << endl;
-							break;
+					cout << "Table is not existed,please check the database" << endl;
+					break;
 		}
 		case INDEXEROR:{
-						   cout << "Index is not existed,please check the database" << endl;
-						   break;
+					cout << "Index is not existed,please check the database" << endl;
+					break;
 		}
 		case COLUMNERROR:{
-							 cout << "One column is not existed" << endl;
-							 break;
+					cout << "One column is not existed" << endl;
+					break;
 		}
 		case INSERTNUMBERERROR:{
-								   cout << "The column number is not according to the columns in our database" << endl;
-								   break;
+					cout << "The column number is not according to the columns in our database" << endl;
+					break;
 		}
 		case DBERR:{
-					   cout << "The database is not existed" << endl;
-					   break;
+					cout << "The database is not existed" << endl;
+					break;
 		}
 		case CREDBERR:{
-						  cout << "The database is already existed" << endl;
-						  break;
+					cout << "The database is already existed" << endl;
+					break;
 		}
 		case INSERT_VALUES_TYPERR:{
-									  cout << "Some of the values are not correct" << endl;
-									  break;
+					cout << "Some of the values are not correct" << endl;
+					break;
 		}
 		default: break;
 	}
@@ -377,54 +426,62 @@ int main()
 	Table tableinfor;
 	Index indexinfor;
 	Row insertValue;
+	int insertnum=0;
 	//Data datas;
 	char command[COMLEN] = "";
 	char input[INPUTLEN] = "";
 	char word[WORDLEN] = "";
 	short int ComEnd = 0;
-	char temp[256];
 	fstream in;
+	time_t   first, second;
 
-	if ((query.state == EXECFILE) && (query.fileName != ""))
+	while (1)
 	{
-		in.open(query.fileName.c_str(), ios::in);
-		while (!in.eof())
+		
+		strcpy_s(command, "");//command清零
+		ComEnd = 0;
+		cout << "miniSQL>>";
+
+		while (!ComEnd)
 		{
-			in.getline(temp, 256, '\n');
-			if (IsComEnd(input))
-			{
-				strcat(input, temp);
-				AddSeperator(command);
-				query.Parse(command);
-				execute();
-				strcpy_s(command, "");
-				strcpy_s(temp, "");
+			gets_s(input);
+			if (IsComEnd(input)){
+				ComEnd = 1;
+				first = time(NULL);
 			}
-			strcat(input, temp);
-			AddSeperator(command);
+				
+			strcat(command, input);//保存分号结束之前的命令，不含分号
+			AddSeperator(command); //在command命令的字符串加一个空格在字符串结尾，并在空格后补上'\0'
 		}
-		in.close();
-	}
-	else
-	{
-		while (1)
+		query.Parse(command);
+		execute();
+		second = time(NULL);
+		cout << "The during time is: " << difftime(second, first) << " seconds\n" << endl;
+		if ((query.state == EXECFILE) && (query.fileName != ""))
 		{
 			strcpy_s(command, "");//command清零
-			ComEnd = 0;
-			cout << "miniSQL>>";
-
-			while (!ComEnd)
+			in.open(query.fileName.c_str(), ios::in);
+			while (!in.eof())
 			{
-				gets_s(input);
+				in.getline(input, INPUTLEN, '\n');
 				if (IsComEnd(input))
-					ComEnd = 1;
-				strcat(command, input);//保存分号结束之前的命令，不含分号
-				AddSeperator(command); //在command命令的字符串加一个空格在字符串结尾，并在空格后补上'\0'
+				{
+					strcat(command, input);
+					AddSeperator(command);
+					query.Parse(command);
+					execute();
+					insertnum++;
+					if (insertnum % 10000 == 0)
+						cout << insertnum <<"records has been inserted!" <<endl;
+					strcpy_s(input, "");
+					strcpy_s(command, "");
+				}
+				strcat(command, input);
+				AddSeperator(command);
 			}
-			query.Parse(command);
-			execute();
-
+			in.close();
 		}
+		
 	}
 	
 	getchar();

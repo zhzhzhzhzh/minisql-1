@@ -26,7 +26,6 @@ public:
 class Condition{
 public:
 	Operator op;
-	string Lop;
 	int columnNum;
 	string value;
 };
@@ -41,6 +40,7 @@ public:
 	string fileName;                       //要执行的文件名
 	vector<Attribute> column;
 	vector<Condition> condition;		   //要比较的where字句的链表
+	vector<string > Lop;
 	Row row;		                       //要插入的值链表
 	Table NewTableInfo;                    //存入要新建的表的信息
 	const Table* TableInfo;                      //接收来自catalogmanager传递的表头的信息
